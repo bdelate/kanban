@@ -10,6 +10,7 @@ import styled from 'styled-components';
 
 const ColumnContainer = styled.div`
   display: flex;
+  flex: 1;
 `;
 
 class Board extends Component {

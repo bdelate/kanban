@@ -7,18 +7,26 @@ import Board from './containers/Board/Board';
 // 3rd party imports
 import styled from 'styled-components';
 
-import './App.css';
+const UIContainer = styled.div`
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+`;
 
 const BoardContainer = styled.div`
-  color: red;
+  display: flex;
+  flex: 1;
 `;
 
 class App extends Component {
   render() {
     return (
-      <BoardContainer>
-        <Board></Board>
-      </BoardContainer>
+      <UIContainer>
+        <BoardContainer>
+          <Board></Board>
+        </BoardContainer>
+      </UIContainer>
     );
   }
 }

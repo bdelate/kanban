@@ -9,7 +9,7 @@ const ColumnContainer = styled.div`
   padding: 15px;
   margin: 15px;
   background-color: blue;
-  height: 100%;
+  flex: 1;
 `;
 
 
