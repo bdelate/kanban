@@ -1,11 +1,13 @@
 // react imports
-import React from 'react';
+import React, { Component } from 'react';
 
-// component imports
+// project imports
 import Card from '../Card/Card';
+import { DragTypes } from '../../DragTypes';
 
 // 3rd party imports
 import styled from 'styled-components';
+import { DropTarget } from 'react-dnd';
 
 
 const ColumnContainer = styled.div`
@@ -15,20 +17,39 @@ const ColumnContainer = styled.div`
   flex: 1;
 `;
 
-const column = (props) => {
-  const cards = props.cards.map(card => (
-    <Card
-      key={card.cardId}
-      cardId={card.cardId}
-      task={card.task}
-    />
-  ));
-  return (
-    <ColumnContainer>
-      <h3>{props.title}</h3>
-      {cards}
-    </ColumnContainer>
-  )
+const columnTarget = {
+
+  drop(props, monitor, component) {
+    console.log(monitor.getItem());
+  }
 };
 
-export default column;
+function collect(connect, monitor) {
+  return {
+    connectDropTarget: connect.dropTarget()
+  };
+}
+
+class Column extends Component {
+
+  render() {
+    const { connectDropTarget } = this.props;
+    const cards = this.props.cards.map(card => (
+      <Card
+        key={card.cardId}
+        cardId={card.cardId}
+        task={card.task}
+      />
+    ));
+
+    return (
+      <ColumnContainer innerRef={node => connectDropTarget(node)}>
+        <h3>{this.props.title}</h3>
+        {cards}
+      </ColumnContainer>
+
+    )
+  }
+};
+
+export default DropTarget(DragTypes.CARD, columnTarget, collect)(Column);

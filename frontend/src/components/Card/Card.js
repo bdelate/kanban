@@ -1,8 +1,12 @@
 // react imports
 import React from 'react';
 
+// project imports
+import { DragTypes } from '../../DragTypes';
+
 // 3rd party imports
 import styled from 'styled-components';
+import { DragSource } from 'react-dnd';
 
 
 const CardContainer = styled.div`
@@ -12,13 +16,28 @@ const CardContainer = styled.div`
   flex: 1;
 `;
 
+const cardSource = {
+  beginDrag(props) {
+    console.log('Dragging has started');
+    return {
+      cardId: props.cardId
+    };
+  }
+};
+
+function collect(connect, monitor) {
+  return {
+    connectDragSource: connect.dragSource()
+  }
+}
 
 const card = (props) => {
+    const { connectDragSource } = props;
     return (
-        <CardContainer>
-            <span>{props.task}</span>
-        </CardContainer>
+      <CardContainer innerRef={node => connectDragSource(node)}>
+        <span>{props.task}</span>
+      </CardContainer>
     )
 };
 
-export default card;
+export default DragSource(DragTypes.CARD, cardSource, collect)(card);

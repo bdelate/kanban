@@ -6,7 +6,8 @@ import Column from '../../components/Column/Column';
 
 // 3rd party imports
 import styled from 'styled-components';
-
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
 
 const ColumnsContainer = styled.div`
   display: flex;
@@ -57,4 +58,4 @@ class Board extends Component {
   }
 }
 
-export default Board;
+export default DragDropContext(HTML5Backend)(Board);
