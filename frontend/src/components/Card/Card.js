@@ -18,9 +18,9 @@ const CardContainer = styled.div`
 
 const cardSource = {
   beginDrag(props) {
-    console.log('Dragging has started');
     return {
-      cardId: props.cardId
+      columnIndex: props.columnIndex,
+      cardIndex: props.cardIndex
     };
   }
 };

@@ -20,7 +20,11 @@ const ColumnContainer = styled.div`
 const columnTarget = {
 
   drop(props, monitor, component) {
-    console.log(monitor.getItem());
+    props.moveCard(
+      monitor.getItem().columnIndex,
+      monitor.getItem().cardIndex,
+      props.columnIndex
+    );
   }
 };
 
@@ -34,10 +38,11 @@ class Column extends Component {
 
   render() {
     const { connectDropTarget } = this.props;
-    const cards = this.props.cards.map(card => (
+    const cards = this.props.cards.map((card, index) => (
       <Card
         key={card.cardId}
-        cardId={card.cardId}
+        cardIndex={index}
+        columnIndex={this.props.columnIndex}
         task={card.task}
       />
     ));
