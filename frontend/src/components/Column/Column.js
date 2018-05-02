@@ -20,11 +20,15 @@ const ColumnContainer = styled.div`
 const columnTarget = {
 
   drop(props, monitor, component) {
-    props.moveCard(
-      monitor.getItem().columnIndex,
-      monitor.getItem().cardIndex,
-      props.columnIndex
-    );
+    // only moveCard if columns are different
+    // same column rearranging is handled by Card components hover method
+    if (monitor.getItem().columnIndex !== props.columnIndex) {
+      props.moveCard(
+        monitor.getItem().columnIndex,
+        monitor.getItem().cardIndex,
+        props.columnIndex
+      );
+    }
   }
 };
 
@@ -44,6 +48,7 @@ class Column extends Component {
         cardIndex={index}
         columnIndex={this.props.columnIndex}
         task={card.task}
+        rearrangeCard={this.props.rearrangeCard}
       />
     ));
 

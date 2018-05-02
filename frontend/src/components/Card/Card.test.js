@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 
 // project imports
-import Card from './Card';
+import Card, { CardSource } from './Card';
 
 // 3rd party imports
 import TestBackend from 'react-dnd-test-backend';
@@ -37,7 +37,7 @@ it('can be dragged', () => {
 
   const manager = card.instance().getManager()
   const backend = manager.getBackend()
-  const cardIntance = card.find(Card).instance()
+  const cardIntance = card.find(CardSource).instance()
   const cardIntanceId = cardIntance.getHandlerId()
   backend.simulateBeginDrag([cardIntanceId])
 });

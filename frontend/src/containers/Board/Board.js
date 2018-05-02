@@ -44,36 +44,35 @@ class Board extends Component {
     ]
   }
 
-  appendCard = (card, columnIndex) => {
-    const updatedToColumn = {...this.state.columns[columnIndex]};
-    updatedToColumn.cards = [...this.state.columns[columnIndex].cards];
-    updatedToColumn.cards.push(card);
+  // rearrange cards within the same column
+  rearrangeCardHandler = (fromColumnIndex, fromCardIndex, toCardIndex) => {
+    const fromColumn = {...this.state.columns[fromColumnIndex]};
+    fromColumn.cards = [...this.state.columns[fromColumnIndex].cards];
+    const card = fromColumn.cards.splice(fromCardIndex, 1)[0];
+    fromColumn.cards.splice(toCardIndex, 0, card);
     this.setState({
       columns: [
-        ...this.state.columns.slice(0, columnIndex),
-        updatedToColumn,
-        ...this.state.columns.slice(columnIndex + 1)
+        ...this.state.columns.slice(0, fromColumnIndex),
+        fromColumn,
+        ...this.state.columns.slice(fromColumnIndex + 1)
       ]
     });
   };
 
-  removeCard = (columnIndex, cardIndex) => {
-    const updatedFromColumn = {...this.state.columns[columnIndex]};
-    updatedFromColumn.cards = [...this.state.columns[columnIndex].cards];
-    updatedFromColumn.cards.splice(cardIndex, 1);
-    this.setState({
-      columns: [
-        ...this.state.columns.slice(0, columnIndex),
-        updatedFromColumn,
-        ...this.state.columns.slice(columnIndex + 1)
-      ]
-    });
-  };
-
+  // move card to a different column
   moveCardHandler = (fromColumnIndex, fromCardIndex, toColumnIndex) => {
-    const card = {...this.state.columns[fromColumnIndex].cards[fromCardIndex]};
-    this.appendCard(card, toColumnIndex);
-    this.removeCard(fromColumnIndex, fromCardIndex);
+    const updatedState = {...this.state};
+    for (let column in this.state.columns) {
+      updatedState.columns[column] = {...this.state.columns[column]}
+      updatedState.columns[column].cards = [...this.state.columns[column].cards];
+      for (let card in this.state.columns[column].cards) {
+        updatedState.columns[column].cards[card] = {...this.state.columns[column].cards[card]}
+      }
+    }
+
+    const card = updatedState.columns[fromColumnIndex].cards.splice(fromCardIndex, 1)[0];
+    updatedState.columns[toColumnIndex].cards.push(card);
+    this.setState(updatedState);
   };
 
   render() {
@@ -83,6 +82,7 @@ class Board extends Component {
         columnIndex={index}
         title={column.title}
         cards={column.cards}
+        rearrangeCard={this.rearrangeCardHandler}
         moveCard={this.moveCardHandler}
       />
     ));

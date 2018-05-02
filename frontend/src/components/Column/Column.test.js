@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 
 // component imports
 import Column from '../../components/Column/Column';
-import Card from '../../components/Card/Card';
+import Card, { CardSource } from '../../components/Card/Card';
 
 // 3rd party imports
 import TestBackend from 'react-dnd-test-backend';
@@ -59,28 +59,35 @@ it('contains 2 cards in props and renders 2 cards', () => {
   expect(column.find(Card).length).toBe(2);
 });
 
-it('can have a card dropped on it', () => {
-  const props = {
-    moveCard: jest.fn(),
+it('calls moveCard when a different column card is dropped on it', () => {
+  const ColumnContext = wrapInTestContext(Column);
+
+  // create first column and get a ref to the cardId it contains
+  const propsFirstColumn = {
     key: 0,
     columnIndex: 0,
     cards: [{cardId: 0, task: 'first task'}]
   };
-
-  const ColumnContext = wrapInTestContext(Column);
-  const column = mount(<ColumnContext {...props} />);
-
-  const card = column.find(Card).instance();
+  const firstColumn = mount(<ColumnContext {...propsFirstColumn} />);
+  const card = firstColumn.find(CardSource).instance();
   const cardId = card.getHandlerId();
 
-  const columnDropable = column.find(Column).instance();
+  // create second column and get a ref to its columnID (which is dropable)
+  const propsSecondColumn = {
+    moveCard: jest.fn(),
+    key: 1,
+    columnIndex: 1,
+    cards: []
+  };
+  const secondColumn = mount(<ColumnContext {...propsSecondColumn} />);
+  const columnDropable = secondColumn.find(Column).instance();
   const columnDropableId = columnDropable.getHandlerId();
 
-  // get testing backend and simulate card being dropped
-  const manager = column.instance().getManager();
+  // simulate card being dropped from first column to second column
+  const manager = secondColumn.instance().getManager();
   const backend = manager.getBackend();
   backend.simulateBeginDrag([cardId]);
   backend.simulateHover([columnDropableId]);
   backend.simulateDrop();
-  expect(props.moveCard).toHaveBeenCalled();
+  expect(propsSecondColumn.moveCard).toHaveBeenCalled();
 });
