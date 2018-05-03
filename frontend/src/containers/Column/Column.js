@@ -11,8 +11,8 @@ import { DropTarget } from 'react-dnd';
 
 
 const ColumnContainer = styled.div`
-  padding: 15px;
-  margin: 15px;
+  padding: 10px;
+  margin: 10px;
   background-color: blue;
   flex: 1;
 `;
@@ -56,6 +56,11 @@ class Column extends Component {
 
     return (
       <ColumnContainer innerRef={node => connectDropTarget(node)}>
+        <i
+          title="Collapse Column"
+          className="fas fa-compress"
+          onClick={() => this.props.toggleColumn(this.props.columnIndex)}
+        ></i>
         <h3>{this.props.title}</h3>
         {cards}
       </ColumnContainer>
