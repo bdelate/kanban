@@ -4,6 +4,8 @@
   "private": true,
   "dependencies": {
     "react": "^16.3.1",
+    "react-dnd": "^2.6.0",
+    "react-dnd-html5-backend": "^2.6.0",
     "react-dom": "^16.3.1",
     "react-scripts": "1.1.4",
     "styled-components": "^3.2.5"
@@ -13,5 +15,10 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1",
+    "react-dnd-test-backend": "^2.6.0"
   }
 }
