@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 
 // project imports
-import Card from '../Card/Card';
+import Card from '../../components/Card/Card';
 import { DragTypes } from '../../DragTypes';
 
 // 3rd party imports

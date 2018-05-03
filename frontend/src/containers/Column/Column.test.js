@@ -2,7 +2,7 @@
 import React, {Component} from 'react';
 
 // component imports
-import Column from '../../components/Column/Column';
+import Column from './Column';
 import Card, { CardSource } from '../../components/Card/Card';
 
 // 3rd party imports

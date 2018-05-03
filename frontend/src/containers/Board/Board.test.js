@@ -3,10 +3,7 @@ import React, {Component} from 'react';
 
 // container imports
 import Board from './Board';
-import Bla from './Board';
-
-// component imports
-import Column from '../../components/Column/Column';
+import Column from '../Column/Column';
 
 // 3rd party imports
 import TestBackend from 'react-dnd-test-backend';

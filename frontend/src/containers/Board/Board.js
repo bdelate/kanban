@@ -2,7 +2,7 @@
 import React, {Component} from 'react';
 
 // component imports
-import Column from '../../components/Column/Column';
+import Column from '../Column/Column';
 
 // 3rd party imports
 import styled from 'styled-components';
