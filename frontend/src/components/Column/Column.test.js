@@ -91,3 +91,29 @@ it('calls moveCard when a different column card is dropped on it', () => {
   backend.simulateDrop();
   expect(propsSecondColumn.moveCard).toHaveBeenCalled();
 });
+
+it('does not call moveCard when a card is dropped on the same column', () => {
+  const ColumnContext = wrapInTestContext(Column);
+
+  // create column and get a ref to the cardId it contains
+  const props = {
+    moveCard: jest.fn(),
+    key: 0,
+    columnIndex: 0,
+    cards: [{cardId: 0, task: 'first task'}]
+  };
+  const column = mount(<ColumnContext {...props} />);
+  const card = column.find(CardSource).instance();
+  const cardId = card.getHandlerId();
+
+  const columnDropable = column.find(Column).instance();
+  const columnDropableId = columnDropable.getHandlerId();
+
+  // simulate card being dropped from column to second column
+  const manager = column.instance().getManager();
+  const backend = manager.getBackend();
+  backend.simulateBeginDrag([cardId]);
+  backend.simulateHover([columnDropableId]);
+  backend.simulateDrop();
+  expect(props.moveCard).toHaveBeenCalledTimes(0);
+});

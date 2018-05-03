@@ -44,8 +44,8 @@ class Board extends Component {
     ]
   }
 
-  // rearrange cards within the same column
-  rearrangeCardHandler = (fromColumnIndex, fromCardIndex, toCardIndex) => {
+  // reorder cards within the same column
+  reorderCardHandler = (fromColumnIndex, fromCardIndex, toCardIndex) => {
     const fromColumn = {...this.state.columns[fromColumnIndex]};
     fromColumn.cards = [...this.state.columns[fromColumnIndex].cards];
     const card = fromColumn.cards.splice(fromCardIndex, 1)[0];
@@ -64,13 +64,19 @@ class Board extends Component {
     const updatedState = {...this.state};
     for (let column in this.state.columns) {
       updatedState.columns[column] = {...this.state.columns[column]}
-      updatedState.columns[column].cards = [...this.state.columns[column].cards];
+      updatedState.columns[column].cards = [
+        ...this.state.columns[column].cards
+      ];
       for (let card in this.state.columns[column].cards) {
-        updatedState.columns[column].cards[card] = {...this.state.columns[column].cards[card]}
+        updatedState.columns[column].cards[card] = {
+          ...this.state.columns[column].cards[card]
+        };
       }
     }
 
-    const card = updatedState.columns[fromColumnIndex].cards.splice(fromCardIndex, 1)[0];
+    const card = updatedState.columns[
+      fromColumnIndex
+    ].cards.splice(fromCardIndex, 1)[0];
     updatedState.columns[toColumnIndex].cards.push(card);
     this.setState(updatedState);
   };
@@ -82,7 +88,7 @@ class Board extends Component {
         columnIndex={index}
         title={column.title}
         cards={column.cards}
-        rearrangeCard={this.rearrangeCardHandler}
+        reorderCard={this.reorderCardHandler}
         moveCard={this.moveCardHandler}
       />
     ));

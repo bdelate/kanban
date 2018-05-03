@@ -28,7 +28,7 @@ const cardSource = {
 };
 
 const cardTarget = {
-  // rearrange cards when hovered if they are in the same column
+  // reorder cards when hovered if they are in the same column
 	hover(props, monitor, component) {
     if (monitor.getItem().columnIndex === props.columnIndex) {
   		const dragIndex = monitor.getItem().cardIndex;
@@ -63,7 +63,7 @@ const cardTarget = {
   		}
 
 		  // move card
-		  props.rearrangeCard(monitor.getItem().columnIndex, dragIndex, hoverIndex);
+		  props.reorderCard(monitor.getItem().columnIndex, dragIndex, hoverIndex);
 		  monitor.getItem().cardIndex = hoverIndex
     }
 	}

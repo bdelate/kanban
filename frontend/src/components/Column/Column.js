@@ -20,21 +20,23 @@ const ColumnContainer = styled.div`
 const columnTarget = {
 
   drop(props, monitor, component) {
-    // only moveCard if columns are different
-    // same column rearranging is handled by Card components hover method
-    if (monitor.getItem().columnIndex !== props.columnIndex) {
-      props.moveCard(
-        monitor.getItem().columnIndex,
-        monitor.getItem().cardIndex,
-        props.columnIndex
-      );
-    }
+    props.moveCard(
+      monitor.getItem().columnIndex,
+      monitor.getItem().cardIndex,
+      props.columnIndex
+    );
+  },
+  // only moveCard if columns are different
+  // same column reordering is handled by Card components hover method
+  canDrop(props, monitor) {
+    return monitor.getItem().columnIndex !== props.columnIndex;
   }
 };
 
 function collect(connect, monitor) {
   return {
-    connectDropTarget: connect.dropTarget()
+    connectDropTarget: connect.dropTarget(),
+    canDrop: monitor.canDrop()
   };
 }
 
@@ -48,7 +50,7 @@ class Column extends Component {
         cardIndex={index}
         columnIndex={this.props.columnIndex}
         task={card.task}
-        rearrangeCard={this.props.rearrangeCard}
+        reorderCard={this.props.reorderCard}
       />
     ));
 
