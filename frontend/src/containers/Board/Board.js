@@ -1,8 +1,9 @@
 // react imports
 import React, {Component} from 'react';
 
-// component imports
-import Column from '../../components/Column/Column';
+// project imports
+import Column from '../Column/Column';
+import CollapsedColumn from '../../components/CollapsedColumn/CollapsedColumn';
 
 // 3rd party imports
 import styled from 'styled-components';
@@ -21,6 +22,7 @@ class Board extends Component {
       {
         columnId: 0,
         title: 'first column',
+        collapsed: false,
         cards: [
           {cardId: 0, task: 'first column first task'},
           {cardId: 1, task: 'first column second task'},
@@ -28,6 +30,7 @@ class Board extends Component {
       }, {
         columnId: 1,
         title: 'second column',
+        collapsed: false,
         cards: [
           {cardId: 2, task: 'second column first task'},
           {cardId: 3, task: 'second column second task'},
@@ -36,6 +39,7 @@ class Board extends Component {
       }, {
         columnId: 2,
         title: 'third column',
+        collapsed: true,
         cards: [
           {cardId: 5, task: 'third column first task'},
           {cardId: 6, task: 'third column second task'},
@@ -43,6 +47,19 @@ class Board extends Component {
       }
     ]
   }
+
+  // collapse / uncollapse column
+  toggleColumnHandler = columnIndex => {
+    const column = {...this.state.columns[columnIndex]};
+    column.collapsed = !column.collapsed;
+    this.setState({
+      columns: [
+        ...this.state.columns.slice(0, columnIndex),
+        column,
+        ...this.state.columns.slice(columnIndex + 1)
+      ]
+    });
+  };
 
   // reorder cards within the same column
   reorderCardHandler = (fromColumnIndex, fromCardIndex, toCardIndex) => {
@@ -82,18 +99,29 @@ class Board extends Component {
   };
 
   render() {
-    const columns = this.state.columns.map((column, index) => (
-      <Column
-        key={column.columnId}
-        columnIndex={index}
-        title={column.title}
-        cards={column.cards}
-        reorderCard={this.reorderCardHandler}
-        moveCard={this.moveCardHandler}
-      />
-    ));
+    const columns = this.state.columns.map((column, index) => {
+      if (column.collapsed) {
+        return <CollapsedColumn
+          key={column.columnId}
+          columnIndex={index}
+          title={column.title}
+          numCards={column.cards.length}
+          toggleColumn={this.toggleColumnHandler}
+        />
+      } else {
+        return <Column
+          key={column.columnId}
+          columnIndex={index}
+          title={column.title}
+          cards={column.cards}
+          reorderCard={this.reorderCardHandler}
+          moveCard={this.moveCardHandler}
+          toggleColumn={this.toggleColumnHandler}
+        />
+      }
+    });
 
-    return(
+    return (
       <ColumnsContainer>{columns}</ColumnsContainer>
     )
   }

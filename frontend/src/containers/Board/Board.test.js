@@ -1,12 +1,9 @@
 // react imports
 import React, {Component} from 'react';
 
-// container imports
+// project imports
 import Board from './Board';
-import Bla from './Board';
-
-// component imports
-import Column from '../../components/Column/Column';
+import Column from '../Column/Column';
 
 // 3rd party imports
 import TestBackend from 'react-dnd-test-backend';
@@ -80,4 +77,25 @@ it('should reorder when reorderCardHandler is called', () => {
   expect(boardInstance.state.columns[0].cards.length).toBe(2);
   expect(boardInstance.state.columns[0].cards[0].task).toBe('second task');
   expect(boardInstance.state.columns[0].cards[1].task).toBe('first task');
+});
+
+it('should toggle column.collapsed when toggleColumnHandler is called', () => {
+  const state = {
+    columns: [
+      {
+        columnId: 0,
+        title: 'first column',
+        collapsed: false,
+        cards: [
+          {cardId: 0, task: 'first task'}
+        ]
+      }
+    ]
+  };
+
+  const board = shallow(<Board />);
+  const boardInstance = board.dive().instance();
+  boardInstance.setState(state);
+  boardInstance.toggleColumnHandler(0);
+  expect(boardInstance.state.columns[0].collapsed).toBeTruthy();
 });

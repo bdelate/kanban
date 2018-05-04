@@ -1,15 +1,15 @@
 // react imports
 import React, {Component} from 'react';
 
-// component imports
-import Column from '../../components/Column/Column';
+// project imports
+import Column from './Column';
 import Card, { CardSource } from '../../components/Card/Card';
 
 // 3rd party imports
 import TestBackend from 'react-dnd-test-backend';
 import { DragDropContext } from 'react-dnd';
 import TestUtils from 'react-dom/test-utils';
-import {configure, mount} from 'enzyme';
+import {configure, mount, shallow} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
 configure({adapter: new Adapter()});
@@ -116,4 +116,18 @@ it('does not call moveCard when a card is dropped on the same column', () => {
   backend.simulateHover([columnDropableId]);
   backend.simulateDrop();
   expect(props.moveCard).toHaveBeenCalledTimes(0);
+});
+
+it('should call toggleColumn when compress icon is clicked', () => {
+  const ColumnContext = wrapInTestContext(Column);
+  const props = {
+    moveCard: jest.fn(),
+    key: 0,
+    columnIndex: 0,
+    cards: [{cardId: 0, task: 'first task'}],
+    toggleColumn: jest.fn()
+  };
+  const column = mount(<ColumnContext {...props} />);
+  column.find('.fa-compress').simulate('click');
+  expect(props.toggleColumn).toHaveBeenCalled();
 });
