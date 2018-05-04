@@ -1,5 +1,5 @@
 // react imports
-import React, { Component } from 'react';
+import React from 'react';
 
 // project imports
 import Card from '../../components/Card/Card';
@@ -40,17 +40,15 @@ function collect(connect, monitor) {
   };
 }
 
-class Column extends Component {
-
-  render() {
-    const { connectDropTarget } = this.props;
-    const cards = this.props.cards.map((card, index) => (
+const column = (props) => {
+    const { connectDropTarget } = props;
+    const cards = props.cards.map((card, index) => (
       <Card
         key={card.cardId}
         cardIndex={index}
-        columnIndex={this.props.columnIndex}
+        columnIndex={props.columnIndex}
         task={card.task}
-        reorderCard={this.props.reorderCard}
+        reorderCard={props.reorderCard}
       />
     ));
 
@@ -59,14 +57,12 @@ class Column extends Component {
         <i
           title="Collapse Column"
           className="fas fa-compress"
-          onClick={() => this.props.toggleColumn(this.props.columnIndex)}
+          onClick={() => props.toggleColumn(props.columnIndex)}
         ></i>
-        <h3>{this.props.title}</h3>
+        <h3>{props.title}</h3>
         {cards}
       </ColumnContainer>
-
     )
-  }
 };
 
-export default DropTarget(DragTypes.CARD, columnTarget, collect)(Column);
+export default DropTarget(DragTypes.CARD, columnTarget, collect)(column);

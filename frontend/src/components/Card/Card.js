@@ -96,7 +96,7 @@ const card = (props) => {
     )
 };
 
-// export CardSource separately to be used in Card.test.js
+// export CardSource separately to be used in tests
 export const CardSource = DragSource(
   DragTypes.CARD, cardSource, collectSource
 )(card);
