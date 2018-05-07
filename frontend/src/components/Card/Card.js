@@ -90,6 +90,14 @@ const card = (props) => {
         <div>
           <CardContainer style={{ opacity }}>
             <span>{props.task}</span>
+            <i
+              title="Edit or Delete"
+              className="fas fa-edit"
+              onClick={() => props.displayTaskCrud(
+                props.columnIndex,
+                props.cardIndex
+              )}
+            ></i>
           </CardContainer>
         </div>
       )

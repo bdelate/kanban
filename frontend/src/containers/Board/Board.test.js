@@ -2,8 +2,9 @@
 import React, {Component} from 'react';
 
 // project imports
-import Board from './Board';
+import Board, { BoardComponentOnly } from './Board';
 import Column from '../Column/Column';
+import TaskCrud from '../../components/TaskCrud/TaskCrud';
 
 // 3rd party imports
 import TestBackend from 'react-dnd-test-backend';
@@ -98,4 +99,12 @@ it('should toggle column.collapsed when toggleColumnHandler is called', () => {
   boardInstance.setState(state);
   boardInstance.toggleColumnHandler(0);
   expect(boardInstance.state.columns[0].collapsed).toBeTruthy();
+});
+
+it('displays TaskCrud component when displayTaskCrudHandler is called', () => {
+  const board = shallow(<BoardComponentOnly />);
+  expect(board.find(TaskCrud).length).toBe(0);
+  board.instance().displayTaskCrudHandler(0, 0);
+  board.update();
+  expect(board.find(TaskCrud).length).toBe(1);
 });

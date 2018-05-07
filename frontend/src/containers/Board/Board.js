@@ -4,6 +4,7 @@ import React, {Component} from 'react';
 // project imports
 import Column from '../Column/Column';
 import CollapsedColumn from '../../components/CollapsedColumn/CollapsedColumn';
+import TaskCrud from '../../components/TaskCrud/TaskCrud';
 
 // 3rd party imports
 import styled from 'styled-components';
@@ -45,7 +46,12 @@ class Board extends Component {
           {cardId: 6, task: 'third column second task'},
         ]
       }
-    ]
+    ],
+    taskCrud: {
+      active: false,
+      columnIndex: -1,
+      cardIndex: -1
+    }
   }
 
   // collapse / uncollapse column
@@ -98,6 +104,25 @@ class Board extends Component {
     this.setState(updatedState);
   };
 
+  cancelTaskCrudHandler = () => {
+    const taskCrud = {
+      active: false,
+      columnIndex: -1,
+      cardIndex: -1
+    }
+    this.setState({taskCrud: taskCrud});
+  };
+
+
+  displayTaskCrudHandler = (columnIndex, cardIndex) => {
+    const taskCrud = {
+      active: true,
+      columnIndex: columnIndex,
+      cardIndex: cardIndex
+    }
+    this.setState({taskCrud: taskCrud});
+  }
+
   render() {
     const columns = this.state.columns.map((column, index) => {
       if (column.collapsed) {
@@ -117,14 +142,32 @@ class Board extends Component {
           reorderCard={this.reorderCardHandler}
           moveCard={this.moveCardHandler}
           toggleColumn={this.toggleColumnHandler}
+          displayTaskCrud={this.displayTaskCrudHandler}
         />
       }
     });
 
+    // display taskCrud modal if this.state.taskCrud.active
+    let taskCrud = null;
+    if (this.state.taskCrud.active) {
+      const card = this.state.columns[
+        this.state.taskCrud.columnIndex]
+        .cards[this.state.taskCrud.cardIndex];
+      taskCrud = <TaskCrud
+        {...this.state.taskCrud}
+        task={card ? card.task : null}
+        cancelTaskCrud={this.cancelTaskCrudHandler}
+      />
+    }
+
     return (
-      <ColumnsContainer>{columns}</ColumnsContainer>
+      <ColumnsContainer>
+        {taskCrud}
+        {columns}
+      </ColumnsContainer>
     )
   }
 }
 
+export const BoardComponentOnly = Board; // used for shallow unit testing
 export default DragDropContext(HTML5Backend)(Board);

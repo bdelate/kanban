@@ -49,6 +49,7 @@ const column = (props) => {
         columnIndex={props.columnIndex}
         task={card.task}
         reorderCard={props.reorderCard}
+        displayTaskCrud={props.displayTaskCrud}
       />
     ));
 
