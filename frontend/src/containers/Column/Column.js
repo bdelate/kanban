@@ -60,6 +60,11 @@ const column = (props) => {
           className="fas fa-compress"
           onClick={() => props.toggleColumn(props.columnIndex)}
         ></i>
+        <i
+          title="Add Task"
+          className="fas fa-plus"
+          onClick={() => props.displayTaskCrud(props.columnIndex)}
+        ></i>
         <h3>{props.title}</h3>
         {cards}
       </ColumnContainer>

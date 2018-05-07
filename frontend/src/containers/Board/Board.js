@@ -114,7 +114,7 @@ class Board extends Component {
   };
 
 
-  displayTaskCrudHandler = (columnIndex, cardIndex) => {
+  displayTaskCrudHandler = (columnIndex, cardIndex=-1) => {
     const taskCrud = {
       active: true,
       columnIndex: columnIndex,
