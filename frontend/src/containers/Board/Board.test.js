@@ -9,8 +9,7 @@ import TaskCrud from '../../components/TaskCrud/TaskCrud';
 // 3rd party imports
 import TestBackend from 'react-dnd-test-backend';
 import { DragDropContext } from 'react-dnd';
-import TestUtils from 'react-dom/test-utils';
-import {configure, shallow, mount} from 'enzyme';
+import {configure, shallow} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
 configure({adapter: new Adapter()});
@@ -101,10 +100,18 @@ it('should toggle column.collapsed when toggleColumnHandler is called', () => {
   expect(boardInstance.state.columns[0].collapsed).toBeTruthy();
 });
 
-it('displays TaskCrud component when displayTaskCrudHandler is called', () => {
+it('toggles TaskCrud component when toggleTaskCrudHandler is called', () => {
   const board = shallow(<BoardComponentOnly />);
+  // initially there is no modal
   expect(board.find(TaskCrud).length).toBe(0);
-  board.instance().displayTaskCrudHandler(0, 0);
+
+  // display modal
+  board.instance().toggleTaskCrudHandler(true, 0);
   board.update();
   expect(board.find(TaskCrud).length).toBe(1);
+
+  // close modal
+  board.instance().toggleTaskCrudHandler(false);
+  board.update();
+  expect(board.find(TaskCrud).length).toBe(0);
 });

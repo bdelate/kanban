@@ -104,19 +104,10 @@ class Board extends Component {
     this.setState(updatedState);
   };
 
-  cancelTaskCrudHandler = () => {
+  // update state.taskCrud which allows for displaying / hiding taskCrud modal
+  toggleTaskCrudHandler = (active, columnIndex=-1, cardIndex=-1) => {
     const taskCrud = {
-      active: false,
-      columnIndex: -1,
-      cardIndex: -1
-    }
-    this.setState({taskCrud: taskCrud});
-  };
-
-
-  displayTaskCrudHandler = (columnIndex, cardIndex=-1) => {
-    const taskCrud = {
-      active: true,
+      active: active,
       columnIndex: columnIndex,
       cardIndex: cardIndex
     }
@@ -142,7 +133,7 @@ class Board extends Component {
           reorderCard={this.reorderCardHandler}
           moveCard={this.moveCardHandler}
           toggleColumn={this.toggleColumnHandler}
-          displayTaskCrud={this.displayTaskCrudHandler}
+          toggleTaskCrud={this.toggleTaskCrudHandler}
         />
       }
     });
@@ -156,7 +147,7 @@ class Board extends Component {
       taskCrud = <TaskCrud
         {...this.state.taskCrud}
         task={card ? card.task : null}
-        cancelTaskCrud={this.cancelTaskCrudHandler}
+        toggleTaskCrud={this.toggleTaskCrudHandler}
       />
     }
 

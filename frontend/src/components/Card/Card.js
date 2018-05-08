@@ -93,7 +93,8 @@ const card = (props) => {
             <i
               title="Edit or Delete"
               className="fas fa-edit"
-              onClick={() => props.displayTaskCrud(
+              onClick={() => props.toggleTaskCrud(
+                true,
                 props.columnIndex,
                 props.cardIndex
               )}

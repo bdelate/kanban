@@ -49,7 +49,7 @@ const column = (props) => {
         columnIndex={props.columnIndex}
         task={card.task}
         reorderCard={props.reorderCard}
-        displayTaskCrud={props.displayTaskCrud}
+        toggleTaskCrud={props.toggleTaskCrud}
       />
     ));
 
@@ -63,7 +63,7 @@ const column = (props) => {
         <i
           title="Add Task"
           className="fas fa-plus"
-          onClick={() => props.displayTaskCrud(props.columnIndex)}
+          onClick={() => props.toggleTaskCrud(true, props.columnIndex)}
         ></i>
         <h3>{props.title}</h3>
         {cards}

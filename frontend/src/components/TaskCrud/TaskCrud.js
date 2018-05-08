@@ -45,7 +45,7 @@ const taskCrud = (props) => {
         </textarea>
         <button>Save</button>
         {deleteButton}
-        <button onClick={props.cancelTaskCrud}>
+        <button onClick={() => props.toggleTaskCrud(false)}>
           Cancel
         </button>
       </Content>
