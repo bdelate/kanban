@@ -1,18 +1,18 @@
 // react imports
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 
 // project imports
 import Board, { BoardComponentOnly } from './Board';
 import Column from '../Column/Column';
-import TaskCrud from '../../components/TaskCrud/TaskCrud';
+import CardCrud from '../../components/CardCrud/CardCrud';
 
 // 3rd party imports
 import TestBackend from 'react-dnd-test-backend';
 import { DragDropContext } from 'react-dnd';
-import {configure, shallow} from 'enzyme';
+import { configure, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
-configure({adapter: new Adapter()});
+configure({ adapter: new Adapter() });
 
 // Wraps a component in a DragDropContext that uses the dnd TestBackend.
 function wrapInTestContext(DecoratedComponent) {
@@ -37,7 +37,7 @@ it('should move card when moveCardHandler is called', () => {
         columnId: 0,
         title: 'first column',
         cards: [
-          {cardId: 0, task: 'first column first task'}
+          { cardId: 0, task: 'first column first task' }
         ]
       }, {
         columnId: 1,
@@ -63,8 +63,8 @@ it('should reorder when reorderCardHandler is called', () => {
         columnId: 0,
         title: 'first column',
         cards: [
-          {cardId: 0, task: 'first task'},
-          {cardId: 1, task: 'second task'}
+          { cardId: 0, task: 'first task' },
+          { cardId: 1, task: 'second task' }
         ]
       }
     ]
@@ -87,7 +87,7 @@ it('should toggle column.collapsed when toggleColumnHandler is called', () => {
         title: 'first column',
         collapsed: false,
         cards: [
-          {cardId: 0, task: 'first task'}
+          { cardId: 0, task: 'first task' }
         ]
       }
     ]
@@ -100,18 +100,78 @@ it('should toggle column.collapsed when toggleColumnHandler is called', () => {
   expect(boardInstance.state.columns[0].collapsed).toBeTruthy();
 });
 
-it('toggles TaskCrud component when toggleTaskCrudHandler is called', () => {
+it('toggles CardCrud component when toggleCardCrudHandler is called', () => {
   const board = shallow(<BoardComponentOnly />);
   // initially there is no modal
-  expect(board.find(TaskCrud).length).toBe(0);
+  expect(board.find(CardCrud).length).toBe(0);
 
   // display modal
-  board.instance().toggleTaskCrudHandler(true, 0);
+  board.instance().toggleCardCrudHandler(true, 0);
   board.update();
-  expect(board.find(TaskCrud).length).toBe(1);
+  expect(board.find(CardCrud).length).toBe(1);
 
   // close modal
-  board.instance().toggleTaskCrudHandler(false);
+  board.instance().toggleCardCrudHandler(false);
   board.update();
-  expect(board.find(TaskCrud).length).toBe(0);
+  expect(board.find(CardCrud).length).toBe(0);
 });
+
+it('deletes card from state when deleteCardHandler is called with valid card', () => {
+  const state = {
+    columns: [
+      {
+        columnId: 0,
+        title: 'first column',
+        collapsed: false,
+        cards: [
+          { cardId: 0, task: 'first task' }
+        ]
+      }
+    ]
+  };
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  board.instance().deleteCardHandler(0, 0);
+  board.update();
+  expect(board.state().columns[0].cards.length).toBe(0);
+});
+
+it('edit card state when editCardHandler is called with valid card', () => {
+  const state = {
+    columns: [
+      {
+        columnId: 0,
+        title: 'first column',
+        collapsed: false,
+        cards: [{ cardId: 0, task: 'first task' }]
+      }
+    ]
+  };
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  board.instance().editCardHandler(0, 0, 'new task text');
+  board.update();
+  expect(board.state().columns[0].cards[0].task).toEqual('new task text');
+});
+
+
+
+it('create new card when createCardHandler is called with valid card', () => {
+  const state = {
+    columns: [
+      {
+        columnId: 0,
+        title: 'first column',
+        collapsed: false,
+        cards: []
+      }
+    ]
+  };
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  board.instance().createCardHandler(0, 'new task');
+  board.update();
+  expect(board.state().columns[0].cards.length).toBe(1);
+  expect(board.state().columns[0].cards[0].task).toEqual('new task');
+});
+

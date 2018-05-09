@@ -29,44 +29,43 @@ const cardSource = {
 
 const cardTarget = {
   // reorder cards when hovered if they are in the same column
-	hover(props, monitor, component) {
+  hover(props, monitor, component) {
     if (monitor.getItem().columnIndex === props.columnIndex) {
-  		const dragIndex = monitor.getItem().cardIndex;
-  		const hoverIndex = props.cardIndex;
+      const dragIndex = monitor.getItem().cardIndex;
+      const hoverIndex = props.cardIndex;
 
-  		// Don't replace items with themselves
-  		if (dragIndex === hoverIndex) {
-  			return;
-  		}
+      // Don't replace items with themselves
+      if (dragIndex === hoverIndex) {
+        return;
+      }
 
-  		// Determine rectangle on screen
-  		const hoverBoundingRect = findDOMNode(component).getBoundingClientRect();
+      // Determine rectangle on screen
+      const hoverBoundingRect = findDOMNode(component).getBoundingClientRect();
 
-  		// Get vertical middle
-  		const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      // Get vertical middle
+      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
 
-  		// Determine mouse position
-  		const clientOffset = monitor.getClientOffset();
+      // Determine mouse position
+      const clientOffset = monitor.getClientOffset();
 
-  		// Get pixels to the top
-  		const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+      // Get pixels to the top
+      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
 
-      // only perform
-  		// Dragging downwards
-  		if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-  			return;
-  		}
+      // Dragging downwards
+      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+        return;
+      }
 
-  		// Dragging upwards
-  		if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-  			return;
-  		}
+      // Dragging upwards
+      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+        return;
+      }
 
-		  // move card
-		  props.reorderCard(monitor.getItem().columnIndex, dragIndex, hoverIndex);
-		  monitor.getItem().cardIndex = hoverIndex
+      // move card
+      props.reorderCard(monitor.getItem().columnIndex, dragIndex, hoverIndex);
+      monitor.getItem().cardIndex = hoverIndex
     }
-	}
+  }
 };
 
 function collectSource(connect, monitor) {
@@ -83,9 +82,18 @@ function collectTarget(connect, monitor) {
 }
 
 const card = (props) => {
-    const { connectDragSource, connectDropTarget, isDragging } = props;
-    const opacity = isDragging ? 0 : 1;
-    return connectDragSource(
+  const { connectDragSource, connectDropTarget, isDragging } = props;
+  const opacity = isDragging ? 0 : 1;
+
+  let output = null;
+  if (props.spinner) {
+    output = (
+      <CardContainer>
+        <i className="fas fa-spinner fa-spin"></i>
+      </CardContainer>
+    )
+  } else {
+    output = connectDragSource(
       connectDropTarget(
         <div>
           <CardContainer style={{ opacity }}>
@@ -93,7 +101,7 @@ const card = (props) => {
             <i
               title="Edit or Delete"
               className="fas fa-edit"
-              onClick={() => props.toggleTaskCrud(
+              onClick={() => props.toggleCardCrud(
                 true,
                 props.columnIndex,
                 props.cardIndex
@@ -103,6 +111,8 @@ const card = (props) => {
         </div>
       )
     )
+  }
+  return output;
 };
 
 // export CardSource separately to be used in tests
