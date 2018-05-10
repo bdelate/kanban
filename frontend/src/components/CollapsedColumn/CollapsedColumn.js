@@ -17,7 +17,6 @@ const collapsedColumn = (props) => {
   return (
     <ColumnContainer>
       <i
-        id="test"
         title="Expand Column"
         className="fas fa-expand"
         onClick={() => props.toggleColumn(props.columnIndex)}

@@ -41,28 +41,35 @@ function collect(connect, monitor) {
 }
 
 const column = (props) => {
-    const { connectDropTarget } = props;
-    const cards = props.cards.map((card, index) => (
-      <Card
-        key={card.cardId}
-        cardIndex={index}
-        columnIndex={props.columnIndex}
-        task={card.task}
-        reorderCard={props.reorderCard}
-      />
-    ));
+  const { connectDropTarget } = props;
+  const cards = props.cards.map((card, index) => (
+    <Card
+      key={card.cardId}
+      cardIndex={index}
+      columnIndex={props.columnIndex}
+      task={card.task}
+      spinner={card.spinner}
+      reorderCard={props.reorderCard}
+      toggleCardCrud={props.toggleCardCrud}
+    />
+  ));
 
-    return (
-      <ColumnContainer innerRef={node => connectDropTarget(node)}>
-        <i
-          title="Collapse Column"
-          className="fas fa-compress"
-          onClick={() => props.toggleColumn(props.columnIndex)}
-        ></i>
-        <h3>{props.title}</h3>
-        {cards}
-      </ColumnContainer>
-    )
+  return (
+    <ColumnContainer innerRef={node => connectDropTarget(node)}>
+      <i
+        title="Collapse Column"
+        className="fas fa-compress"
+        onClick={() => props.toggleColumn(props.columnIndex)}
+      ></i>
+      <i
+        title="Add Task"
+        className="fas fa-plus"
+        onClick={() => props.toggleCardCrud(true, props.columnIndex)}
+      ></i>
+      <h3>{props.title}</h3>
+      {cards}
+    </ColumnContainer>
+  )
 };
 
 export default DropTarget(DragTypes.CARD, columnTarget, collect)(column);
