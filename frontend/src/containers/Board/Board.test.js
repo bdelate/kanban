@@ -154,8 +154,6 @@ it('edit card state when editCardHandler is called with valid card', () => {
   expect(board.state().columns[0].cards[0].task).toEqual('new task text');
 });
 
-
-
 it('create new card when createCardHandler is called with valid card', () => {
   const state = {
     columns: [

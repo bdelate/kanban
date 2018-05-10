@@ -8,7 +8,17 @@ import { DragTypes } from '../../DragTypes';
 // 3rd party imports
 import styled from 'styled-components';
 import { DragSource, DropTarget } from 'react-dnd';
+import PropTypes from 'prop-types';
 
+
+const propTypes = {
+  cardIndex: PropTypes.number.isRequired,
+  columnIndex: PropTypes.number.isRequired,
+  task: PropTypes.string.isRequired,
+  spinner: PropTypes.bool,
+  reorderCard: PropTypes.func.isRequired,
+  toggleCardCrud: PropTypes.func.isRequired
+}
 
 const CardContainer = styled.div`
   padding: 15px;
@@ -114,6 +124,8 @@ const card = (props) => {
   }
   return output;
 };
+
+card.propTypes = propTypes;
 
 // export CardSource separately to be used in tests
 export const CardSource = DragSource(

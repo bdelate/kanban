@@ -1,5 +1,5 @@
 // react imports
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 
 // project imports
 import Column from './Column';
@@ -9,10 +9,10 @@ import Card, { CardSource } from '../../components/Card/Card';
 import TestBackend from 'react-dnd-test-backend';
 import { DragDropContext } from 'react-dnd';
 import TestUtils from 'react-dom/test-utils';
-import {configure, mount, shallow} from 'enzyme';
+import { configure, mount, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 
-configure({adapter: new Adapter()});
+configure({ adapter: new Adapter() });
 
 // Wraps a component in a DragDropContext that uses the dnd TestBackend.
 function wrapInTestContext(DecoratedComponent) {
@@ -29,10 +29,13 @@ it('contains 0 cards in props and renders title and 0 cards', () => {
   const ColumnContext = wrapInTestContext(Column);
   const column = mount(
     <ColumnContext
-      key={0}
-      id={0}
+      columnIndex={0}
       title={'This is a column title'}
       cards={[]}
+      reorderCard={jest.fn()}
+      moveCard={jest.fn()}
+      toggleColumn={jest.fn()}
+      toggleCardCrud={jest.fn()}
     />
   );
 
@@ -49,10 +52,16 @@ it('contains 2 cards in props and renders 2 cards', () => {
   const column = mount(
     <ColumnContext
       key={0}
+      columnIndex={0}
+      title={'This is a column title'}
       cards={[
-        {cardId: 0, task: 'first task'},
-        {cardId: 1, task: 'second task'},
+        { cardId: 0, task: 'first task' },
+        { cardId: 1, task: 'second task' },
       ]}
+      reorderCard={jest.fn()}
+      moveCard={jest.fn()}
+      toggleColumn={jest.fn()}
+      toggleCardCrud={jest.fn()}
     />
   );
 
@@ -66,7 +75,12 @@ it('calls moveCard when a different column card is dropped on it', () => {
   const propsFirstColumn = {
     key: 0,
     columnIndex: 0,
-    cards: [{cardId: 0, task: 'first task'}]
+    title: 'This is a column title',
+    cards: [{ cardId: 0, task: 'first task' }],
+    reorderCard: jest.fn(),
+    moveCard: jest.fn(),
+    toggleColumn: jest.fn(),
+    toggleCardCrud: jest.fn(),
   };
   const firstColumn = mount(<ColumnContext {...propsFirstColumn} />);
   const card = firstColumn.find(CardSource).instance();
@@ -74,10 +88,14 @@ it('calls moveCard when a different column card is dropped on it', () => {
 
   // create second column and get a ref to its columnID (which is dropable)
   const propsSecondColumn = {
-    moveCard: jest.fn(),
     key: 1,
     columnIndex: 1,
-    cards: []
+    title: 'This is a column title',
+    cards: [{ cardId: 0, task: 'first task' }],
+    reorderCard: jest.fn(),
+    moveCard: jest.fn(),
+    toggleColumn: jest.fn(),
+    toggleCardCrud: jest.fn(),
   };
   const secondColumn = mount(<ColumnContext {...propsSecondColumn} />);
   const columnDropable = secondColumn.find(Column).instance();
@@ -97,10 +115,14 @@ it('does not call moveCard when a card is dropped on the same column', () => {
 
   // create column and get a ref to the cardId it contains
   const props = {
-    moveCard: jest.fn(),
     key: 0,
     columnIndex: 0,
-    cards: [{cardId: 0, task: 'first task'}]
+    title: 'test',
+    cards: [{ cardId: 0, task: 'first task' }],
+    reorderCard: jest.fn(),
+    moveCard: jest.fn(),
+    toggleColumn: jest.fn(),
+    toggleCardCrud: jest.fn()
   };
   const column = mount(<ColumnContext {...props} />);
   const card = column.find(CardSource).instance();
@@ -121,11 +143,14 @@ it('does not call moveCard when a card is dropped on the same column', () => {
 it('should call toggleColumn when compress icon is clicked', () => {
   const ColumnContext = wrapInTestContext(Column);
   const props = {
-    moveCard: jest.fn(),
     key: 0,
     columnIndex: 0,
-    cards: [{cardId: 0, task: 'first task'}],
-    toggleColumn: jest.fn()
+    title: 'test',
+    cards: [{ cardId: 0, task: 'first task' }],
+    reorderCard: jest.fn(),
+    moveCard: jest.fn(),
+    toggleColumn: jest.fn(),
+    toggleCardCrud: jest.fn()
   };
   const column = mount(<ColumnContext {...props} />);
   column.find('.fa-compress').simulate('click');

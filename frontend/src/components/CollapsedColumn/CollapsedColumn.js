@@ -3,7 +3,15 @@ import React from 'react';
 
 // 3rd party imports
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
 
+
+const propTypes = {
+  columnIndex: PropTypes.number.isRequired,
+  title: PropTypes.string.isRequired,
+  numCards: PropTypes.number.isRequired,
+  toggleColumn: PropTypes.func.isRequired
+}
 
 const ColumnContainer = styled.div`
   padding: 10px;
@@ -25,5 +33,7 @@ const collapsedColumn = (props) => {
     </ColumnContainer>
   )
 };
+
+collapsedColumn.propTypes = propTypes;
 
 export default collapsedColumn;

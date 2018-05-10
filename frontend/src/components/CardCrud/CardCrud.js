@@ -3,7 +3,19 @@ import React, { Component } from 'react';
 
 // 3rd party imports
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
 
+
+const propTypes = {
+  active: PropTypes.bool.isRequired,
+  columnIndex: PropTypes.number.isRequired,
+  cardIndex: PropTypes.number.isRequired,
+  task: PropTypes.string,
+  toggleCardCrud: PropTypes.func.isRequired,
+  editCard: PropTypes.func.isRequired,
+  deleteCard: PropTypes.func.isRequired,
+  createCard: PropTypes.func.isRequired,
+}
 
 const Container = styled.div`
   position: fixed;
@@ -107,5 +119,7 @@ class CardCrud extends Component {
     )
   }
 }
+
+CardCrud.propTypes = propTypes;
 
 export default CardCrud;

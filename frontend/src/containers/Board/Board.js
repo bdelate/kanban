@@ -84,6 +84,7 @@ class Board extends Component {
 
   // move card to a different column
   moveCardHandler = (fromColumnIndex, fromCardIndex, toColumnIndex) => {
+    // make deep copy of entire state
     const updatedState = { ...this.state };
     for (let column in this.state.columns) {
       updatedState.columns[column] = { ...this.state.columns[column] }
@@ -97,6 +98,7 @@ class Board extends Component {
       }
     }
 
+    // remove card from fromColumnIndex and push to toColumnIndex
     const card = updatedState.columns[
       fromColumnIndex
     ].cards.splice(fromCardIndex, 1)[0];

@@ -8,7 +8,18 @@ import { DragTypes } from '../../DragTypes';
 // 3rd party imports
 import styled from 'styled-components';
 import { DropTarget } from 'react-dnd';
+import PropTypes from 'prop-types';
 
+
+const propTypes = {
+  columnIndex: PropTypes.number.isRequired,
+  title: PropTypes.string.isRequired,
+  cards: PropTypes.array.isRequired,
+  reorderCard: PropTypes.func.isRequired,
+  moveCard: PropTypes.func.isRequired,
+  toggleColumn: PropTypes.func.isRequired,
+  toggleCardCrud: PropTypes.func.isRequired
+}
 
 const ColumnContainer = styled.div`
   padding: 10px;
@@ -71,5 +82,7 @@ const column = (props) => {
     </ColumnContainer>
   )
 };
+
+column.propTypes = propTypes;
 
 export default DropTarget(DragTypes.CARD, columnTarget, collect)(column);

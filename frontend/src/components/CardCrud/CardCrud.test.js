@@ -13,9 +13,13 @@ configure({ adapter: new Adapter() });
 it('displays delete button only if editing an existing card', () => {
   const props = {
     active: true,
-    cardIndex: 1,
     columnIndex: 1,
+    cardIndex: 1,
     task: 'test task',
+    toggleCardCrud: jest.fn(),
+    editCard: jest.fn(),
+    deleteCard: jest.fn(),
+    createCard: jest.fn()
   };
 
   // delete button present
@@ -31,10 +35,12 @@ it('displays delete button only if editing an existing card', () => {
 it('calls createCard when save is clicked on new card', () => {
   const props = {
     active: true,
-    cardIndex: -1,
     columnIndex: 1,
-    task: 'test',
+    cardIndex: -1,
+    task: 'test task',
+    toggleCardCrud: jest.fn(),
     editCard: jest.fn(),
+    deleteCard: jest.fn(),
     createCard: jest.fn()
   };
 
@@ -46,10 +52,12 @@ it('calls createCard when save is clicked on new card', () => {
 it('calls editCard when save is clicked on an existing card', () => {
   const props = {
     active: true,
-    cardIndex: 1,
     columnIndex: 1,
-    task: 'test',
+    cardIndex: 1,
+    task: 'test task',
+    toggleCardCrud: jest.fn(),
     editCard: jest.fn(),
+    deleteCard: jest.fn(),
     createCard: jest.fn()
   };
 
