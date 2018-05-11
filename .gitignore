@@ -1,1 +1,3 @@
-frontend/node_modules/
+kanban/frontend/node_modules/
+kanban/kanban/settings/dev.py
+*.pyc
