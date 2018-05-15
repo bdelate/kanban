@@ -14,7 +14,7 @@ it('should call toggleColumn when expand icon is clicked', () => {
   const props = {
     key: 0,
     columnIndex: 0,
-    title: 'test',
+    name: 'test',
     numCards: 3,
     toggleColumn: jest.fn()
   };

@@ -12,7 +12,9 @@ class Board(models.Model):
 
 
 class Column(models.Model):
-    board = models.ForeignKey(to=Board, on_delete=models.CASCADE)
+    board = models.ForeignKey(to=Board,
+                              on_delete=models.CASCADE,
+                              related_name='columns')
     name = models.CharField(max_length=100)
     position_id = models.IntegerField()
 
@@ -25,7 +27,9 @@ class Column(models.Model):
 
 
 class Card(models.Model):
-    column = models.ForeignKey(to=Column, on_delete=models.CASCADE)
+    column = models.ForeignKey(to=Column,
+                               on_delete=models.CASCADE,
+                               related_name='cards')
     task = models.TextField()
     position_id = models.IntegerField()
 

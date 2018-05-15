@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
 
 const propTypes = {
   columnIndex: PropTypes.number.isRequired,
-  title: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
   cards: PropTypes.array.isRequired,
   reorderCard: PropTypes.func.isRequired,
   moveCard: PropTypes.func.isRequired,
@@ -55,7 +55,7 @@ const column = (props) => {
   const { connectDropTarget } = props;
   const cards = props.cards.map((card, index) => (
     <Card
-      key={card.cardId}
+      key={card.id}
       cardIndex={index}
       columnIndex={props.columnIndex}
       task={card.task}
@@ -77,7 +77,7 @@ const column = (props) => {
         className="fas fa-plus"
         onClick={() => props.toggleCardCrud(true, props.columnIndex)}
       ></i>
-      <h3>{props.title}</h3>
+      <h3>{props.name}</h3>
       {cards}
     </ColumnContainer>
   )

@@ -10,6 +10,8 @@ import CardCrud from '../../components/CardCrud/CardCrud';
 import styled from 'styled-components';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
+import axios from 'axios';
+
 
 const ColumnsContainer = styled.div`
   display: flex;
@@ -21,29 +23,29 @@ class Board extends Component {
   state = {
     columns: [
       {
-        columnId: 0,
-        title: 'first column',
+        id: 0,
+        name: 'first column',
         collapsed: false,
         cards: [
-          { cardId: 0, task: 'first column first task' },
-          { cardId: 1, task: 'first column second task' },
+          { id: 0, task: 'first column first task' },
+          { id: 1, task: 'first column second task' },
         ]
       }, {
-        columnId: 1,
-        title: 'second column',
+        id: 1,
+        name: 'second column',
         collapsed: false,
         cards: [
-          { cardId: 2, task: 'second column first task' },
-          { cardId: 3, task: 'second column second task' },
-          { cardId: 4, task: 'second column third task' },
+          { id: 2, task: 'second column first task' },
+          { id: 3, task: 'second column second task' },
+          { id: 4, task: 'second column third task' },
         ]
       }, {
-        columnId: 2,
-        title: 'third column',
+        id: 2,
+        name: 'third column',
         collapsed: true,
         cards: [
-          { cardId: 5, task: 'third column first task' },
-          { cardId: 6, task: 'third column second task' },
+          { id: 5, task: 'third column first task' },
+          { id: 6, task: 'third column second task' },
         ]
       }
     ],
@@ -52,6 +54,18 @@ class Board extends Component {
       columnIndex: -1,
       cardIndex: -1
     }
+  }
+
+  test = () => {
+    axios.get('/api/boards/2/')
+      .then(res => {
+        console.log('response recieved with data:')
+        console.log(res.data);
+        // this.setState(res.data);
+      })
+  }
+  componentDidMount() {
+    this.test();
   }
 
   // collapse / uncollapse column
@@ -177,7 +191,7 @@ class Board extends Component {
     const column = { ...this.state.columns[columnIndex] };
     column.cards = [...this.state.columns[columnIndex].cards];
     column.cards.push({
-      cardId: -1,
+      id: -1,
       spinner: true
     });
 
@@ -206,17 +220,17 @@ class Board extends Component {
     const columns = this.state.columns.map((column, index) => {
       if (column.collapsed) {
         return <CollapsedColumn
-          key={column.columnId}
+          key={column.id}
           columnIndex={index}
-          title={column.title}
+          name={column.name}
           numCards={column.cards.length}
           toggleColumn={this.toggleColumnHandler}
         />
       } else {
         return <Column
-          key={column.columnId}
+          key={column.id}
           columnIndex={index}
-          title={column.title}
+          name={column.name}
           cards={column.cards}
           reorderCard={this.reorderCardHandler}
           moveCard={this.moveCardHandler}

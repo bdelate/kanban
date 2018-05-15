@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 
 const propTypes = {
   columnIndex: PropTypes.number.isRequired,
-  title: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
   numCards: PropTypes.number.isRequired,
   toggleColumn: PropTypes.func.isRequired
 }
@@ -29,7 +29,7 @@ const collapsedColumn = (props) => {
         className="fas fa-expand"
         onClick={() => props.toggleColumn(props.columnIndex)}
       ></i>
-      <span>{props.title}: {props.numCards} Tasks</span>
+      <span>{props.name}: {props.numCards} Tasks</span>
     </ColumnContainer>
   )
 };

@@ -11,8 +11,18 @@ import TestBackend from 'react-dnd-test-backend';
 import { DragDropContext } from 'react-dnd';
 import { configure, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
+import moxios from 'moxios'
 
 configure({ adapter: new Adapter() });
+
+beforeEach(function () {
+  // mock axios calls to the server
+  moxios.install();
+})
+
+afterEach(function () {
+  moxios.uninstall();
+})
 
 // Wraps a component in a DragDropContext that uses the dnd TestBackend.
 function wrapInTestContext(DecoratedComponent) {
@@ -26,7 +36,7 @@ function wrapInTestContext(DecoratedComponent) {
 }
 
 it('should have at least 3 columns', () => {
-  const board = shallow(<Board />);
+  const board = shallow(<Board test={jest.fn()} />);
   expect(board.find(Column).length) >= 3;
 });
 
@@ -34,20 +44,20 @@ it('should move card when moveCardHandler is called', () => {
   const state = {
     columns: [
       {
-        columnId: 0,
-        title: 'first column',
+        id: 0,
+        name: 'first column',
         cards: [
-          { cardId: 0, task: 'first column first task' }
+          { id: 0, task: 'first column first task' }
         ]
       }, {
-        columnId: 1,
-        title: 'second column',
+        id: 1,
+        name: 'second column',
         cards: []
       }
     ]
   };
 
-  const board = shallow(<Board />);
+  const board = shallow(<Board />, { lifeCycleExperimental: true });
   const boardInstance = board.dive().instance();
   boardInstance.setState(state);
   boardInstance.moveCardHandler(0, 0, 1);
@@ -60,11 +70,11 @@ it('should reorder when reorderCardHandler is called', () => {
   const state = {
     columns: [
       {
-        columnId: 0,
-        title: 'first column',
+        id: 0,
+        name: 'first column',
         cards: [
-          { cardId: 0, task: 'first task' },
-          { cardId: 1, task: 'second task' }
+          { id: 0, task: 'first task' },
+          { id: 1, task: 'second task' }
         ]
       }
     ]
@@ -83,11 +93,11 @@ it('should toggle column.collapsed when toggleColumnHandler is called', () => {
   const state = {
     columns: [
       {
-        columnId: 0,
-        title: 'first column',
+        id: 0,
+        name: 'first column',
         collapsed: false,
         cards: [
-          { cardId: 0, task: 'first task' }
+          { id: 0, task: 'first task' }
         ]
       }
     ]
@@ -120,11 +130,11 @@ it('deletes card from state when deleteCardHandler is called with valid card', (
   const state = {
     columns: [
       {
-        columnId: 0,
-        title: 'first column',
+        id: 0,
+        name: 'first column',
         collapsed: false,
         cards: [
-          { cardId: 0, task: 'first task' }
+          { id: 0, task: 'first task' }
         ]
       }
     ]
@@ -140,10 +150,10 @@ it('edit card state when editCardHandler is called with valid card', () => {
   const state = {
     columns: [
       {
-        columnId: 0,
-        title: 'first column',
+        id: 0,
+        name: 'first column',
         collapsed: false,
-        cards: [{ cardId: 0, task: 'first task' }]
+        cards: [{ id: 0, task: 'first task' }]
       }
     ]
   };
@@ -158,8 +168,8 @@ it('create new card when createCardHandler is called with valid card', () => {
   const state = {
     columns: [
       {
-        columnId: 0,
-        title: 'first column',
+        id: 0,
+        name: 'first column',
         collapsed: false,
         cards: []
       }
