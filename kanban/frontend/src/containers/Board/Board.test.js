@@ -4,12 +4,13 @@ import React, { Component } from 'react';
 // project imports
 import Board, { BoardComponentOnly } from './Board';
 import Column from '../Column/Column';
+import Spinner from '../../components/Spinner/Spinner';
 import CardCrud from '../../components/CardCrud/CardCrud';
 
 // 3rd party imports
 import TestBackend from 'react-dnd-test-backend';
 import { DragDropContext } from 'react-dnd';
-import { configure, shallow } from 'enzyme';
+import { configure, shallow, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import moxios from 'moxios'
 
@@ -35,9 +36,31 @@ function wrapInTestContext(DecoratedComponent) {
   );
 }
 
-it('should have at least 3 columns', () => {
-  const board = shallow(<Board />);
-  expect(board.find(Column).length) >= 3;
+it('should only display spinner when mounted (ie: retrieving data)', () => {
+  const board = shallow(<BoardComponentOnly />);
+  expect(board.find(Column).length).toEqual(0);
+  expect(board.find(Spinner).length).toEqual(1);
+});
+
+it('should have column instance when not retrieving data', () => {
+  const state = {
+    retrieving_data: false,
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        cards: [
+          { id: 0, task: 'first column first task' }
+        ]
+      }
+    ]
+  };
+
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  board.update();
+  expect(board.find(Column).length).toEqual(1);
+  expect(board.find(Spinner).length).toEqual(0);
 });
 
 it('should move card when moveCardHandler is called', () => {
@@ -112,6 +135,7 @@ it('should toggle column.collapsed when toggleColumnHandler is called', () => {
 
 it('toggles CardCrud component when toggleCardCrudHandler is called', () => {
   const state = {
+    retrieving_data: false,
     columns: [
       {
         id: 0,

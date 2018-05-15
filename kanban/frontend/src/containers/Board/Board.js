@@ -1,10 +1,11 @@
 // react imports
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 
 // project imports
 import Column from '../Column/Column';
 import CollapsedColumn from '../../components/CollapsedColumn/CollapsedColumn';
 import CardCrud from '../../components/CardCrud/CardCrud';
+import Spinner from '../../components/Spinner/Spinner';
 
 // 3rd party imports
 import styled from 'styled-components';
@@ -21,6 +22,7 @@ const ColumnsContainer = styled.div`
 class Board extends Component {
 
   state = {
+    retrieving_data: true,
     columns: [],
     cardCrud: {
       active: false,
@@ -29,12 +31,19 @@ class Board extends Component {
     }
   }
 
-  componentDidMount() {
+  retrieve_board_data = () => {
     axios.get('/api/boards/2/')
       .then(res => {
-        this.setState({ columns: res.data.columns });
-        console.log(res.data);
+        this.setState({
+          ...this.state,
+          retrieving_data: false,
+          columns: res.data.columns
+        });
       })
+  }
+
+  componentDidMount() {
+    this.retrieve_board_data();
   }
 
   // collapse / uncollapse column
@@ -186,51 +195,56 @@ class Board extends Component {
   }
 
   render() {
-    const columns = this.state.columns.map((column, index) => {
-      if (column.collapsed) {
-        return <CollapsedColumn
-          key={column.id}
-          columnIndex={index}
-          name={column.name}
-          numCards={column.cards.length}
-          toggleColumn={this.toggleColumnHandler}
-        />
-      } else {
-        return <Column
-          key={column.id}
-          columnIndex={index}
-          name={column.name}
-          cards={column.cards}
-          reorderCard={this.reorderCardHandler}
-          moveCard={this.moveCardHandler}
-          toggleColumn={this.toggleColumnHandler}
+    let output = <Spinner />;
+    if (!this.state.retrieving_data) {
+      const columns = this.state.columns.map((column, index) => {
+        if (column.collapsed) {
+          return <CollapsedColumn
+            key={column.id}
+            columnIndex={index}
+            name={column.name}
+            numCards={column.cards.length}
+            toggleColumn={this.toggleColumnHandler}
+          />
+        } else {
+          return <Column
+            key={column.id}
+            columnIndex={index}
+            name={column.name}
+            cards={column.cards}
+            reorderCard={this.reorderCardHandler}
+            moveCard={this.moveCardHandler}
+            toggleColumn={this.toggleColumnHandler}
+            toggleCardCrud={this.toggleCardCrudHandler}
+          />
+        }
+      });
+
+      // display CardCrud modal if this.state.cardCrud.active
+      let cardCrud = null;
+      if (this.state.cardCrud.active) {
+        const card = this.state.columns[
+          this.state.cardCrud.columnIndex]
+          .cards[this.state.cardCrud.cardIndex];
+        cardCrud = <CardCrud
+          {...this.state.cardCrud}
+          task={card ? card.task : null}
           toggleCardCrud={this.toggleCardCrudHandler}
+          editCard={this.editCardHandler}
+          deleteCard={this.deleteCardHandler}
+          createCard={this.createCardHandler}
         />
       }
-    });
 
-    // display CardCrud modal if this.state.cardCrud.active
-    let cardCrud = null;
-    if (this.state.cardCrud.active) {
-      const card = this.state.columns[
-        this.state.cardCrud.columnIndex]
-        .cards[this.state.cardCrud.cardIndex];
-      cardCrud = <CardCrud
-        {...this.state.cardCrud}
-        task={card ? card.task : null}
-        toggleCardCrud={this.toggleCardCrudHandler}
-        editCard={this.editCardHandler}
-        deleteCard={this.deleteCardHandler}
-        createCard={this.createCardHandler}
-      />
+      output = (
+        <ColumnsContainer>
+          {cardCrud}
+          {columns}
+        </ColumnsContainer>
+      )
     }
 
-    return (
-      <ColumnsContainer>
-        {cardCrud}
-        {columns}
-      </ColumnsContainer>
-    )
+    return (<Fragment>{output}</Fragment>)
   }
 }
 
