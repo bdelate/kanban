@@ -21,34 +21,7 @@ const ColumnsContainer = styled.div`
 class Board extends Component {
 
   state = {
-    columns: [
-      {
-        id: 0,
-        name: 'first column',
-        collapsed: false,
-        cards: [
-          { id: 0, task: 'first column first task' },
-          { id: 1, task: 'first column second task' },
-        ]
-      }, {
-        id: 1,
-        name: 'second column',
-        collapsed: false,
-        cards: [
-          { id: 2, task: 'second column first task' },
-          { id: 3, task: 'second column second task' },
-          { id: 4, task: 'second column third task' },
-        ]
-      }, {
-        id: 2,
-        name: 'third column',
-        collapsed: true,
-        cards: [
-          { id: 5, task: 'third column first task' },
-          { id: 6, task: 'third column second task' },
-        ]
-      }
-    ],
+    columns: [],
     cardCrud: {
       active: false,
       columnIndex: -1,
@@ -56,16 +29,12 @@ class Board extends Component {
     }
   }
 
-  test = () => {
+  componentDidMount() {
     axios.get('/api/boards/2/')
       .then(res => {
-        console.log('response recieved with data:')
+        this.setState({ columns: res.data.columns });
         console.log(res.data);
-        // this.setState(res.data);
       })
-  }
-  componentDidMount() {
-    this.test();
   }
 
   // collapse / uncollapse column

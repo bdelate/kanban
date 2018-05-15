@@ -15,12 +15,12 @@ import moxios from 'moxios'
 
 configure({ adapter: new Adapter() });
 
-beforeEach(function () {
+beforeAll(function () {
   // mock axios calls to the server
   moxios.install();
 })
 
-afterEach(function () {
+afterAll(function () {
   moxios.uninstall();
 })
 
@@ -36,7 +36,7 @@ function wrapInTestContext(DecoratedComponent) {
 }
 
 it('should have at least 3 columns', () => {
-  const board = shallow(<Board test={jest.fn()} />);
+  const board = shallow(<Board />);
   expect(board.find(Column).length) >= 3;
 });
 
@@ -57,7 +57,7 @@ it('should move card when moveCardHandler is called', () => {
     ]
   };
 
-  const board = shallow(<Board />, { lifeCycleExperimental: true });
+  const board = shallow(<Board />);
   const boardInstance = board.dive().instance();
   boardInstance.setState(state);
   boardInstance.moveCardHandler(0, 0, 1);
@@ -111,7 +111,20 @@ it('should toggle column.collapsed when toggleColumnHandler is called', () => {
 });
 
 it('toggles CardCrud component when toggleCardCrudHandler is called', () => {
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        collapsed: false,
+        cards: [
+          { id: 0, task: 'first task' }
+        ]
+      }
+    ]
+  };
   const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
   // initially there is no modal
   expect(board.find(CardCrud).length).toBe(0);
 
