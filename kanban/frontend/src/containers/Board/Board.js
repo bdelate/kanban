@@ -6,6 +6,7 @@ import Column from '../Column/Column';
 import CollapsedColumn from '../../components/CollapsedColumn/CollapsedColumn';
 import CardCrud from '../../components/CardCrud/CardCrud';
 import Spinner from '../../components/Spinner/Spinner';
+import Modal from '../../components/Modal/Modal';
 
 // 3rd party imports
 import styled from 'styled-components';
@@ -23,16 +24,17 @@ class Board extends Component {
 
   state = {
     retrieving_data: true,
-    columns: [],
+    modal: false,
     cardCrud: {
       active: false,
       columnIndex: -1,
       cardIndex: -1
-    }
+    },
+    columns: []
   }
 
-  retrieve_board_data = () => {
-    axios.get('/api/boards/2/')
+  async retrieveData() {
+    await axios.get('/api/boards/2/')
       .then(res => {
         this.setState({
           ...this.state,
@@ -40,10 +42,14 @@ class Board extends Component {
           columns: res.data.columns
         });
       })
+      .catch(error => {
+        const message = 'Error: Unable to load board data';
+        this.displayModal(message)
+      })
   }
 
   componentDidMount() {
-    this.retrieve_board_data();
+    this.retrieveData();
   }
 
   // collapse / uncollapse column
@@ -194,6 +200,20 @@ class Board extends Component {
     });
   }
 
+  displayModal(message) {
+    this.setState({
+      retrieving_data: false,
+      modal: message
+    });
+  }
+
+  // close the modal by setting its state to false
+  closeModalHandler = () => {
+    this.setState({
+      modal: false
+    });
+  }
+
   render() {
     let output = <Spinner />;
     if (!this.state.retrieving_data) {
@@ -244,7 +264,19 @@ class Board extends Component {
       )
     }
 
-    return (<Fragment>{output}</Fragment>)
+    let modal = null;
+    if (this.state.modal) {
+      modal = <Modal
+        message={this.state.modal}
+        closeModal={this.closeModalHandler} />
+    }
+
+    return (
+      <Fragment>
+        {modal}
+        {output}
+      </Fragment>
+    )
   }
 }
 

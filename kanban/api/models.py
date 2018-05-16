@@ -21,6 +21,7 @@ class Column(models.Model):
     class Meta:
 
         unique_together = ('board', 'position_id')
+        ordering = ['position_id']
 
     def __str__(self):
         return self.name
@@ -36,6 +37,7 @@ class Card(models.Model):
     class Meta:
 
         unique_together = ('column', 'position_id')
+        ordering = ['position_id']
 
     def __str__(self):
         task_str = '{}'.format(self.task)[:15]

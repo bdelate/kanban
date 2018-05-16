@@ -16,6 +16,7 @@ class ColumnSerializer(serializers.ModelSerializer):
     class Meta:
         model = Column
         fields = '__all__'
+        ordering = ['position_id']
 
 
 class BoardSerializer(serializers.ModelSerializer):

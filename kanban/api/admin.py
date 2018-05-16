@@ -11,7 +11,7 @@ class ColumnAdmin(admin.ModelAdmin):
 
 
 class CardAdmin(admin.ModelAdmin):
-    list_display = ('column', 'task', 'column')
+    list_display = ('column', 'task')
 
 
 admin.site.register(Board, BoardAdmin)

@@ -5,6 +5,7 @@ import React, { Component } from 'react';
 import Board, { BoardComponentOnly } from './Board';
 import Column from '../Column/Column';
 import Spinner from '../../components/Spinner/Spinner';
+import Modal from '../../components/Modal/Modal';
 import CardCrud from '../../components/CardCrud/CardCrud';
 
 // 3rd party imports
@@ -25,6 +26,10 @@ afterAll(function () {
   moxios.uninstall();
 })
 
+function flushPromises() {
+  return new Promise(resolve => setImmediate(resolve));
+}
+
 // Wraps a component in a DragDropContext that uses the dnd TestBackend.
 function wrapInTestContext(DecoratedComponent) {
   return DragDropContext(TestBackend)(
@@ -36,10 +41,27 @@ function wrapInTestContext(DecoratedComponent) {
   );
 }
 
-it('should only display spinner when mounted (ie: retrieving data)', () => {
+it('only displays a spinner when mounted (ie: retrieving data)', () => {
   const board = shallow(<BoardComponentOnly />);
   expect(board.find(Column).length).toEqual(0);
   expect(board.find(Spinner).length).toEqual(1);
+});
+
+it('calls retrieveData when mounted', () => {
+  const spy = jest.spyOn(BoardComponentOnly.prototype, 'retrieveData');
+  const wrapper = shallow(<BoardComponentOnly />);
+  expect(spy).toHaveBeenCalledTimes(1);
+});
+
+it('calls displayModal if data retrieval fails when mounting', async () => {
+  // mock 404 returned from any url matching /api/boards/*
+  moxios.stubRequest(/api\/boards\/*/, {
+    status: 404
+  })
+  const spy = jest.spyOn(BoardComponentOnly.prototype, 'displayModal');
+  const wrapper = shallow(<BoardComponentOnly />);
+  await flushPromises();
+  expect(spy).toHaveBeenCalledTimes(1);
 });
 
 it('should have column instance when not retrieving data', () => {

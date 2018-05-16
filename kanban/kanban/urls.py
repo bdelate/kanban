@@ -20,6 +20,6 @@ from django.conf import settings
 ADMIN_URL = settings.ADMIN_URL
 
 urlpatterns = [
-    path('api/', include('api.urls')),
+    path('api/', include('api.urls', namespace='api')),
     path(ADMIN_URL, admin.site.urls),
 ]
