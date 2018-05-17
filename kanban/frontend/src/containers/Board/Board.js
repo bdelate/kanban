@@ -33,6 +33,10 @@ class Board extends Component {
     columns: []
   }
 
+  componentDidMount() {
+    this.retrieveData();
+  }
+
   async retrieveData() {
     await axios.get('/api/boards/2/')
       .then(res => {
@@ -46,10 +50,6 @@ class Board extends Component {
         const message = 'Error: Unable to load board data';
         this.displayModal(message)
       })
-  }
-
-  componentDidMount() {
-    this.retrieveData();
   }
 
   // collapse / uncollapse column
@@ -150,22 +150,31 @@ class Board extends Component {
   editCardHandler = (columnIndex, cardIndex, task) => {
     this.toggleCardCrudHandler(false);
 
+    // create column/card object from state and display spinner in card
     const column = { ...this.state.columns[columnIndex] };
     column.cards = [...this.state.columns[columnIndex].cards];
     column.cards[cardIndex] = { ...column.cards[cardIndex] };
     this.displayCardSpinner(column, columnIndex, cardIndex);
 
-    // TODO: ajax to server
-
-    column.cards[cardIndex].spinner = false;
-    column.cards[cardIndex].task = task;
-    this.setState({
-      columns: [
-        ...this.state.columns.slice(0, columnIndex),
-        column,
-        ...this.state.columns.slice(columnIndex + 1)
-      ]
-    });
+    // update card on server and in state, or display error modal
+    const cardId = column.cards[cardIndex].id;
+    axios.patch(`/api/cards/${cardId}/`, { id: cardId, task: task })
+      .then(res => {
+        column.cards[cardIndex].spinner = false;
+        column.cards[cardIndex].task = task;
+        this.setState({
+          columns: [
+            ...this.state.columns.slice(0, columnIndex),
+            column,
+            ...this.state.columns.slice(columnIndex + 1)
+          ]
+        });
+      })
+      .catch(error => {
+        column.cards[cardIndex].spinner = false;
+        const message = 'Error: Unable to save task';
+        this.displayModal(message)
+      })
   }
 
   // create card on the server and add new card to local state

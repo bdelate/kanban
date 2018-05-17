@@ -6,7 +6,7 @@ class CardSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Card
-        fields = '__all__'
+        fields = ('task', 'id')
 
 
 class ColumnSerializer(serializers.ModelSerializer):
@@ -16,7 +16,6 @@ class ColumnSerializer(serializers.ModelSerializer):
     class Meta:
         model = Column
         fields = '__all__'
-        ordering = ['position_id']
 
 
 class BoardSerializer(serializers.ModelSerializer):

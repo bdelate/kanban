@@ -17,12 +17,12 @@ import moxios from 'moxios'
 
 configure({ adapter: new Adapter() });
 
-beforeAll(function () {
+beforeEach(function () {
   // mock axios calls to the server
   moxios.install();
 })
 
-afterAll(function () {
+afterEach(function () {
   moxios.uninstall();
 })
 
@@ -205,7 +205,10 @@ it('deletes card from state when deleteCardHandler is called with valid card', (
   expect(board.state().columns[0].cards.length).toBe(0);
 });
 
-it('edit card state when editCardHandler is called with valid card', () => {
+it('update card task when editCardHandler is called', async () => {
+  moxios.stubRequest(/api\/cards\/*/, {
+    status: 200
+  })
   const state = {
     columns: [
       {
@@ -219,8 +222,32 @@ it('edit card state when editCardHandler is called with valid card', () => {
   const board = shallow(<BoardComponentOnly />);
   board.setState(state);
   board.instance().editCardHandler(0, 0, 'new task text');
+  await flushPromises();
   board.update();
   expect(board.state().columns[0].cards[0].task).toEqual('new task text');
+});
+
+it('displays modal when editCardHandler call to server fails', async () => {
+  moxios.stubRequest(/api\/cards\/*/, {
+    status: 404
+  })
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        collapsed: false,
+        cards: [{ id: 0, task: 'original task' }]
+      }
+    ]
+  };
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  board.instance().editCardHandler(0, 0, 'new task text');
+  await flushPromises();
+  board.update();
+  expect(board.find(Modal).length).toEqual(1);
+  expect(board.state().columns[0].cards[0].task).toEqual('original task');
 });
 
 it('create new card when createCardHandler is called with valid card', () => {
