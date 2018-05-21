@@ -17,6 +17,7 @@ const propTypes = {
   cards: PropTypes.array.isRequired,
   reorderCard: PropTypes.func.isRequired,
   moveCard: PropTypes.func.isRequired,
+  updateServerCards: PropTypes.func.isRequired,
   toggleColumn: PropTypes.func.isRequired,
   toggleCardCrud: PropTypes.func.isRequired
 }
@@ -31,23 +32,24 @@ const ColumnContainer = styled.div`
 const columnTarget = {
 
   drop(props, monitor, component) {
-    props.moveCard(
-      monitor.getItem().columnIndex,
-      monitor.getItem().cardIndex,
-      props.columnIndex
-    );
-  },
-  // only moveCard if columns are different
-  // same column reordering is handled by Card components hover method
-  canDrop(props, monitor) {
-    return monitor.getItem().columnIndex !== props.columnIndex;
+    if (monitor.getItem().columnIndex !== props.columnIndex) {
+      props.moveCard(
+        monitor.getItem().columnIndex,
+        monitor.getItem().cardIndex,
+        props.columnIndex
+      )
+    } else {
+      props.updateServerCards(
+        monitor.getItem().columnIndex,
+        monitor.getItem().cardIndex
+      )
+    }
   }
 };
 
 function collect(connect, monitor) {
   return {
-    connectDropTarget: connect.dropTarget(),
-    canDrop: monitor.canDrop()
+    connectDropTarget: connect.dropTarget()
   };
 }
 

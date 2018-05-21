@@ -14,13 +14,13 @@ class TestDataMixin:
         c1 = Column.objects.create(board=board,
                                    name='first column',
                                    position_id=1)
-        Card.objects.create(column=c1, task="column 1 card 1", position_id=1)
-        Card.objects.create(column=c1, task="column 1 card 2", position_id=2)
-        Card.objects.create(column=c1, task="column 1 card 3", position_id=3)
+        Card.objects.create(column=c1, task="column 1 card 1", position_id=0)
+        Card.objects.create(column=c1, task="column 1 card 2", position_id=1)
+        Card.objects.create(column=c1, task="column 1 card 3", position_id=2)
 
         c2 = Column.objects.create(board=board,
                                    name='second column',
                                    position_id=2)
-        Card.objects.create(column=c2, task="column 2 card 1", position_id=1)
-        Card.objects.create(column=c2, task="column 2 card 2", position_id=2)
-        Card.objects.create(column=c2, task="column 2 card 3", position_id=3)
+        Card.objects.create(column=c2, task="column 2 card 1", position_id=0)
+        Card.objects.create(column=c2, task="column 2 card 2", position_id=1)
+        Card.objects.create(column=c2, task="column 2 card 3", position_id=2)

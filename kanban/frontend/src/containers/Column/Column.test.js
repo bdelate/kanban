@@ -34,6 +34,7 @@ it('contains 0 cards in props and renders name and 0 cards', () => {
       cards={[]}
       reorderCard={jest.fn()}
       moveCard={jest.fn()}
+      updateServerCards={jest.fn()}
       toggleColumn={jest.fn()}
       toggleCardCrud={jest.fn()}
     />
@@ -60,6 +61,7 @@ it('contains 2 cards in props and renders 2 cards', () => {
       ]}
       reorderCard={jest.fn()}
       moveCard={jest.fn()}
+      updateServerCards={jest.fn()}
       toggleColumn={jest.fn()}
       toggleCardCrud={jest.fn()}
     />
@@ -79,6 +81,7 @@ it('calls moveCard when a different column card is dropped on it', () => {
     cards: [{ id: 0, task: 'first task' }],
     reorderCard: jest.fn(),
     moveCard: jest.fn(),
+    updateServerCards: jest.fn(),
     toggleColumn: jest.fn(),
     toggleCardCrud: jest.fn(),
   };
@@ -94,6 +97,7 @@ it('calls moveCard when a different column card is dropped on it', () => {
     cards: [{ id: 0, task: 'first task' }],
     reorderCard: jest.fn(),
     moveCard: jest.fn(),
+    updateServerCards: jest.fn(),
     toggleColumn: jest.fn(),
     toggleCardCrud: jest.fn(),
   };
@@ -118,9 +122,10 @@ it('does not call moveCard when a card is dropped on the same column', () => {
     key: 0,
     columnIndex: 0,
     name: 'test',
-    cards: [{ id: 0, task: 'first task' }],
+    cards: [{ id: 0, task: 'first task', position_id: 0 }],
     reorderCard: jest.fn(),
     moveCard: jest.fn(),
+    updateServerCards: jest.fn(),
     toggleColumn: jest.fn(),
     toggleCardCrud: jest.fn()
   };
@@ -149,6 +154,7 @@ it('should call toggleColumn when compress icon is clicked', () => {
     cards: [{ id: 0, task: 'first task' }],
     reorderCard: jest.fn(),
     moveCard: jest.fn(),
+    updateServerCards: jest.fn(),
     toggleColumn: jest.fn(),
     toggleCardCrud: jest.fn()
   };

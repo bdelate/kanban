@@ -111,15 +111,15 @@ it('should move card when moveCardHandler is called', () => {
   expect(boardInstance.state.columns[1].cards[0].task).toBe('first column first task');
 });
 
-it('should reorder when reorderCardHandler is called', () => {
+it('should reorder cards when reorderCardHandler is called', () => {
   const state = {
     columns: [
       {
         id: 0,
         name: 'first column',
         cards: [
-          { id: 0, task: 'first task' },
-          { id: 1, task: 'second task' }
+          { id: 0, task: 'first task', position_id: 0 },
+          { id: 1, task: 'second task', position_id: 1 }
         ]
       }
     ]
@@ -153,6 +153,28 @@ it('should toggle column.collapsed when toggleColumnHandler is called', () => {
   boardInstance.setState(state);
   boardInstance.toggleColumnHandler(0);
   expect(boardInstance.state.columns[0].collapsed).toBeTruthy();
+});
+
+it('should display error modal if updateServerCardsFails', async () => {
+  moxios.stubRequest('/api/cards/', {
+    status: 404
+  })
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        collapsed: false,
+        cards: [{ id: 0, task: 'original task', position_id: 0 }]
+      }
+    ]
+  };
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  board.instance().updateServerCardsHandler(0, 0);
+  await flushPromises();
+  board.update();
+  expect(board.find(Modal).length).toEqual(1);
 });
 
 it('toggles CardCrud component when toggleCardCrudHandler is called', () => {
@@ -207,7 +229,12 @@ it('deletes card from state when deleteCardHandler is called with valid card', (
 
 it('update card task when editCardHandler is called', async () => {
   moxios.stubRequest(/api\/cards\/*/, {
-    status: 200
+    status: 200,
+    response: {
+      task: 'new task text',
+      id: 0,
+      position_id: 0
+    }
   })
   const state = {
     columns: [
@@ -215,7 +242,7 @@ it('update card task when editCardHandler is called', async () => {
         id: 0,
         name: 'first column',
         collapsed: false,
-        cards: [{ id: 0, task: 'first task' }]
+        cards: [{ id: 0, task: 'first task', position_id: 0 }]
       }
     ]
   };

@@ -2,7 +2,7 @@ from rest_framework.test import APITestCase
 from django.urls import reverse
 from rest_framework import status
 from .mixins import TestDataMixin
-from api.models import Card
+from api.models import Card, Column
 
 
 class BoardDetailTest(APITestCase, TestDataMixin):
@@ -59,3 +59,38 @@ class CardDetailTest(APITestCase, TestDataMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         card.refresh_from_db()
         self.assertEqual(card.task, 'updated')
+
+    def test_reorder_cards(self):
+        column = Column.objects.first()
+        first_card = Card.objects.get(column_id=column.id, position_id=0)
+        second_card = Card.objects.get(column_id=column.id, position_id=1)
+        third_card = Card.objects.get(column_id=column.id, position_id=2)
+        self.assertEqual(first_card.task, 'column 1 card 1')
+        self.assertEqual(second_card.task, 'column 1 card 2')
+        self.assertEqual(third_card.task, 'column 1 card 3')
+
+        cards = [{
+            'id': third_card.id,
+            'task': 'column 1 card 3',
+            'position_id': 0
+        }, {
+            'id': second_card.id,
+            'task': 'column 1 card 2',
+            'position_id': 1
+        }, {
+            'id': first_card.id,
+            'task': 'column 1 card 1',
+            'position_id': 2
+        }]
+        data = {'cards': cards}
+
+        url = reverse('api:cards')
+        response = self.client.patch(url, data, format='json')
+
+        first_card = Card.objects.get(column_id=column.id, position_id=0)
+        second_card = Card.objects.get(column_id=column.id, position_id=1)
+        third_card = Card.objects.get(column_id=column.id, position_id=2)
+
+        self.assertEqual(first_card.task, 'column 1 card 3')
+        self.assertEqual(second_card.task, 'column 1 card 2')
+        self.assertEqual(third_card.task, 'column 1 card 1')

@@ -65,12 +65,34 @@ class Board extends Component {
     });
   };
 
-  // reorder cards within the same column
+  // update all cards in ColumnIndex on the server
+  updateServerCardsHandler = (columnIndex, cardIndex) => {
+    this.toggleCardSpinner(columnIndex, cardIndex);
+    const cards = [...this.state.columns[columnIndex].cards];
+    axios.patch(`/api/cards/`, {
+      cards
+    }).then(res => {
+      this.toggleCardSpinner(columnIndex, cardIndex);
+    }).catch(error => {
+      // TODO: write test to ensure spinner no longer displays when error is received
+      this.toggleCardSpinner(columnIndex, cardIndex);
+      const message = 'Error: Unable to update cards on the server';
+      this.displayModal(message)
+    })
+  };
+
+  // reorder cards within the same column (local state update only)
   reorderCardHandler = (fromColumnIndex, fromCardIndex, toCardIndex) => {
     const fromColumn = { ...this.state.columns[fromColumnIndex] };
     fromColumn.cards = [...this.state.columns[fromColumnIndex].cards];
     const card = fromColumn.cards.splice(fromCardIndex, 1)[0];
     fromColumn.cards.splice(toCardIndex, 0, card);
+
+    // update position_ids
+    for (let key in fromColumn.cards) {
+      fromColumn.cards[key]['position_id'] = parseInt(key, 10);
+    }
+
     this.setState({
       columns: [
         ...this.state.columns.slice(0, fromColumnIndex),
@@ -114,12 +136,23 @@ class Board extends Component {
     this.setState({ cardCrud: cardCrud });
   }
 
-  displayCardSpinner = (column, columnIndex, cardIndex) => {
-    column.cards[cardIndex].spinner = true;
+  // show / hide spinner within a specific card
+  toggleCardSpinner = (columnIndex, cardIndex) => {
+    const spinner = this.state.columns[columnIndex].cards[cardIndex].spinner;
     this.setState({
       columns: [
         ...this.state.columns.slice(0, columnIndex),
-        column,
+        {
+          ...this.state.columns[columnIndex],
+          cards: [
+            ...this.state.columns[columnIndex].cards.slice(0, cardIndex),
+            {
+              ...this.state.columns[columnIndex].cards[cardIndex],
+              spinner: !spinner
+            },
+            ...this.state.columns[columnIndex].cards.slice(cardIndex + 1)
+          ]
+        },
         ...this.state.columns.slice(columnIndex + 1)
       ]
     });
@@ -132,10 +165,11 @@ class Board extends Component {
     const column = { ...this.state.columns[columnIndex] };
     column.cards = [...this.state.columns[columnIndex].cards];
     column.cards[cardIndex] = { ...column.cards[cardIndex] };
-    this.displayCardSpinner(column, columnIndex, cardIndex);
+    this.toggleCardSpinner(columnIndex, cardIndex);
 
     // TODO: ajax to server
 
+    this.toggleCardSpinner(columnIndex, cardIndex);
     column.cards.splice(cardIndex, 1);
     this.setState({
       columns: [
@@ -154,14 +188,13 @@ class Board extends Component {
     const column = { ...this.state.columns[columnIndex] };
     column.cards = [...this.state.columns[columnIndex].cards];
     column.cards[cardIndex] = { ...column.cards[cardIndex] };
-    this.displayCardSpinner(column, columnIndex, cardIndex);
+    this.toggleCardSpinner(columnIndex, cardIndex);
 
     // update card on server and in state, or display error modal
     const cardId = column.cards[cardIndex].id;
     axios.patch(`/api/cards/${cardId}/`, { id: cardId, task: task })
       .then(res => {
-        column.cards[cardIndex].spinner = false;
-        column.cards[cardIndex].task = task;
+        column.cards[cardIndex] = res.data
         this.setState({
           columns: [
             ...this.state.columns.slice(0, columnIndex),
@@ -171,7 +204,8 @@ class Board extends Component {
         });
       })
       .catch(error => {
-        column.cards[cardIndex].spinner = false;
+        // TODO: write test to ensure spinner no longer displays when error is received
+        this.toggleCardSpinner(columnIndex, cardIndex);
         const message = 'Error: Unable to save task';
         this.displayModal(message)
       })
@@ -243,6 +277,7 @@ class Board extends Component {
             cards={column.cards}
             reorderCard={this.reorderCardHandler}
             moveCard={this.moveCardHandler}
+            updateServerCards={this.updateServerCardsHandler}
             toggleColumn={this.toggleColumnHandler}
             toggleCardCrud={this.toggleCardCrudHandler}
           />

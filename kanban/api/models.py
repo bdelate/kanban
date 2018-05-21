@@ -36,7 +36,6 @@ class Card(models.Model):
 
     class Meta:
 
-        unique_together = ('column', 'position_id')
         ordering = ['position_id']
 
     def __str__(self):
