@@ -17,7 +17,7 @@ it('displays delete button only if editing an existing card', () => {
     cardIndex: 1,
     task: 'test task',
     toggleCardCrud: jest.fn(),
-    editCard: jest.fn(),
+    editCardDetail: jest.fn(),
     deleteCard: jest.fn(),
     createCard: jest.fn()
   };
@@ -39,7 +39,7 @@ it('calls createCard when save is clicked on new card', () => {
     cardIndex: -1,
     task: 'test task',
     toggleCardCrud: jest.fn(),
-    editCard: jest.fn(),
+    editCardDetail: jest.fn(),
     deleteCard: jest.fn(),
     createCard: jest.fn()
   };
@@ -49,19 +49,19 @@ it('calls createCard when save is clicked on new card', () => {
   expect(props.createCard).toHaveBeenCalled();
 });
 
-it('calls editCard when save is clicked on an existing card', () => {
+it('calls editCardDetail when save is clicked on an existing card', () => {
   const props = {
     active: true,
     columnIndex: 1,
     cardIndex: 1,
     task: 'test task',
     toggleCardCrud: jest.fn(),
-    editCard: jest.fn(),
+    editCardDetail: jest.fn(),
     deleteCard: jest.fn(),
     createCard: jest.fn()
   };
 
   let cardCrud = shallow(<CardCrud {...props} />);
   cardCrud.find('#idSaveCardButton').simulate('click');
-  expect(props.editCard).toHaveBeenCalled();
+  expect(props.editCardDetail).toHaveBeenCalled();
 });

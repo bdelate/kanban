@@ -49,7 +49,7 @@ class Board extends Component {
       })
       .catch(error => {
         const message = 'Error: Unable to load board data';
-        this.displayModal(message)
+        this.toggleModal(message)
       })
   }
 
@@ -67,8 +67,8 @@ class Board extends Component {
   };
 
   // update all cards in ColumnIndex on the server
-  // optionally display a spinner for a specific card in the column
-  updateServerCardsHandler = (columnIndex, cardIndex = -1) => {
+  // optionally display a card spinner if a cardIndex is provided
+  patchServerCards = (columnIndex, cardIndex = -1) => {
     if (cardIndex > -1) this.toggleCardSpinner(columnIndex, cardIndex);
     const cards = [...this.state.columns[columnIndex].cards];
     axios.patch(`/api/cards/`, {
@@ -78,11 +78,27 @@ class Board extends Component {
     }).catch(error => {
       if (cardIndex > -1) this.toggleCardSpinner(columnIndex, cardIndex);
       const message = 'Error: Unable to update cards on the server';
-      this.displayModal(message)
+      this.toggleModal(message)
     })
   };
 
-  // reorder cards within the same column (local state update only)
+  // display card spinner and update card detail on the server
+  patchServerCardDetail = (columnIndex, cardIndex) => {
+    this.toggleCardSpinner(columnIndex, cardIndex);
+    const card = { ...this.state.columns[columnIndex].cards[cardIndex] };
+    axios.patch(`/api/cards/${card.id}/`, { ...card })
+      .then(res => {
+        this.toggleCardSpinner(columnIndex, cardIndex);
+      })
+      .catch(error => {
+        this.toggleCardSpinner(columnIndex, cardIndex);
+        const message = 'Error: Unable to update task on the server';
+        this.toggleModal(message)
+      })
+  }
+
+  // reorder cards within a column (local state update only)
+  // triggered by card hover DnD action
   reorderCardHandler = (fromColumnIndex, fromCardIndex, toCardIndex) => {
     const fromColumn = { ...this.state.columns[fromColumnIndex] };
     fromColumn.cards = [...this.state.columns[fromColumnIndex].cards];
@@ -142,8 +158,9 @@ class Board extends Component {
     this.setState(updatedState);
 
     // update the server
-    this.updateServerCardsHandler(fromColumnIndex);
-    this.updateServerCardsHandler(toColumnIndex, card.position_id);
+    this.patchServerCards(fromColumnIndex);
+    const newCardIndex = updatedState.columns[toColumnIndex].cards.length - 1;
+    this.patchServerCardDetail(toColumnIndex, newCardIndex);
   };
 
   // update state.cardCrud which allows for displaying / hiding cardCrud modal
@@ -203,34 +220,29 @@ class Board extends Component {
   }
 
   // edit existing card on the server and update local state
-  editCardHandler = (columnIndex, cardIndex, task) => {
+  editCardDetailHandler = (columnIndex, cardIndex, task) => {
     this.toggleCardCrudHandler(false);
 
-    // create column/card object from state and display spinner in card
-    const column = { ...this.state.columns[columnIndex] };
-    column.cards = [...this.state.columns[columnIndex].cards];
-    column.cards[cardIndex] = { ...column.cards[cardIndex] };
-    this.toggleCardSpinner(columnIndex, cardIndex);
+    const card = { ...this.state.columns[columnIndex].cards[cardIndex] };
+    card.task = task;
 
-    // update card on server and in state, or display error modal
-    const cardId = column.cards[cardIndex].id;
-    axios.patch(`/api/cards/${cardId}/`, { id: cardId, task: task })
-      .then(res => {
-        column.cards[cardIndex] = res.data
-        this.setState({
-          columns: [
-            ...this.state.columns.slice(0, columnIndex),
-            column,
-            ...this.state.columns.slice(columnIndex + 1)
+    this.setState({
+      columns: [
+        ...this.state.columns.slice(0, columnIndex),
+        {
+          ...this.state.columns[columnIndex],
+          cards: [
+            ...this.state.columns[columnIndex].cards.slice(0, cardIndex),
+            { ...card },
+            ...this.state.columns[columnIndex].cards.slice(cardIndex + 1)
           ]
-        });
-      })
-      .catch(error => {
-        // TODO: write test to ensure spinner no longer displays when error is received
-        this.toggleCardSpinner(columnIndex, cardIndex);
-        const message = 'Error: Unable to save task';
-        this.displayModal(message)
-      })
+        },
+        ...this.state.columns.slice(columnIndex + 1)
+      ]
+    },
+      // call back function executed after setState completes  
+      () => this.patchServerCardDetail(columnIndex, cardIndex)
+    );
   }
 
   // create card on the server and add new card to local state
@@ -265,17 +277,11 @@ class Board extends Component {
     });
   }
 
-  displayModal(message) {
+  // display / hide modal with message
+  toggleModal(message = null) {
     this.setState({
-      retrieving_data: false,
+      retrieving_data: !this.state.retrieving_data,
       modal: message
-    });
-  }
-
-  // close the modal by setting its state to false
-  closeModalHandler = () => {
-    this.setState({
-      modal: false
     });
   }
 
@@ -299,7 +305,7 @@ class Board extends Component {
             cards={column.cards}
             reorderCard={this.reorderCardHandler}
             moveCard={this.moveCardHandler}
-            updateServerCards={this.updateServerCardsHandler}
+            patchServerCards={this.patchServerCards}
             toggleColumn={this.toggleColumnHandler}
             toggleCardCrud={this.toggleCardCrudHandler}
           />
@@ -316,7 +322,7 @@ class Board extends Component {
           {...this.state.cardCrud}
           task={card ? card.task : null}
           toggleCardCrud={this.toggleCardCrudHandler}
-          editCard={this.editCardHandler}
+          editCardDetail={this.editCardDetailHandler}
           deleteCard={this.deleteCardHandler}
           createCard={this.createCardHandler}
         />
@@ -334,7 +340,7 @@ class Board extends Component {
     if (this.state.modal) {
       modal = <Modal
         message={this.state.modal}
-        closeModal={this.closeModalHandler} />
+        toggleModal={this.toggleModalHandler} />
     }
 
     return (

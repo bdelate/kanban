@@ -28,5 +28,5 @@ class Cards(APIView):
                                     many=True)
         if serializer.is_valid():
             serializer.save()
-            return Response({'message': 'updated'}, status.HTTP_200_OK)
+            return Response(serializer.validated_data, status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

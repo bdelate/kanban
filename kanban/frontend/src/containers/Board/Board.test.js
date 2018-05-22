@@ -53,12 +53,12 @@ it('calls retrieveData when mounted', () => {
   expect(spy).toHaveBeenCalledTimes(1);
 });
 
-it('calls displayModal if data retrieval fails when mounting', async () => {
+it('calls toggleModal if data retrieval fails when mounting', async () => {
   // mock 404 returned from any url matching /api/boards/*
   moxios.stubRequest(/api\/boards\/*/, {
     status: 404
   })
-  const spy = jest.spyOn(BoardComponentOnly.prototype, 'displayModal');
+  const spy = jest.spyOn(BoardComponentOnly.prototype, 'toggleModal');
   const wrapper = shallow(<BoardComponentOnly />);
   await flushPromises();
   expect(spy).toHaveBeenCalledTimes(1);
@@ -164,7 +164,7 @@ it('should toggle column.collapsed when toggleColumnHandler is called', () => {
   expect(boardInstance.state.columns[0].collapsed).toBeTruthy();
 });
 
-it('should display error modal if updateServerCardsFails', async () => {
+it('should display error modal if patchServerCards Fails', async () => {
   moxios.stubRequest('/api/cards/', {
     status: 404
   })
@@ -180,7 +180,7 @@ it('should display error modal if updateServerCardsFails', async () => {
   };
   const board = shallow(<BoardComponentOnly />);
   board.setState(state);
-  board.instance().updateServerCardsHandler(0, 0);
+  board.instance().patchServerCards(0);
   await flushPromises();
   board.update();
   expect(board.find(Modal).length).toEqual(1);
@@ -236,7 +236,7 @@ it('deletes card from state when deleteCardHandler is called with valid card', (
   expect(board.state().columns[0].cards.length).toBe(0);
 });
 
-it('update card task when editCardHandler is called', async () => {
+it('update card task when editCardDetailHandler is called', async () => {
   moxios.stubRequest(/api\/cards\/*/, {
     status: 200,
     response: {
@@ -257,13 +257,13 @@ it('update card task when editCardHandler is called', async () => {
   };
   const board = shallow(<BoardComponentOnly />);
   board.setState(state);
-  board.instance().editCardHandler(0, 0, 'new task text');
+  board.instance().editCardDetailHandler(0, 0, 'new task text');
   await flushPromises();
   board.update();
   expect(board.state().columns[0].cards[0].task).toEqual('new task text');
 });
 
-it('displays modal when editCardHandler call to server fails', async () => {
+it('displays modal when editCardDetailHandler call to server fails', async () => {
   moxios.stubRequest(/api\/cards\/*/, {
     status: 404
   })
@@ -279,11 +279,10 @@ it('displays modal when editCardHandler call to server fails', async () => {
   };
   const board = shallow(<BoardComponentOnly />);
   board.setState(state);
-  board.instance().editCardHandler(0, 0, 'new task text');
+  board.instance().editCardDetailHandler(0, 0, 'new task text');
   await flushPromises();
   board.update();
   expect(board.find(Modal).length).toEqual(1);
-  expect(board.state().columns[0].cards[0].task).toEqual('original task');
 });
 
 it('create new card when createCardHandler is called with valid card', () => {

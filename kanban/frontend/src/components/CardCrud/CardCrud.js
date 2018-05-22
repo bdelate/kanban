@@ -12,7 +12,7 @@ const propTypes = {
   cardIndex: PropTypes.number.isRequired,
   task: PropTypes.string,
   toggleCardCrud: PropTypes.func.isRequired,
-  editCard: PropTypes.func.isRequired,
+  editCardDetail: PropTypes.func.isRequired,
   deleteCard: PropTypes.func.isRequired,
   createCard: PropTypes.func.isRequired,
 }
@@ -73,7 +73,7 @@ class CardCrud extends Component {
       saveButton = <button
         id="idSaveCardButton"
         disabled={this.state.task.length === 0}
-        onClick={() => this.props.editCard(
+        onClick={() => this.props.editCardDetail(
           this.props.columnIndex,
           this.props.cardIndex,
           this.state.task

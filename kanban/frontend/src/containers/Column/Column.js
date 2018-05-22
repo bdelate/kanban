@@ -17,7 +17,7 @@ const propTypes = {
   cards: PropTypes.array.isRequired,
   reorderCard: PropTypes.func.isRequired,
   moveCard: PropTypes.func.isRequired,
-  updateServerCards: PropTypes.func.isRequired,
+  patchServerCards: PropTypes.func.isRequired,
   toggleColumn: PropTypes.func.isRequired,
   toggleCardCrud: PropTypes.func.isRequired
 }
@@ -39,7 +39,7 @@ const columnTarget = {
         props.columnIndex
       )
     } else {
-      props.updateServerCards(
+      props.patchServerCards(
         monitor.getItem().columnIndex,
         monitor.getItem().cardIndex
       )
