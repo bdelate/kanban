@@ -18,10 +18,11 @@ class CardListSerializer(serializers.ListSerializer):
 class CardSerializer(serializers.ModelSerializer):
 
     id = serializers.IntegerField()
+    column_id = serializers.IntegerField()
 
     class Meta:
         model = Card
-        fields = ('task', 'id', 'position_id')
+        fields = ('task', 'id', 'position_id', 'column_id')
         list_serializer_class = CardListSerializer
 
 

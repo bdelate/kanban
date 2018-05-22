@@ -92,7 +92,14 @@ it('should move card when moveCardHandler is called', () => {
         id: 0,
         name: 'first column',
         cards: [
-          { id: 0, task: 'first column first task' }
+          {
+            id: 0, task: 'first column first task',
+            position_id: 0, column_id: 0
+          },
+          {
+            id: 1, task: 'first column second task',
+            position_id: 1, column_id: 0
+          }
         ]
       }, {
         id: 1,
@@ -106,9 +113,11 @@ it('should move card when moveCardHandler is called', () => {
   const boardInstance = board.dive().instance();
   boardInstance.setState(state);
   boardInstance.moveCardHandler(0, 0, 1);
-  expect(boardInstance.state.columns[0].cards.length).toBe(0);
+  expect(boardInstance.state.columns[0].cards.length).toBe(1);
   expect(boardInstance.state.columns[1].cards.length).toBe(1);
   expect(boardInstance.state.columns[1].cards[0].task).toBe('first column first task');
+  expect(boardInstance.state.columns[1].cards[0].position_id).toBe(0);
+  expect(boardInstance.state.columns[1].cards[0].column_id).toBe(1);
 });
 
 it('should reorder cards when reorderCardHandler is called', () => {

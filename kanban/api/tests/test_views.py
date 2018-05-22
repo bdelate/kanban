@@ -61,6 +61,9 @@ class CardDetailTest(APITestCase, TestDataMixin):
         self.assertEqual(card.task, 'updated')
 
     def test_reorder_cards(self):
+        """
+        Reorder first column third card to first column first card position
+        """
         column = Column.objects.first()
         first_card = Card.objects.get(column_id=column.id, position_id=0)
         second_card = Card.objects.get(column_id=column.id, position_id=1)
@@ -72,15 +75,18 @@ class CardDetailTest(APITestCase, TestDataMixin):
         cards = [{
             'id': third_card.id,
             'task': 'column 1 card 3',
-            'position_id': 0
+            'position_id': 0,
+            'column_id': column.id
         }, {
             'id': second_card.id,
             'task': 'column 1 card 2',
-            'position_id': 1
+            'position_id': 1,
+            'column_id': column.id
         }, {
             'id': first_card.id,
             'task': 'column 1 card 1',
-            'position_id': 2
+            'position_id': 2,
+            'column_id': column.id
         }]
         data = {'cards': cards}
 
@@ -94,3 +100,37 @@ class CardDetailTest(APITestCase, TestDataMixin):
         self.assertEqual(first_card.task, 'column 1 card 3')
         self.assertEqual(second_card.task, 'column 1 card 2')
         self.assertEqual(third_card.task, 'column 1 card 1')
+
+    def test_move_card_to_different_column(self):
+        """
+        Move first card in first column to last column
+        """
+        first_column = Column.objects.first()
+        first_column_cards = Card.objects.filter(column_id=first_column.id)
+        num_first_column_cards = len(first_column_cards)
+        first_card = Card.objects.get(column_id=first_column.id, position_id=0)
+
+        last_column = Column.objects.last()
+        last_column_cards = Card.objects.filter(column_id=last_column.id)
+        num_last_column_cards = len(last_column_cards)
+
+        # construct and send patch request
+        cards = [{
+            'id': first_card.id,
+            'task': 'column 1 card 1',
+            'position_id': len(last_column_cards),
+            'column_id': last_column.id
+        }]
+        data = {'cards': cards}
+        url = reverse('api:cards')
+        response = self.client.patch(url, data, format='json')
+
+        # refresh db data
+        first_card.refresh_from_db()
+        first_column_cards = Card.objects.filter(column_id=first_column.id)
+        last_column_cards = Card.objects.filter(column_id=last_column.id)
+
+        # assert that the card has moved to the last column
+        self.assertEqual(first_card.column_id, last_column.id)
+        self.assertEqual(len(first_column_cards), num_first_column_cards - 1)
+        self.assertEqual(len(last_column_cards), num_last_column_cards + 1)

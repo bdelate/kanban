@@ -37,6 +37,7 @@ class Board extends Component {
     this.retrieveData();
   }
 
+  // retrieve all board data from the server
   async retrieveData() {
     await axios.get('/api/boards/2/')
       .then(res => {
@@ -66,16 +67,16 @@ class Board extends Component {
   };
 
   // update all cards in ColumnIndex on the server
-  updateServerCardsHandler = (columnIndex, cardIndex) => {
-    this.toggleCardSpinner(columnIndex, cardIndex);
+  // optionally display a spinner for a specific card in the column
+  updateServerCardsHandler = (columnIndex, cardIndex = -1) => {
+    if (cardIndex > -1) this.toggleCardSpinner(columnIndex, cardIndex);
     const cards = [...this.state.columns[columnIndex].cards];
     axios.patch(`/api/cards/`, {
       cards
     }).then(res => {
-      this.toggleCardSpinner(columnIndex, cardIndex);
+      if (cardIndex > -1) this.toggleCardSpinner(columnIndex, cardIndex);
     }).catch(error => {
-      // TODO: write test to ensure spinner no longer displays when error is received
-      this.toggleCardSpinner(columnIndex, cardIndex);
+      if (cardIndex > -1) this.toggleCardSpinner(columnIndex, cardIndex);
       const message = 'Error: Unable to update cards on the server';
       this.displayModal(message)
     })
@@ -118,12 +119,31 @@ class Board extends Component {
       }
     }
 
-    // remove card from fromColumnIndex and push to toColumnIndex
+    // remove card from fromColumnIndex
     const card = updatedState.columns[
       fromColumnIndex
     ].cards.splice(fromCardIndex, 1)[0];
+
+    // update card.column_id
+    card.column_id = updatedState.columns[toColumnIndex].id;
+
+    // push card to toColumnIndex
     updatedState.columns[toColumnIndex].cards.push(card);
+
+    // update card position ids in fromColumnIndex and toColumnIndex columns
+    for (let key in updatedState.columns[fromColumnIndex].cards) {
+      updatedState.columns[fromColumnIndex].cards[key]['position_id'] = parseInt(key, 10);
+    }
+    for (let key in updatedState.columns[toColumnIndex].cards) {
+      updatedState.columns[toColumnIndex].cards[key]['position_id'] = parseInt(key, 10);
+    }
+
+    // update state
     this.setState(updatedState);
+
+    // update the server
+    this.updateServerCardsHandler(fromColumnIndex);
+    this.updateServerCardsHandler(toColumnIndex, card.position_id);
   };
 
   // update state.cardCrud which allows for displaying / hiding cardCrud modal
@@ -139,22 +159,24 @@ class Board extends Component {
   // show / hide spinner within a specific card
   toggleCardSpinner = (columnIndex, cardIndex) => {
     const spinner = this.state.columns[columnIndex].cards[cardIndex].spinner;
-    this.setState({
-      columns: [
-        ...this.state.columns.slice(0, columnIndex),
-        {
-          ...this.state.columns[columnIndex],
-          cards: [
-            ...this.state.columns[columnIndex].cards.slice(0, cardIndex),
-            {
-              ...this.state.columns[columnIndex].cards[cardIndex],
-              spinner: !spinner
-            },
-            ...this.state.columns[columnIndex].cards.slice(cardIndex + 1)
-          ]
-        },
-        ...this.state.columns.slice(columnIndex + 1)
-      ]
+    this.setState((prevState) => {
+      return {
+        columns: [
+          ...this.state.columns.slice(0, columnIndex),
+          {
+            ...this.state.columns[columnIndex],
+            cards: [
+              ...this.state.columns[columnIndex].cards.slice(0, cardIndex),
+              {
+                ...this.state.columns[columnIndex].cards[cardIndex],
+                spinner: !spinner
+              },
+              ...this.state.columns[columnIndex].cards.slice(cardIndex + 1)
+            ]
+          },
+          ...this.state.columns.slice(columnIndex + 1)
+        ]
+      }
     });
   }
 
