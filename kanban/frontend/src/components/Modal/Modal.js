@@ -30,7 +30,7 @@ const modal = (props) => (
     <Content>
       <div>{props.message}</div>
       <button
-        onClick={() => props.toggleModal()}
+        onClick={(t) => props.toggleModal()}
       >
         Close
       </button>

@@ -17,7 +17,6 @@ const propTypes = {
   cards: PropTypes.array.isRequired,
   reorderCard: PropTypes.func.isRequired,
   moveCard: PropTypes.func.isRequired,
-  patchServerCards: PropTypes.func.isRequired,
   toggleColumn: PropTypes.func.isRequired,
   toggleCardCrud: PropTypes.func.isRequired
 }
@@ -39,10 +38,12 @@ const columnTarget = {
         props.columnIndex
       )
     } else {
-      props.patchServerCards(
-        monitor.getItem().columnIndex,
-        monitor.getItem().cardIndex
-      )
+      const args = {
+        hasDropped: true,
+        columnIndex: monitor.getItem().columnIndex,
+        toCardIndex: monitor.getItem().cardIndex
+      };
+      props.reorderCard(args)
     }
   }
 };

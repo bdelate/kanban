@@ -30,7 +30,8 @@ class Board extends Component {
       columnIndex: -1,
       cardIndex: -1
     },
-    columns: []
+    columns: [],
+    previousState: {}
   }
 
   componentDidMount() {
@@ -45,12 +46,31 @@ class Board extends Component {
           ...this.state,
           retrieving_data: false,
           columns: res.data.columns
-        });
+        }, this.savePreviousState);
       })
       .catch(error => {
         const message = 'Error: Unable to load board data';
-        this.toggleModal(message)
+        this.setState({ retrieveData: false });
+        this.toggleModalHandler(message)
       })
+  }
+
+  // make a deep copy of the entire state and save it to state.previousState
+  savePreviousState = () => {
+    const currentState = { ...this.state };
+    for (let column in this.state.columns) {
+      currentState.columns[column] = { ...this.state.columns[column] }
+      currentState.columns[column].cards = [
+        ...this.state.columns[column].cards
+      ];
+      for (let card in this.state.columns[column].cards) {
+        currentState.columns[column].cards[card] = {
+          ...this.state.columns[column].cards[card]
+        };
+      }
+    }
+    delete currentState.previousState;
+    this.setState({ previousState: currentState });
   }
 
   // collapse / uncollapse column
@@ -66,64 +86,78 @@ class Board extends Component {
     });
   };
 
-  // update all cards in ColumnIndex on the server
-  // optionally display a card spinner if a cardIndex is provided
-  patchServerCards = (columnIndex, cardIndex = -1) => {
-    if (cardIndex > -1) this.toggleCardSpinner(columnIndex, cardIndex);
-    const cards = [...this.state.columns[columnIndex].cards];
-    axios.patch(`/api/cards/`, {
-      cards
-    }).then(res => {
-      if (cardIndex > -1) this.toggleCardSpinner(columnIndex, cardIndex);
-    }).catch(error => {
-      if (cardIndex > -1) this.toggleCardSpinner(columnIndex, cardIndex);
-      const message = 'Error: Unable to update cards on the server';
-      this.toggleModal(message)
-    })
+  // update all specified cards.
+  // optionally display a card spinner if a spinnerCard is provided
+  patchServerCards = (cards, spinnerCard) => {
+    if (spinnerCard) this.toggleCardSpinner(spinnerCard[0], spinnerCard[1]);
+    axios.patch(`/api/cards/`, { cards })
+      .then(res => {
+        if (spinnerCard) this.toggleCardSpinner(spinnerCard[0], spinnerCard[1]);
+        this.savePreviousState();
+      })
+      // hide spinner, restore previous valid state and display error message
+      .catch(error => {
+        if (spinnerCard) this.toggleCardSpinner(spinnerCard[0], spinnerCard[1]);
+        const previousState = this.state.previousState;
+        this.setState(previousState);
+        const message = 'Error: Unable to update cards on the server';
+        this.toggleModalHandler(message)
+      })
   };
 
-  // display card spinner and update card detail on the server
+  // Update single card detail on the server
   patchServerCardDetail = (columnIndex, cardIndex) => {
     this.toggleCardSpinner(columnIndex, cardIndex);
     const card = { ...this.state.columns[columnIndex].cards[cardIndex] };
     axios.patch(`/api/cards/${card.id}/`, { ...card })
       .then(res => {
         this.toggleCardSpinner(columnIndex, cardIndex);
+        this.savePreviousState();
       })
+      // hide spinner, restore previous valid state and display error message
       .catch(error => {
         this.toggleCardSpinner(columnIndex, cardIndex);
+        const previousState = this.state.previousState;
+        this.setState(previousState);
         const message = 'Error: Unable to update task on the server';
-        this.toggleModal(message)
+        this.toggleModalHandler(message);
       })
   }
 
-  // reorder cards within a column (local state update only)
-  // triggered by card hover DnD action
-  reorderCardHandler = (fromColumnIndex, fromCardIndex, toCardIndex) => {
-    const fromColumn = { ...this.state.columns[fromColumnIndex] };
-    fromColumn.cards = [...this.state.columns[fromColumnIndex].cards];
-    const card = fromColumn.cards.splice(fromCardIndex, 1)[0];
-    fromColumn.cards.splice(toCardIndex, 0, card);
+  // reorder cards within a column
+  reorderCardHandler = ({ hasDropped, columnIndex, fromCardIndex, toCardIndex }) => {
+    const column = { ...this.state.columns[columnIndex] };
+    column.cards = [...this.state.columns[columnIndex].cards];
+    // card has been dropped, update column on the server
+    if (hasDropped) {
+      const spinnerCard = [columnIndex, toCardIndex];
+      this.patchServerCards(column.cards, spinnerCard);
+      // card hasn't been dropped yet, update local column state only
+    } else {
+      // reorder card
+      const card = column.cards.splice(fromCardIndex, 1)[0];
+      column.cards.splice(toCardIndex, 0, card);
 
-    // update position_ids
-    for (let key in fromColumn.cards) {
-      fromColumn.cards[key]['position_id'] = parseInt(key, 10);
+      // update position_ids
+      for (let key in column.cards) {
+        column.cards[key]['position_id'] = parseInt(key, 10);
+      }
+
+      this.setState({
+        columns: [
+          ...this.state.columns.slice(0, columnIndex),
+          column,
+          ...this.state.columns.slice(columnIndex + 1)
+        ]
+      });
     }
-
-    this.setState({
-      columns: [
-        ...this.state.columns.slice(0, fromColumnIndex),
-        fromColumn,
-        ...this.state.columns.slice(fromColumnIndex + 1)
-      ]
-    });
   };
 
   // move card to a different column
   moveCardHandler = (fromColumnIndex, fromCardIndex, toColumnIndex) => {
-    // make deep copy of entire state
-    const updatedState = { ...this.state };
-    for (let column in this.state.columns) {
+    // create deep copy of all columns
+    const updatedState = { columns: [...this.state.columns] };
+    for (let column in updatedState.columns) {
       updatedState.columns[column] = { ...this.state.columns[column] }
       updatedState.columns[column].cards = [
         ...this.state.columns[column].cards
@@ -155,12 +189,14 @@ class Board extends Component {
     }
 
     // update state
-    this.setState(updatedState);
+    this.setState({ columns: updatedState.columns });
 
-    // update the server
-    this.patchServerCards(fromColumnIndex);
+    // update server with changed cards, ie: moved card and cards in fromColumn
     const newCardIndex = updatedState.columns[toColumnIndex].cards.length - 1;
-    this.patchServerCardDetail(toColumnIndex, newCardIndex);
+    const cards = [...updatedState.columns[fromColumnIndex].cards];
+    cards.push(updatedState.columns[toColumnIndex].cards[newCardIndex]);
+    const spinnerCard = [toColumnIndex, newCardIndex];
+    this.patchServerCards(cards, spinnerCard);
   };
 
   // update state.cardCrud which allows for displaying / hiding cardCrud modal
@@ -278,11 +314,8 @@ class Board extends Component {
   }
 
   // display / hide modal with message
-  toggleModal(message = null) {
-    this.setState({
-      retrieving_data: !this.state.retrieving_data,
-      modal: message
-    });
+  toggleModalHandler = (message = null) => {
+    this.setState({ modal: message });
   }
 
   render() {
@@ -305,7 +338,6 @@ class Board extends Component {
             cards={column.cards}
             reorderCard={this.reorderCardHandler}
             moveCard={this.moveCardHandler}
-            patchServerCards={this.patchServerCards}
             toggleColumn={this.toggleColumnHandler}
             toggleCardCrud={this.toggleCardCrudHandler}
           />

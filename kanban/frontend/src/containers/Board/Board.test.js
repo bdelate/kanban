@@ -53,17 +53,6 @@ it('calls retrieveData when mounted', () => {
   expect(spy).toHaveBeenCalledTimes(1);
 });
 
-it('calls toggleModal if data retrieval fails when mounting', async () => {
-  // mock 404 returned from any url matching /api/boards/*
-  moxios.stubRequest(/api\/boards\/*/, {
-    status: 404
-  })
-  const spy = jest.spyOn(BoardComponentOnly.prototype, 'toggleModal');
-  const wrapper = shallow(<BoardComponentOnly />);
-  await flushPromises();
-  expect(spy).toHaveBeenCalledTimes(1);
-});
-
 it('should have column instance when not retrieving data', () => {
   const state = {
     retrieving_data: false,
@@ -120,7 +109,7 @@ it('should move card when moveCardHandler is called', () => {
   expect(boardInstance.state.columns[1].cards[0].column_id).toBe(1);
 });
 
-it('should reorder cards when reorderCardHandler is called', () => {
+it('should reorder cards when reorderCardHandler is called while hovering', () => {
   const state = {
     columns: [
       {
@@ -133,14 +122,54 @@ it('should reorder cards when reorderCardHandler is called', () => {
       }
     ]
   };
-
+  const args = {
+    hasDropped: false,
+    columnIndex: 0,
+    fromCardIndex: 0,
+    toCardIndex: 1
+  };
   const board = shallow(<Board />);
   const boardInstance = board.dive().instance();
   boardInstance.setState(state);
-  boardInstance.reorderCardHandler(0, 0, 1);
+  boardInstance.reorderCardHandler(args);
   expect(boardInstance.state.columns[0].cards.length).toBe(2);
   expect(boardInstance.state.columns[0].cards[0].task).toBe('second task');
   expect(boardInstance.state.columns[0].cards[1].task).toBe('first task');
+});
+
+it('should call patchServerCards when reorderCardHandler on card drop', () => {
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        cards: [
+          { id: 0, task: 'first task', position_id: 0 },
+          { id: 1, task: 'second task', position_id: 1 }
+        ]
+      }
+    ]
+  };
+  const args = {
+    hasDropped: true,
+    columnIndex: 0,
+    toCardIndex: 1
+  };
+
+  // use wrapper to allow jest to spy on what is actually an arrow function
+  const patchServerCards = jest.fn();
+  class BoardWrapper extends BoardComponentOnly {
+    constructor(props) {
+      super(props);
+      this.patchServerCards = patchServerCards;
+    }
+  }
+
+  const board = shallow(<BoardWrapper />);
+  const boardInstance = board.instance();
+  boardInstance.setState(state);
+  boardInstance.reorderCardHandler(args);
+  expect(patchServerCards).toHaveBeenCalledTimes(1);
 });
 
 it('should toggle column.collapsed when toggleColumnHandler is called', () => {
@@ -304,3 +333,54 @@ it('create new card when createCardHandler is called with valid card', () => {
   expect(board.state().columns[0].cards[0].task).toEqual('new task');
 });
 
+it('should merge previous state if patchServerCards fails', async () => {
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        collapsed: false,
+        cards: [{ id: 0, task: 'first task', position_id: 0 }]
+      }
+    ],
+    previousState: {
+      value: 'fake previous state value'
+    }
+  };
+  moxios.stubRequest('/api/cards/', {
+    status: 404,
+    response: {}
+  })
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  expect(board.state().value).toBeUndefined();
+  board.instance().patchServerCards([]);
+  await flushPromises();
+  expect(board.state().value).toEqual('fake previous state value');
+});
+
+it('should merge previous state if patchServerCardDetail fails', async () => {
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        collapsed: false,
+        cards: [{ id: 0, task: 'first task', position_id: 0 }]
+      }
+    ],
+    previousState: {
+      value: 'fake previous state value'
+    }
+  };
+  moxios.stubRequest('/api/cards/0/', {
+    status: 404,
+    response: {}
+  })
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  expect(board.state().value).toBeUndefined();
+  board.instance().patchServerCardDetail(0, 0);
+  await flushPromises();
+  expect(board.state().value).toEqual('fake previous state value');
+});
