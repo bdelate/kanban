@@ -15,7 +15,7 @@ class CardListSerializer(serializers.ListSerializer):
         return cards
 
 
-class CardSerializer(serializers.ModelSerializer):
+class ExistingCardSerializer(serializers.ModelSerializer):
 
     id = serializers.IntegerField()
     column_id = serializers.IntegerField()
@@ -26,9 +26,18 @@ class CardSerializer(serializers.ModelSerializer):
         list_serializer_class = CardListSerializer
 
 
+class NewCardSerializer(serializers.ModelSerializer):
+
+    column_id = serializers.IntegerField()
+
+    class Meta:
+        model = Card
+        fields = ('task', 'position_id', 'column_id')
+
+
 class ColumnSerializer(serializers.ModelSerializer):
 
-    cards = CardSerializer(many=True)
+    cards = ExistingCardSerializer(many=True)
 
     class Meta:
         model = Column

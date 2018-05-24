@@ -95,9 +95,8 @@ class Board extends Component {
         if (spinnerCard) this.toggleCardSpinner(spinnerCard[0], spinnerCard[1]);
         this.savePreviousState();
       })
-      // hide spinner, restore previous valid state and display error message
+      //restore previous valid state and display error message
       .catch(error => {
-        if (spinnerCard) this.toggleCardSpinner(spinnerCard[0], spinnerCard[1]);
         const previousState = this.state.previousState;
         this.setState(previousState);
         const message = 'Error: Unable to update cards on the server';
@@ -114,16 +113,46 @@ class Board extends Component {
         this.toggleCardSpinner(columnIndex, cardIndex);
         this.savePreviousState();
       })
-      // hide spinner, restore previous valid state and display error message
+      // restore previous valid state and display error message
       .catch(error => {
-        this.toggleCardSpinner(columnIndex, cardIndex);
         const previousState = this.state.previousState;
         this.setState(previousState);
-        const message = 'Error: Unable to update task on the server';
+        const message = 'Error: Unable to update card on the server';
         this.toggleModalHandler(message);
       })
   }
 
+  // create new card on the server, update state with response (to get db id)
+  postServerCard = (columnIndex, card) => {
+    // deep copy card so that temporary id can be deleted before server call
+    const new_card = { ...card };
+
+    axios.post(`/api/cards/`, new_card)
+      .then(res => {
+        const cardIndex = this.state.columns[columnIndex].cards.length - 1;
+        this.setState({
+          ...this.state,
+          columns: [
+            ...this.state.columns.slice(0, columnIndex),
+            {
+              ...this.state.columns[columnIndex],
+              cards: [
+                ...this.state.columns[columnIndex].cards.slice(0, cardIndex),
+                { ...res.data }
+              ]
+            },
+            ...this.state.columns.slice(columnIndex + 1)
+          ]
+        }, this.savePreviousState);
+      })
+      // restore previous valid state and display error message
+      .catch(error => {
+        const previousState = this.state.previousState;
+        this.setState(previousState);
+        const message = 'Error: Unable to create card on the server';
+        this.toggleModalHandler(message)
+      })
+  }
   // reorder cards within a column
   reorderCardHandler = ({ hasDropped, columnIndex, fromCardIndex, toCardIndex }) => {
     const column = { ...this.state.columns[columnIndex] };
@@ -281,16 +310,20 @@ class Board extends Component {
     );
   }
 
-  // create card on the server and add new card to local state
+  // create new card in state and call postServerCard to create it on the server
   createCardHandler = (columnIndex, task) => {
     this.toggleCardCrudHandler(false);
 
     const column = { ...this.state.columns[columnIndex] };
     column.cards = [...this.state.columns[columnIndex].cards];
-    column.cards.push({
-      id: -1,
-      spinner: true
-    });
+    const new_card = {
+      id: -1, // temporary id used for Card keys until id received from db
+      spinner: true,
+      task: task,
+      column_id: column.id,
+      position_id: column.cards.length
+    }
+    column.cards.push(new_card);
 
     this.setState({
       columns: [
@@ -300,17 +333,7 @@ class Board extends Component {
       ]
     });
 
-    // TODO: ajax to server
-
-    column.cards[column.cards.length - 1].spinner = false;
-    column.cards[column.cards.length - 1].task = task;
-    this.setState({
-      columns: [
-        ...this.state.columns.slice(0, columnIndex),
-        column,
-        ...this.state.columns.slice(columnIndex + 1)
-      ]
-    });
+    this.postServerCard(columnIndex, new_card);
   }
 
   // display / hide modal with message

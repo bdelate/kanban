@@ -60,8 +60,44 @@ class CardDetailTest(APITestCase, TestDataMixin):
         card.refresh_from_db()
         self.assertEqual(card.task, 'updated')
 
+
+class CardCreateUpdateTest(APITestCase, TestDataMixin):
+
+    @classmethod
+    def setUpTestData(cls):
+
+        cls.create_test_data()
+
+    def test_create_card(self):
+        column = Column.objects.first()
+        before_cards = Card.objects.filter(column_id=column.id)
+        data = {
+            'id': -1,
+            'spinner': 'true',
+            'task': 'newly created test task',
+            'column_id': column.id,
+            'position_id': len(before_cards)
+        }
+
+        url = reverse('api:cards_create_update')
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        after_cards = Card.objects.filter(column_id=column.id)
+        self.assertEqual(len(before_cards) + 1, len(after_cards))
+        card = Card.objects.last()
+        self.assertEqual(card.task, 'newly created test task')
+        self.assertEqual(card.column_id, column.id)
+
+    def test_create_card_fails(self):
+        data = {}
+        url = reverse('api:cards_create_update')
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_reorder_cards(self):
         """
+        Test updating of multiple cards, eg:
         Reorder first column third card to first column first card position
         """
         column = Column.objects.first()
@@ -90,7 +126,7 @@ class CardDetailTest(APITestCase, TestDataMixin):
         }]
         data = {'cards': cards}
 
-        url = reverse('api:cards')
+        url = reverse('api:cards_create_update')
         response = self.client.patch(url, data, format='json')
 
         first_card = Card.objects.get(column_id=column.id, position_id=0)
@@ -122,7 +158,7 @@ class CardDetailTest(APITestCase, TestDataMixin):
             'column_id': last_column.id
         }]
         data = {'cards': cards}
-        url = reverse('api:cards')
+        url = reverse('api:cards_create_update')
         response = self.client.patch(url, data, format='json')
 
         # refresh db data
