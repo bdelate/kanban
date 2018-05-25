@@ -7,11 +7,11 @@ class BoardAdmin(admin.ModelAdmin):
 
 
 class ColumnAdmin(admin.ModelAdmin):
-    list_display = ('name', 'board')
+    list_display = ('name', 'board', 'id')
 
 
 class CardAdmin(admin.ModelAdmin):
-    list_display = ('column', 'task')
+    list_display = ('column', 'task', 'position_id', 'id')
 
 
 admin.site.register(Board, BoardAdmin)

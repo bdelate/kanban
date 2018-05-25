@@ -71,8 +71,14 @@ const cardTarget = {
         return;
       }
 
-      // move card
-      props.reorderCard(monitor.getItem().columnIndex, dragIndex, hoverIndex);
+      // reorder cards
+      const args = {
+        hasDropped: false,
+        columnIndex: monitor.getItem().columnIndex,
+        fromCardIndex: dragIndex,
+        toCardIndex: hoverIndex
+      };
+      props.reorderCard(args);
       monitor.getItem().cardIndex = hoverIndex
     }
   }
