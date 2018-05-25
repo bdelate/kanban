@@ -87,6 +87,7 @@ const cardTarget = {
 function collectSource(connect, monitor) {
   return {
     connectDragSource: connect.dragSource(),
+    connectDragPreview: connect.dragPreview(),
     isDragging: monitor.isDragging()
   }
 }
@@ -98,7 +99,11 @@ function collectTarget(connect, monitor) {
 }
 
 const card = (props) => {
-  const { connectDragSource, connectDropTarget, isDragging } = props;
+  const {
+    connectDragSource,
+    connectDropTarget,
+    connectDragPreview,
+    isDragging } = props;
   const opacity = isDragging ? 0 : 1;
 
   let output = null;
@@ -109,24 +114,30 @@ const card = (props) => {
       </CardContainer>
     )
   } else {
-    output = connectDragSource(
+    output =
       connectDropTarget(
-        <div>
-          <CardContainer style={{ opacity }}>
-            <span>{props.task}</span>
-            <i
-              title="Edit or Delete"
-              className="fas fa-edit"
-              onClick={() => props.toggleCardCrud(
-                true,
-                props.columnIndex,
-                props.cardIndex
+        connectDragPreview(
+          <div>
+            <CardContainer style={{ opacity }}>
+              {connectDragSource(
+                <div
+                  style={{ 'backgroundColor': '#19634e', 'height': '15px' }}>
+                </div>
               )}
-            ></i>
-          </CardContainer>
-        </div>
+              <span>{props.task}</span>
+              <i
+                title="Edit or Delete"
+                className="fas fa-edit"
+                onClick={() => props.toggleCardCrud(
+                  true,
+                  props.columnIndex,
+                  props.cardIndex
+                )}
+              ></i>
+            </CardContainer>
+          </div>
+        )
       )
-    )
   }
   return output;
 };
