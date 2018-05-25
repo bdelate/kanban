@@ -14,18 +14,11 @@ const UIContainer = styled.div`
   flex-direction: column;
 `;
 
-const BoardContainer = styled.div`
-  display: flex;
-  flex: 1;
-`;
-
 class App extends Component {
   render() {
     return (
       <UIContainer>
-        <BoardContainer>
-          <Board></Board>
-        </BoardContainer>
+        <Board></Board>
       </UIContainer>
     );
   }

@@ -7,6 +7,7 @@ import CollapsedColumn from '../../components/CollapsedColumn/CollapsedColumn';
 import CardCrud from '../../components/CardCrud/CardCrud';
 import Spinner from '../../components/Spinner/Spinner';
 import Modal from '../../components/Modal/Modal';
+import BoardControls from '../../containers/BoardControls/BoardControls';
 
 // 3rd party imports
 import styled from 'styled-components';
@@ -14,6 +15,13 @@ import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import axios from 'axios';
 
+
+const BoardContainer = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  background-color: yellow;
+`;
 
 const ColumnsContainer = styled.div`
   display: flex;
@@ -158,7 +166,6 @@ class Board extends Component {
   deleteServerCard = (cardId) => {
     axios.delete(`/api/cards/${cardId}/`)
       .then(res => {
-        console.log('sfsdfsfdsf');
         this.savePreviousState();
       })
       // restore previous valid state and display error message
@@ -399,10 +406,13 @@ class Board extends Component {
       }
 
       output = (
-        <ColumnsContainer>
-          {cardCrud}
-          {columns}
-        </ColumnsContainer>
+        <BoardContainer>
+          <BoardControls />
+          <ColumnsContainer>
+            {cardCrud}
+            {columns}
+          </ColumnsContainer>
+        </BoardContainer>
       )
     }
 
