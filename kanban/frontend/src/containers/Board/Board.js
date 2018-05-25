@@ -120,7 +120,7 @@ class Board extends Component {
         const message = 'Error: Unable to update card on the server';
         this.toggleModalHandler(message);
       })
-  }
+  };
 
   // create new card on the server, update state with response (to get db id)
   postServerCard = (columnIndex, card) => {
@@ -152,7 +152,24 @@ class Board extends Component {
         const message = 'Error: Unable to create card on the server';
         this.toggleModalHandler(message)
       })
-  }
+  };
+
+  // delete card on the server
+  deleteServerCard = (cardId) => {
+    axios.delete(`/api/cards/${cardId}/`)
+      .then(res => {
+        console.log('sfsdfsfdsf');
+        this.savePreviousState();
+      })
+      // restore previous valid state and display error message
+      .catch(error => {
+        const previousState = this.state.previousState;
+        this.setState(previousState);
+        const message = 'Error: Unable to delete card on the server';
+        this.toggleModalHandler(message);
+      })
+  };
+
   // reorder cards within a column
   reorderCardHandler = ({ hasDropped, columnIndex, fromCardIndex, toCardIndex }) => {
     const column = { ...this.state.columns[columnIndex] };
@@ -262,18 +279,14 @@ class Board extends Component {
     });
   }
 
-  // delete card on server and remove it from local state
+  // remove card from state and call deleteServerCard
   deleteCardHandler = (columnIndex, cardIndex) => {
     this.toggleCardCrudHandler(false);
 
     const column = { ...this.state.columns[columnIndex] };
     column.cards = [...this.state.columns[columnIndex].cards];
-    column.cards[cardIndex] = { ...column.cards[cardIndex] };
-    this.toggleCardSpinner(columnIndex, cardIndex);
+    const cardId = column.cards[cardIndex].id;
 
-    // TODO: ajax to server
-
-    this.toggleCardSpinner(columnIndex, cardIndex);
     column.cards.splice(cardIndex, 1);
     this.setState({
       columns: [
@@ -282,6 +295,8 @@ class Board extends Component {
         ...this.state.columns.slice(columnIndex + 1)
       ]
     });
+
+    this.deleteServerCard(cardId);
   }
 
   // edit existing card on the server and update local state

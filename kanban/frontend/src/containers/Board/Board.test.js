@@ -366,7 +366,7 @@ it('should merge previous state if patchServerCardDetail fails', async () => {
         id: 0,
         name: 'first column',
         collapsed: false,
-        cards: [{ id: 0, task: 'first task', position_id: 0 }]
+        cards: [{ id: 0, task: 'first task', position_id: 0, column_id: 0 }]
       }
     ],
     previousState: {
@@ -416,5 +416,31 @@ it('should merge previous state if postServerCard fails', async () => {
   board.instance().postServerCard(0, new_card);
   await flushPromises();
   expect(board.state().columns[0].cards.length).toBe(0);
+  expect(board.state().value).toEqual('fake previous state value');
+});
+
+it('should merge previous state if deleteServerCard fails', async () => {
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        collapsed: false,
+        cards: []
+      }
+    ],
+    previousState: {
+      value: 'fake previous state value'
+    }
+  };
+  moxios.stubRequest('/api/cards/100/', {
+    status: 404,
+    response: {}
+  })
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  expect(board.state().value).toBeUndefined();
+  board.instance().deleteServerCard(100);
+  await flushPromises();
   expect(board.state().value).toEqual('fake previous state value');
 });

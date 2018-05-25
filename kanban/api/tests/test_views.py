@@ -60,6 +60,16 @@ class CardDetailTest(APITestCase, TestDataMixin):
         card.refresh_from_db()
         self.assertEqual(card.task, 'updated')
 
+    def test_delete_card(self):
+        card = Card.objects.first()
+        card_task = card.task
+        url = reverse('api:card_detail', args=[card.id])
+        response = self.client.delete(url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        card = Card.objects.filter(task=card_task)
+        self.assertEqual(len(card), 0)
+
 
 class CardCreateUpdateTest(APITestCase, TestDataMixin):
 
