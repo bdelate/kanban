@@ -139,6 +139,32 @@ class Board extends Component {
         this.toggleModalHandler(message)
       })
   }
+
+  // Update column detail on the server
+  patchServerColumnName = (columnIndex) => {
+    const data = {
+      id: this.state.columns[columnIndex].id,
+      name: this.state.columns[columnIndex].name
+    };
+    axios.patch(`/api/columns/${data.id}/`, { ...data })
+      .then(res => {
+        this.setState({
+          columns: [
+            ...this.state.columns.slice(0, columnIndex),
+            { ...res.data },
+            ...this.state.columns.slice(columnIndex + 1)
+          ]
+        }, this.savePreviousState)
+      })
+      // restore previous valid state and display error message
+      .catch(error => {
+        const previousState = this.state.previousState;
+        this.setState(previousState);
+        const message = 'Error: Unable to update column on the server';
+        this.toggleModalHandler(message);
+      })
+  };
+
   // Update single card detail on the server
   patchServerCardDetail = (columnIndex, cardIndex) => {
     this.toggleCardSpinner(columnIndex, cardIndex);
@@ -291,7 +317,7 @@ class Board extends Component {
     const columnModal = {
       active: active,
       columnIndex: columnIndex
-    }
+    };
     this.setState({ columnModal: columnModal });
   };
 
@@ -337,8 +363,22 @@ class Board extends Component {
   };
 
   // edit existing column name on the server and update local state
-  editColumnName = (columnIndex, name) => {
-
+  editColumnNameHandler = (columnIndex, name) => {
+    this.toggleColumnModalHandler(false);
+    this.setState({
+      columns: [
+        ...this.state.columns.slice(0, columnIndex),
+        {
+          ...this.state.columns[columnIndex],
+          name: name,
+          spinner: true
+        },
+        ...this.state.columns.slice(columnIndex + 1)
+      ]
+    },
+      // call back function executed after setState completes  
+      () => this.patchServerColumnName(columnIndex)
+    )
   }
 
   // remove card from state and call deleteServerCard
@@ -439,6 +479,7 @@ class Board extends Component {
             moveCard={this.moveCardHandler}
             toggleColumn={this.toggleColumnHandler}
             toggleCardCrud={this.toggleCardCrudHandler}
+            toggleColumnModal={this.toggleColumnModalHandler}
           />
         }
       });
@@ -453,7 +494,7 @@ class Board extends Component {
           name={column ? column.name : null}
           toggleColumnModal={this.toggleColumnModalHandler}
           createColumn={this.createColumnHandler}
-          editColumnName={this.editColumnName}
+          editColumnName={this.editColumnNameHandler}
         />
       }
 

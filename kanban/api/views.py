@@ -19,12 +19,12 @@ class BoardDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BoardSerializer
 
 
-class CardDetail(generics.RetrieveUpdateDestroyAPIView):
+class ColumnDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     Update or delete an existing card
     """
-    queryset = Card.objects.all()
-    serializer_class = ExistingCardSerializer
+    queryset = Column.objects.all()
+    serializer_class = ColumnSerializer
 
 
 class ColumnCreateUpdate(APIView):
@@ -40,6 +40,14 @@ class ColumnCreateUpdate(APIView):
             data.update(serializer.data)
             return Response(data, status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CardDetail(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Update or delete an existing card
+    """
+    queryset = Card.objects.all()
+    serializer_class = ExistingCardSerializer
 
 
 class CardsCreateUpdate(APIView):

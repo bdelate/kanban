@@ -87,6 +87,11 @@ const column = (props) => {
         className="fas fa-plus"
         onClick={() => props.toggleCardCrud(true, props.columnIndex)}
       ></i>
+      <i
+        title="Change Column Name"
+        className="fas fa-edit"
+        onClick={() => props.toggleColumnModal(true, props.columnIndex)}
+      ></i>
       <h3>{props.name}</h3>
       {cards}
     </ColumnContainer>

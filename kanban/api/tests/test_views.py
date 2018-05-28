@@ -38,6 +38,31 @@ class BoardDetailTest(APITestCase, TestDataMixin):
                          'column 1 card 3')
 
 
+class ColumnDetailTest(APITestCase, TestDataMixin):
+
+    @classmethod
+    def setUpTestData(cls):
+
+        cls.create_test_data()
+
+    def test_update_invalid_column(self):
+        url = reverse('api:column_detail', args=[100])
+        response = self.client.patch(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_task(self):
+        column = Column.objects.first()
+        url = reverse('api:column_detail', args=[column.id])
+        data = {
+            'id': column.id,
+            'name': 'new column name'
+        }
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        column.refresh_from_db()
+        self.assertEqual(column.name, 'new column name')
+
+
 class ColumnCreateUpdateTest(APITestCase, TestDataMixin):
 
     @classmethod

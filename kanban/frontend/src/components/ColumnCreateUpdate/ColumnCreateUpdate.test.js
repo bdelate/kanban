@@ -24,3 +24,18 @@ it('calls createColumn when save is clicked on new column', () => {
   columnModal.find('#idSaveColumnButton').simulate('click');
   expect(props.createColumn).toHaveBeenCalled();
 });
+
+it('calls editColumnName when save is clicked on an existing column', () => {
+  const props = {
+    active: true,
+    columnIndex: 1,
+    name: 'existing column',
+    toggleColumnModal: jest.fn(),
+    editColumnName: jest.fn(),
+    createColumn: jest.fn()
+  };
+
+  let columnModal = shallow(<ColumnModal {...props} />);
+  columnModal.find('#idSaveColumnButton').simulate('click');
+  expect(props.editColumnName).toHaveBeenCalled();
+});

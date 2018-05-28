@@ -295,6 +295,47 @@ it('creates new column when createColumnHandler is called', () => {
   expect(board.state().columns[1].name).toEqual('new column');
 });
 
+it('update column name when editColumnNameHandler is called', async () => {
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        collapsed: false,
+        cards: [{ id: 0, task: 'first task', position_id: 0 }]
+      }
+    ]
+  };
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  board.instance().editColumnNameHandler(0, 'new column name');
+  await flushPromises();
+  board.update();
+  expect(board.state().columns[0].name).toEqual('new column name');
+});
+
+it('displays modal when editColumnNameHandler call to server fails', async () => {
+  moxios.stubRequest(/api\/columns\/*/, {
+    status: 404
+  })
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        collapsed: false,
+        cards: [{ id: 0, task: 'original task' }]
+      }
+    ]
+  };
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  board.instance().editColumnNameHandler(0, 'new column name');
+  await flushPromises();
+  board.update();
+  expect(board.find(Modal).length).toEqual(1);
+});
+
 it('deletes card from state when deleteCardHandler is called with valid card', () => {
   const state = {
     columns: [
@@ -316,14 +357,6 @@ it('deletes card from state when deleteCardHandler is called with valid card', (
 });
 
 it('update card task when editCardDetailHandler is called', async () => {
-  moxios.stubRequest(/api\/cards\/*/, {
-    status: 200,
-    response: {
-      task: 'new task text',
-      id: 0,
-      position_id: 0
-    }
-  })
   const state = {
     columns: [
       {
@@ -499,6 +532,32 @@ it('should merge previous state if postServerColumn fails', async () => {
   board.instance().postServerColumn(newColumn);
   await flushPromises();
   expect(board.state().columns.length).toBe(1);
+  expect(board.state().value).toEqual('fake previous state value');
+});
+
+it('should merge previous state if patchServerColumnName fails', async () => {
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        collapsed: false,
+        cards: []
+      }
+    ],
+    previousState: {
+      value: 'fake previous state value'
+    }
+  };
+  moxios.stubRequest('/api/columns/0/', {
+    status: 404,
+    response: {}
+  })
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  expect(board.state().value).toBeUndefined();
+  board.instance().patchServerColumnName(0);
+  await flushPromises();
   expect(board.state().value).toEqual('fake previous state value');
 });
 
