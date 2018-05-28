@@ -27,6 +27,21 @@ class CardDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ExistingCardSerializer
 
 
+class ColumnCreateUpdate(APIView):
+
+    def post(self, request):
+        """
+        Create new column. Add resulting column id to response data
+        """
+        serializer = ColumnSerializer(data=request.data)
+        if serializer.is_valid():
+            instance = serializer.save()
+            data = {'id': instance.id}
+            data.update(serializer.data)
+            return Response(data, status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class CardsCreateUpdate(APIView):
 
     def post(self, request):

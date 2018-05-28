@@ -56,6 +56,7 @@ class Board extends Component {
     await axios.get('/api/boards/2/')
       .then(res => {
         this.setState({
+          ...res.data,
           ...this.state,
           retrieving_data: false,
           columns: res.data.columns
@@ -117,6 +118,27 @@ class Board extends Component {
       })
   };
 
+  // create new column on the server. Replace last column with response
+  // to get db id and hide spinner
+  postServerColumn = (column) => {
+    axios.post(`/api/columns/`, column)
+      .then(res => {
+        this.setState({
+          ...this.state,
+          columns: [
+            ...this.state.columns.slice(0, res.data.position_id),
+            { ...res.data }
+          ]
+        }, this.savePreviousState);
+      })
+      // restore previous valid state and display error message
+      .catch(error => {
+        const previousState = this.state.previousState;
+        this.setState(previousState);
+        const message = 'Error: Unable to create column on the server';
+        this.toggleModalHandler(message)
+      })
+  }
   // Update single card detail on the server
   patchServerCardDetail = (columnIndex, cardIndex) => {
     this.toggleCardSpinner(columnIndex, cardIndex);
@@ -137,10 +159,7 @@ class Board extends Component {
 
   // create new card on the server, update state with response (to get db id)
   postServerCard = (columnIndex, card) => {
-    // deep copy card so that temporary id can be deleted before server call
-    const new_card = { ...card };
-
-    axios.post(`/api/cards/`, new_card)
+    axios.post(`/api/cards/`, card)
       .then(res => {
         const cardIndex = this.state.columns[columnIndex].cards.length - 1;
         this.setState({
@@ -302,6 +321,19 @@ class Board extends Component {
 
   // create new column in state and call postServerColumn to create it on the server
   createColumnHandler = (name) => {
+    this.toggleColumnModalHandler(false);
+    const columns = [...this.state.columns];
+    const newColumn = {
+      id: -1, // temporary id used for Column keys until id received from db
+      spinner: true,
+      name: name,
+      position_id: this.state.columns.length,
+      board_id: this.state.id,
+      cards: []
+    };
+    columns.push(newColumn);
+    this.setState({ columns: columns });
+    this.postServerColumn(newColumn);
   };
 
   // edit existing column name on the server and update local state

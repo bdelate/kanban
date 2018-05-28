@@ -37,7 +37,7 @@ class NewCardSerializer(serializers.ModelSerializer):
 
 class ColumnSerializer(serializers.ModelSerializer):
 
-    cards = ExistingCardSerializer(many=True)
+    cards = ExistingCardSerializer(many=True, read_only=True)
     board_id = serializers.IntegerField()
 
     class Meta:

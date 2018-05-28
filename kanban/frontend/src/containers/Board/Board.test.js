@@ -276,6 +276,25 @@ it('toggles CardCrud component when toggleCardCrudHandler is called', () => {
   expect(board.find(CardCrud).length).toBe(0);
 });
 
+it('creates new column when createColumnHandler is called', () => {
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        collapsed: false,
+        cards: []
+      }
+    ]
+  };
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  board.instance().createColumnHandler('new column');
+  board.update();
+  expect(board.state().columns.length).toBe(2);
+  expect(board.state().columns[1].name).toEqual('new column');
+});
+
 it('deletes card from state when deleteCardHandler is called with valid card', () => {
   const state = {
     columns: [
@@ -362,6 +381,125 @@ it('create new card when createCardHandler is called with valid card', () => {
   board.update();
   expect(board.state().columns[0].cards.length).toBe(1);
   expect(board.state().columns[0].cards[0].task).toEqual('new task');
+});
+
+it('should merge previous state if postServerColumn fails', async () => {
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        collapsed: false,
+        cards: []
+      }
+    ],
+    previousState: {
+      value: 'fake previous state value'
+    }
+  };
+  moxios.stubRequest('/api/columns/', {
+    status: 400,
+    response: {}
+  })
+  const newColumn = {
+    id: -1,
+    spinner: true,
+    name: 'new column name',
+    position_id: 1,
+    board_id: 1,
+    cards: []
+  };
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  expect(board.state().value).toBeUndefined();
+  board.instance().postServerColumn(newColumn);
+  await flushPromises();
+  expect(board.state().columns.length).toBe(1);
+  expect(board.state().value).toEqual('fake previous state value');
+});
+
+it('should replace last column with response from postServerColumn', async () => {
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        collapsed: false,
+        cards: [{ id: 0, task: 'first task', position_id: 0 }]
+      },
+      {
+        id: -1,
+        spinner: true,
+        name: 'new column name',
+        position_id: 1,
+        board_id: 1,
+        cards: []
+      }
+    ],
+    previousState: {
+      value: 'fake previous state value'
+    }
+  };
+  const newColumn = {
+    id: -1,
+    spinner: true,
+    name: 'new column name',
+    position_id: 1,
+    board_id: 1,
+    cards: []
+  }
+  moxios.stubRequest('/api/columns/', {
+    status: 201,
+    response: {
+      id: 5,
+      name: 'new column name',
+      position_id: 1,
+      board_id: 1,
+      cards: []
+    }
+  })
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  expect(board.state().value).toBeUndefined();
+  board.instance().postServerColumn(newColumn);
+  await flushPromises();
+  expect(board.state().columns[1].id).toEqual(5);
+  expect(board.state().columns[1].spinner).toBeUndefined;
+});
+
+it('should merge previous state if postServerColumn fails', async () => {
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        collapsed: false,
+        cards: [{ id: 0, task: 'first task', position_id: 0 }]
+      }
+    ],
+    previousState: {
+      value: 'fake previous state value'
+    }
+  };
+  const newColumn = {
+    id: -1,
+    spinner: true,
+    name: 'new column name',
+    position_id: 1,
+    board_id: 1,
+    cards: []
+  }
+  moxios.stubRequest('/api/columns/', {
+    status: 400,
+    response: {}
+  })
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  expect(board.state().value).toBeUndefined();
+  board.instance().postServerColumn(newColumn);
+  await flushPromises();
+  expect(board.state().columns.length).toBe(1);
+  expect(board.state().value).toEqual('fake previous state value');
 });
 
 it('should merge previous state if patchServerCards fails', async () => {

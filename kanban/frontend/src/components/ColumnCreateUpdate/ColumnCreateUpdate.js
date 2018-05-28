@@ -64,7 +64,7 @@ class ColumnModal extends Component {
       saveButton = <button
         id="idSaveColumnButton"
         disabled={this.state.name.length === 0}
-        onClick={() => this.props.editColumnDetail(
+        onClick={() => this.props.editColumnName(
           this.props.columnIndex,
           this.state.name
         )}
