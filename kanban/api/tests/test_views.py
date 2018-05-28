@@ -2,7 +2,7 @@ from rest_framework.test import APITestCase
 from django.urls import reverse
 from rest_framework import status
 from .mixins import TestDataMixin
-from api.models import Card, Column
+from api.models import Board, Card, Column
 
 
 class BoardDetailTest(APITestCase, TestDataMixin):
@@ -36,6 +36,40 @@ class BoardDetailTest(APITestCase, TestDataMixin):
                          'column 1 card 2')
         self.assertEqual(response.data['columns'][0]['cards'][2]['task'],
                          'column 1 card 3')
+
+
+class ColumnCreateUpdateTest(APITestCase, TestDataMixin):
+
+    @classmethod
+    def setUpTestData(cls):
+
+        cls.create_test_data()
+
+    def test_create_column(self):
+        board = Board.objects.first()
+        columns = Column.objects.filter(board_id=board.id)
+        data = {
+            'id': -1,
+            'spinner': 'true',
+            'name': 'new column',
+            'position_id': len(columns),
+            'board_id': board.id,
+            'cards': []
+        }
+
+        url = reverse('api:column_create_update')
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        new_column = Column.objects.last()
+        self.assertEqual(new_column.name, 'new column')
+        self.assertEqual(new_column.board_id, board.id)
+
+    def test_create_column_fails(self):
+        data = {}
+        url = reverse('api:column_create_update')
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class CardDetailTest(APITestCase, TestDataMixin):
