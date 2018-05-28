@@ -7,6 +7,7 @@ import Column from '../Column/Column';
 import Spinner from '../../components/Spinner/Spinner';
 import Modal from '../../components/Modal/Modal';
 import CardCrud from '../../components/CardCrud/CardCrud';
+import ColumnModal from '../../components/ColumnCreateUpdate/ColumnCreateUpdate';
 
 // 3rd party imports
 import TestBackend from 'react-dnd-test-backend';
@@ -213,6 +214,36 @@ it('should display error modal if patchServerCards Fails', async () => {
   await flushPromises();
   board.update();
   expect(board.find(Modal).length).toEqual(1);
+});
+
+it('toggles ColumnModal component when toggleColumnModalHandler is called', () => {
+  const state = {
+    retrieving_data: false,
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        collapsed: false,
+        cards: [
+          { id: 0, task: 'first task' }
+        ]
+      }
+    ]
+  };
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  // initially there is no modal
+  expect(board.find(ColumnModal).length).toBe(0);
+
+  // display modal
+  board.instance().toggleColumnModalHandler(true);
+  board.update();
+  expect(board.find(ColumnModal).length).toBe(1);
+
+  // close modal
+  board.instance().toggleColumnModalHandler(false);
+  board.update();
+  expect(board.find(ColumnModal).length).toBe(0);
 });
 
 it('toggles CardCrud component when toggleCardCrudHandler is called', () => {

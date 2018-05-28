@@ -12,11 +12,17 @@ from django.db.models import Q, F
 
 
 class BoardDetail(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve an existing board along with the associated columns and cards
+    """
     queryset = Board.objects.prefetch_related('columns', 'columns__cards')
     serializer_class = BoardSerializer
 
 
 class CardDetail(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Update or delete an existing card
+    """
     queryset = Card.objects.all()
     serializer_class = ExistingCardSerializer
 

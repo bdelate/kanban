@@ -4,6 +4,7 @@ import React, { Component, Fragment } from 'react';
 // project imports
 import Column from '../Column/Column';
 import CollapsedColumn from '../../components/CollapsedColumn/CollapsedColumn';
+import ColumnModal from '../../components/ColumnCreateUpdate/ColumnCreateUpdate';
 import CardCrud from '../../components/CardCrud/CardCrud';
 import Spinner from '../../components/Spinner/Spinner';
 import Modal from '../../components/Modal/Modal';
@@ -33,6 +34,10 @@ class Board extends Component {
   state = {
     retrieving_data: true,
     modal: false,
+    columnModal: {
+      active: false,
+      columnIndex: -1
+    },
     cardCrud: {
       active: false,
       columnIndex: -1,
@@ -79,7 +84,7 @@ class Board extends Component {
     }
     delete currentState.previousState;
     this.setState({ previousState: currentState });
-  }
+  };
 
   // collapse / uncollapse column
   toggleColumnHandler = columnIndex => {
@@ -260,7 +265,16 @@ class Board extends Component {
       cardIndex: cardIndex
     }
     this.setState({ cardCrud: cardCrud });
-  }
+  };
+
+  // update state.columnModal which allows for displaying / hiding columnModal
+  toggleColumnModalHandler = (active, columnIndex = -1) => {
+    const columnModal = {
+      active: active,
+      columnIndex: columnIndex
+    }
+    this.setState({ columnModal: columnModal });
+  };
 
   // show / hide spinner within a specific card
   toggleCardSpinner = (columnIndex, cardIndex) => {
@@ -284,6 +298,15 @@ class Board extends Component {
         ]
       }
     });
+  };
+
+  // create new column in state and call postServerColumn to create it on the server
+  createColumnHandler = (name) => {
+  };
+
+  // edit existing column name on the server and update local state
+  editColumnName = (columnIndex, name) => {
+
   }
 
   // remove card from state and call deleteServerCard
@@ -304,7 +327,7 @@ class Board extends Component {
     });
 
     this.deleteServerCard(cardId);
-  }
+  };
 
   // edit existing card on the server and update local state
   editCardDetailHandler = (columnIndex, cardIndex, task) => {
@@ -330,7 +353,7 @@ class Board extends Component {
       // call back function executed after setState completes  
       () => this.patchServerCardDetail(columnIndex, cardIndex)
     );
-  }
+  };
 
   // create new card in state and call postServerCard to create it on the server
   createCardHandler = (columnIndex, task) => {
@@ -356,12 +379,12 @@ class Board extends Component {
     });
 
     this.postServerCard(columnIndex, new_card);
-  }
+  };
 
   // display / hide modal with message
   toggleModalHandler = (message = null) => {
     this.setState({ modal: message });
-  }
+  };
 
   render() {
     let output = <Spinner />;
@@ -369,18 +392,17 @@ class Board extends Component {
       const columns = this.state.columns.map((column, index) => {
         if (column.collapsed) {
           return <CollapsedColumn
+            {...column}
             key={column.id}
             columnIndex={index}
-            name={column.name}
             numCards={column.cards.length}
             toggleColumn={this.toggleColumnHandler}
           />
         } else {
           return <Column
+            {...column}
             key={column.id}
             columnIndex={index}
-            name={column.name}
-            cards={column.cards}
             reorderCard={this.reorderCardHandler}
             moveCard={this.moveCardHandler}
             toggleColumn={this.toggleColumnHandler}
@@ -388,6 +410,20 @@ class Board extends Component {
           />
         }
       });
+
+      // display Column modal if this.state.columnModal.active
+      let columnModal = null;
+      if (this.state.columnModal.active) {
+        const column = this.state.columns[
+          this.state.columnModal.columnIndex];
+        columnModal = <ColumnModal
+          {...this.state.columnModal}
+          name={column ? column.name : null}
+          toggleColumnModal={this.toggleColumnModalHandler}
+          createColumn={this.createColumnHandler}
+          editColumnName={this.editColumnName}
+        />
+      }
 
       // display CardCrud modal if this.state.cardCrud.active
       let cardCrud = null;
@@ -407,8 +443,11 @@ class Board extends Component {
 
       output = (
         <BoardContainer>
-          <BoardControls />
+          <BoardControls
+            toggleColumnModal={this.toggleColumnModalHandler}
+          />
           <ColumnsContainer>
+            {columnModal}
             {cardCrud}
             {columns}
           </ColumnsContainer>

@@ -56,20 +56,27 @@ function collect(connect, monitor) {
 
 const column = (props) => {
   const { connectDropTarget } = props;
-  const cards = props.cards.map((card, index) => (
-    <Card
-      key={card.id}
-      cardIndex={index}
-      columnIndex={props.columnIndex}
-      task={card.task}
-      spinner={card.spinner}
-      reorderCard={props.reorderCard}
-      toggleCardCrud={props.toggleCardCrud}
-    />
-  ));
+  let output = null;
+  if (props.spinner) {
+    output = (
+      <ColumnContainer>
+        <i className="fas fa-spinner fa-spin"></i>
+      </ColumnContainer>
+    )
+  } else {
+    const cards = props.cards.map((card, index) => (
+      <Card
+        key={card.id}
+        cardIndex={index}
+        columnIndex={props.columnIndex}
+        task={card.task}
+        spinner={card.spinner}
+        reorderCard={props.reorderCard}
+        toggleCardCrud={props.toggleCardCrud}
+      />
+    ));
 
-  return (
-    <ColumnContainer innerRef={node => connectDropTarget(node)}>
+    output = <ColumnContainer innerRef={node => connectDropTarget(node)}>
       <i
         title="Collapse Column"
         className="fas fa-compress"
@@ -83,7 +90,9 @@ const column = (props) => {
       <h3>{props.name}</h3>
       {cards}
     </ColumnContainer>
-  )
+  }
+
+  return output;
 };
 
 column.propTypes = propTypes;

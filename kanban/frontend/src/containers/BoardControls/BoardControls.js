@@ -14,7 +14,12 @@ const ControlsContainer = styled.div`
 
 const boardControls = (props) => (
   <ControlsContainer>
-    <Button>Create Column</Button>
+    <Button
+      clicked={props.toggleColumnModal}
+      onClickArgs={true}
+    >
+      Create Column
+    </Button>
   </ControlsContainer>
 )
 
