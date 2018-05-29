@@ -11,7 +11,7 @@ const propTypes = {
   columnIndex: PropTypes.number.isRequired,
   cardIndex: PropTypes.number.isRequired,
   task: PropTypes.string,
-  toggleCardCrud: PropTypes.func.isRequired,
+  toggleCardCreateUpdate: PropTypes.func.isRequired,
   editCardDetail: PropTypes.func.isRequired,
   deleteCard: PropTypes.func.isRequired,
   createCard: PropTypes.func.isRequired,
@@ -38,7 +38,7 @@ const Content = styled.div`
   background-color: #209028;
 `;
 
-class CardCrud extends Component {
+class CardCreateUpdate extends Component {
 
   state = {
     task: ''
@@ -110,7 +110,7 @@ class CardCrud extends Component {
           {saveButton}
           {deleteButton}
           <button
-            onClick={() => this.props.toggleCardCrud(false)}
+            onClick={() => this.props.toggleCardCreateUpdate(false)}
           >
             Cancel
           </button>
@@ -120,6 +120,6 @@ class CardCrud extends Component {
   }
 }
 
-CardCrud.propTypes = propTypes;
+CardCreateUpdate.propTypes = propTypes;
 
-export default CardCrud;
+export default CardCreateUpdate;

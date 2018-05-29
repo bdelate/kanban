@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 
 // project imports
-import ColumnModal from './ColumnCreateUpdate';
+import ColumnCreateUpdate from './ColumnCreateUpdate';
 
 // 3rd party imports
 import { configure, shallow } from 'enzyme';
@@ -15,13 +15,13 @@ it('calls createColumn when save is clicked on new column', () => {
     active: true,
     columnIndex: -1,
     name: 'new column',
-    toggleColumnModal: jest.fn(),
+    toggleColumnCreateUpdate: jest.fn(),
     editColumnName: jest.fn(),
     createColumn: jest.fn()
   };
 
-  let columnModal = shallow(<ColumnModal {...props} />);
-  columnModal.find('#idSaveColumnButton').simulate('click');
+  let columnCreateUpdateModal = shallow(<ColumnCreateUpdate {...props} />);
+  columnCreateUpdateModal.find('#idSaveColumnButton').simulate('click');
   expect(props.createColumn).toHaveBeenCalled();
 });
 
@@ -30,12 +30,12 @@ it('calls editColumnName when save is clicked on an existing column', () => {
     active: true,
     columnIndex: 1,
     name: 'existing column',
-    toggleColumnModal: jest.fn(),
+    toggleColumnCreateUpdate: jest.fn(),
     editColumnName: jest.fn(),
     createColumn: jest.fn()
   };
 
-  let columnModal = shallow(<ColumnModal {...props} />);
-  columnModal.find('#idSaveColumnButton').simulate('click');
+  let columnCreateUpdateModal = shallow(<ColumnCreateUpdate {...props} />);
+  columnCreateUpdateModal.find('#idSaveColumnButton').simulate('click');
   expect(props.editColumnName).toHaveBeenCalled();
 });

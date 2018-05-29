@@ -36,7 +36,7 @@ it('contains 0 cards in props and renders name and 0 cards', () => {
       moveCard={jest.fn()}
       patchServerCards={jest.fn()}
       toggleColumn={jest.fn()}
-      toggleCardCrud={jest.fn()}
+      toggleCardCreateUpdate={jest.fn()}
     />
   );
 
@@ -63,7 +63,7 @@ it('contains 2 cards in props and renders 2 cards', () => {
       moveCard={jest.fn()}
       patchServerCards={jest.fn()}
       toggleColumn={jest.fn()}
-      toggleCardCrud={jest.fn()}
+      toggleCardCreateUpdate={jest.fn()}
     />
   );
 
@@ -83,7 +83,7 @@ it('calls moveCard when a different column card is dropped on it', () => {
     moveCard: jest.fn(),
     patchServerCards: jest.fn(),
     toggleColumn: jest.fn(),
-    toggleCardCrud: jest.fn(),
+    toggleCardCreateUpdate: jest.fn(),
   };
   const firstColumn = mount(<ColumnContext {...propsFirstColumn} />);
   const card = firstColumn.find(CardSource).instance();
@@ -99,7 +99,7 @@ it('calls moveCard when a different column card is dropped on it', () => {
     moveCard: jest.fn(),
     patchServerCards: jest.fn(),
     toggleColumn: jest.fn(),
-    toggleCardCrud: jest.fn(),
+    toggleCardCreateUpdate: jest.fn(),
   };
   const secondColumn = mount(<ColumnContext {...propsSecondColumn} />);
   const columnDropable = secondColumn.find(Column).instance();
@@ -127,7 +127,7 @@ it('does not call moveCard when a card is dropped on the same column', () => {
     moveCard: jest.fn(),
     patchServerCards: jest.fn(),
     toggleColumn: jest.fn(),
-    toggleCardCrud: jest.fn()
+    toggleCardCreateUpdate: jest.fn()
   };
   const column = mount(<ColumnContext {...props} />);
   const card = column.find(CardSource).instance();
@@ -156,7 +156,7 @@ it('should call toggleColumn when compress icon is clicked', () => {
     moveCard: jest.fn(),
     patchServerCards: jest.fn(),
     toggleColumn: jest.fn(),
-    toggleCardCrud: jest.fn()
+    toggleCardCreateUpdate: jest.fn()
   };
   const column = mount(<ColumnContext {...props} />);
   column.find('.fa-compress').simulate('click');

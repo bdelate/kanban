@@ -4,10 +4,10 @@ import React, { Component, Fragment } from 'react';
 // project imports
 import Column from '../Column/Column';
 import CollapsedColumn from '../../components/CollapsedColumn/CollapsedColumn';
-import ColumnModal from '../../components/ColumnCreateUpdate/ColumnCreateUpdate';
-import CardCrud from '../../components/CardCrud/CardCrud';
+import ColumnCreateUpdate from '../../components/Modals/ColumnCreateUpdate';
+import CardCreateUpdate from '../../components/Modals/CardCreateUpdate';
 import Spinner from '../../components/Spinner/Spinner';
-import Modal from '../../components/Modal/Modal';
+import Info from '../../components/Modals/Info';
 import BoardControls from '../../containers/BoardControls/BoardControls';
 
 // 3rd party imports
@@ -33,8 +33,8 @@ class Board extends Component {
 
   state = {
     retrieving_data: true,
-    modal: false,
-    columnModal: {
+    infoModal: false,
+    columnCreateUpdateModal: {
       active: false,
       columnIndex: -1
     },
@@ -65,7 +65,7 @@ class Board extends Component {
       .catch(error => {
         const message = 'Error: Unable to load board data';
         this.setState({ retrieveData: false });
-        this.toggleModalHandler(message)
+        this.toggleInfoHandler(message)
       })
   }
 
@@ -114,7 +114,7 @@ class Board extends Component {
         const previousState = this.state.previousState;
         this.setState(previousState);
         const message = 'Error: Unable to update cards on the server';
-        this.toggleModalHandler(message)
+        this.toggleInfoHandler(message)
       })
   };
 
@@ -136,11 +136,11 @@ class Board extends Component {
         const previousState = this.state.previousState;
         this.setState(previousState);
         const message = 'Error: Unable to create column on the server';
-        this.toggleModalHandler(message)
+        this.toggleInfoHandler(message)
       })
   }
 
-  // Update column detail on the server
+  // Update column name on the server
   patchServerColumnName = (columnIndex) => {
     const data = {
       id: this.state.columns[columnIndex].id,
@@ -161,7 +161,7 @@ class Board extends Component {
         const previousState = this.state.previousState;
         this.setState(previousState);
         const message = 'Error: Unable to update column on the server';
-        this.toggleModalHandler(message);
+        this.toggleInfoHandler(message);
       })
   };
 
@@ -179,7 +179,7 @@ class Board extends Component {
         const previousState = this.state.previousState;
         this.setState(previousState);
         const message = 'Error: Unable to update card on the server';
-        this.toggleModalHandler(message);
+        this.toggleInfoHandler(message);
       })
   };
 
@@ -208,7 +208,7 @@ class Board extends Component {
         const previousState = this.state.previousState;
         this.setState(previousState);
         const message = 'Error: Unable to create card on the server';
-        this.toggleModalHandler(message)
+        this.toggleInfoHandler(message)
       })
   };
 
@@ -223,7 +223,7 @@ class Board extends Component {
         const previousState = this.state.previousState;
         this.setState(previousState);
         const message = 'Error: Unable to delete card on the server';
-        this.toggleModalHandler(message);
+        this.toggleInfoHandler(message);
       })
   };
 
@@ -303,7 +303,7 @@ class Board extends Component {
   };
 
   // update state.cardCrud which allows for displaying / hiding cardCrud modal
-  toggleCardCrudHandler = (active, columnIndex = -1, cardIndex = -1) => {
+  toggleCardCreateUpdateHandler = (active, columnIndex = -1, cardIndex = -1) => {
     const cardCrud = {
       active: active,
       columnIndex: columnIndex,
@@ -312,13 +312,13 @@ class Board extends Component {
     this.setState({ cardCrud: cardCrud });
   };
 
-  // update state.columnModal which allows for displaying / hiding columnModal
-  toggleColumnModalHandler = (active, columnIndex = -1) => {
-    const columnModal = {
+  // update state.columnCreateUpdateModal which allows for displaying / hiding columnCreateUpdateModal
+  toggleColumnCreateUpdateHandler = (active, columnIndex = -1) => {
+    const columnCreateUpdateModal = {
       active: active,
       columnIndex: columnIndex
     };
-    this.setState({ columnModal: columnModal });
+    this.setState({ columnCreateUpdateModal: columnCreateUpdateModal });
   };
 
   // show / hide spinner within a specific card
@@ -347,7 +347,7 @@ class Board extends Component {
 
   // create new column in state and call postServerColumn to create it on the server
   createColumnHandler = (name) => {
-    this.toggleColumnModalHandler(false);
+    this.toggleColumnCreateUpdateHandler(false);
     const columns = [...this.state.columns];
     const newColumn = {
       id: -1, // temporary id used for Column keys until id received from db
@@ -364,7 +364,7 @@ class Board extends Component {
 
   // edit existing column name on the server and update local state
   editColumnNameHandler = (columnIndex, name) => {
-    this.toggleColumnModalHandler(false);
+    this.toggleColumnCreateUpdateHandler(false);
     this.setState({
       columns: [
         ...this.state.columns.slice(0, columnIndex),
@@ -383,7 +383,7 @@ class Board extends Component {
 
   // remove card from state and call deleteServerCard
   deleteCardHandler = (columnIndex, cardIndex) => {
-    this.toggleCardCrudHandler(false);
+    this.toggleCardCreateUpdateHandler(false);
 
     const column = { ...this.state.columns[columnIndex] };
     column.cards = [...this.state.columns[columnIndex].cards];
@@ -403,7 +403,7 @@ class Board extends Component {
 
   // edit existing card on the server and update local state
   editCardDetailHandler = (columnIndex, cardIndex, task) => {
-    this.toggleCardCrudHandler(false);
+    this.toggleCardCreateUpdateHandler(false);
 
     const card = { ...this.state.columns[columnIndex].cards[cardIndex] };
     card.task = task;
@@ -429,7 +429,7 @@ class Board extends Component {
 
   // create new card in state and call postServerCard to create it on the server
   createCardHandler = (columnIndex, task) => {
-    this.toggleCardCrudHandler(false);
+    this.toggleCardCreateUpdateHandler(false);
 
     const column = { ...this.state.columns[columnIndex] };
     column.cards = [...this.state.columns[columnIndex].cards];
@@ -454,8 +454,8 @@ class Board extends Component {
   };
 
   // display / hide modal with message
-  toggleModalHandler = (message = null) => {
-    this.setState({ modal: message });
+  toggleInfoHandler = (message = null) => {
+    this.setState({ infoModal: message });
   };
 
   render() {
@@ -478,36 +478,36 @@ class Board extends Component {
             reorderCard={this.reorderCardHandler}
             moveCard={this.moveCardHandler}
             toggleColumn={this.toggleColumnHandler}
-            toggleCardCrud={this.toggleCardCrudHandler}
-            toggleColumnModal={this.toggleColumnModalHandler}
+            toggleCardCreateUpdate={this.toggleCardCreateUpdateHandler}
+            toggleColumnCreateUpdate={this.toggleColumnCreateUpdateHandler}
           />
         }
       });
 
-      // display Column modal if this.state.columnModal.active
-      let columnModal = null;
-      if (this.state.columnModal.active) {
+      // display Column modal if this.state.columnCreateUpdateModal.active
+      let columnCreateUpdateModal = null;
+      if (this.state.columnCreateUpdateModal.active) {
         const column = this.state.columns[
-          this.state.columnModal.columnIndex];
-        columnModal = <ColumnModal
-          {...this.state.columnModal}
+          this.state.columnCreateUpdateModal.columnIndex];
+        columnCreateUpdateModal = <ColumnCreateUpdate
+          {...this.state.columnCreateUpdateModal}
           name={column ? column.name : null}
-          toggleColumnModal={this.toggleColumnModalHandler}
+          toggleColumnCreateUpdate={this.toggleColumnCreateUpdateHandler}
           createColumn={this.createColumnHandler}
           editColumnName={this.editColumnNameHandler}
         />
       }
 
-      // display CardCrud modal if this.state.cardCrud.active
+      // display CardCreateUpdate modal if this.state.cardCrud.active
       let cardCrud = null;
       if (this.state.cardCrud.active) {
         const card = this.state.columns[
           this.state.cardCrud.columnIndex]
           .cards[this.state.cardCrud.cardIndex];
-        cardCrud = <CardCrud
+        cardCrud = <CardCreateUpdate
           {...this.state.cardCrud}
           task={card ? card.task : null}
-          toggleCardCrud={this.toggleCardCrudHandler}
+          toggleCardCreateUpdate={this.toggleCardCreateUpdateHandler}
           editCardDetail={this.editCardDetailHandler}
           deleteCard={this.deleteCardHandler}
           createCard={this.createCardHandler}
@@ -517,10 +517,10 @@ class Board extends Component {
       output = (
         <BoardContainer>
           <BoardControls
-            toggleColumnModal={this.toggleColumnModalHandler}
+            toggleColumnCreateUpdate={this.toggleColumnCreateUpdateHandler}
           />
           <ColumnsContainer>
-            {columnModal}
+            {columnCreateUpdateModal}
             {cardCrud}
             {columns}
           </ColumnsContainer>
@@ -528,16 +528,16 @@ class Board extends Component {
       )
     }
 
-    let modal = null;
-    if (this.state.modal) {
-      modal = <Modal
-        message={this.state.modal}
-        toggleModal={this.toggleModalHandler} />
+    let infoModal = null;
+    if (this.state.infoModal) {
+      infoModal = <Info
+        message={this.state.infoModal}
+        toggleInfo={this.toggleInfoHandler} />
     }
 
     return (
       <Fragment>
-        {modal}
+        {infoModal}
         {output}
       </Fragment>
     )

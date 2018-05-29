@@ -18,7 +18,7 @@ const propTypes = {
   reorderCard: PropTypes.func.isRequired,
   moveCard: PropTypes.func.isRequired,
   toggleColumn: PropTypes.func.isRequired,
-  toggleCardCrud: PropTypes.func.isRequired
+  toggleCardCreateUpdate: PropTypes.func.isRequired
 }
 
 const ColumnContainer = styled.div`
@@ -72,7 +72,7 @@ const column = (props) => {
         task={card.task}
         spinner={card.spinner}
         reorderCard={props.reorderCard}
-        toggleCardCrud={props.toggleCardCrud}
+        toggleCardCreateUpdate={props.toggleCardCreateUpdate}
       />
     ));
 
@@ -85,12 +85,12 @@ const column = (props) => {
       <i
         title="Add Task"
         className="fas fa-plus"
-        onClick={() => props.toggleCardCrud(true, props.columnIndex)}
+        onClick={() => props.toggleCardCreateUpdate(true, props.columnIndex)}
       ></i>
       <i
         title="Change Column Name"
         className="fas fa-edit"
-        onClick={() => props.toggleColumnModal(true, props.columnIndex)}
+        onClick={() => props.toggleColumnCreateUpdate(true, props.columnIndex)}
       ></i>
       <h3>{props.name}</h3>
       {cards}

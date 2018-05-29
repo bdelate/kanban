@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 
 const propTypes = {
   active: PropTypes.bool.isRequired,
-  toggleColumnModal: PropTypes.func.isRequired,
+  toggleColumnCreateUpdate: PropTypes.func.isRequired,
   editColumnName: PropTypes.func.isRequired,
   createColumn: PropTypes.func.isRequired,
 }
@@ -34,7 +34,7 @@ const Content = styled.div`
   background-color: #209028;
 `;
 
-class ColumnModal extends Component {
+class ColumnCreateUpdate extends Component {
 
   state = {
     name: ''
@@ -86,7 +86,7 @@ class ColumnModal extends Component {
           </input>
           {saveButton}
           <button
-            onClick={() => this.props.toggleColumnModal(false)}
+            onClick={() => this.props.toggleColumnCreateUpdate(false)}
           >
             Cancel
           </button>
@@ -96,6 +96,6 @@ class ColumnModal extends Component {
   }
 }
 
-ColumnModal.propTypes = propTypes;
+ColumnCreateUpdate.propTypes = propTypes;
 
-export default ColumnModal;
+export default ColumnCreateUpdate;

@@ -25,12 +25,12 @@ const Content = styled.div`
   background-color: #209028;
 `;
 
-const modal = (props) => (
+const infoModal = (props) => (
   <Container>
     <Content>
       <div>{props.message}</div>
       <button
-        onClick={(t) => props.toggleModal()}
+        onClick={(t) => props.toggleInfo()}
       >
         Close
       </button>
@@ -38,4 +38,4 @@ const modal = (props) => (
   </Container >
 );
 
-export default modal;
+export default infoModal;

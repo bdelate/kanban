@@ -5,9 +5,9 @@ import React, { Component } from 'react';
 import Board, { BoardComponentOnly } from './Board';
 import Column from '../Column/Column';
 import Spinner from '../../components/Spinner/Spinner';
-import Modal from '../../components/Modal/Modal';
-import CardCrud from '../../components/CardCrud/CardCrud';
-import ColumnModal from '../../components/ColumnCreateUpdate/ColumnCreateUpdate';
+import Info from '../../components/Modals/Info';
+import CardCreateUpdate from '../../components/Modals/CardCreateUpdate';
+import ColumnCreateUpdate from '../../components/Modals/ColumnCreateUpdate';
 
 // 3rd party imports
 import TestBackend from 'react-dnd-test-backend';
@@ -213,10 +213,10 @@ it('should display error modal if patchServerCards Fails', async () => {
   board.instance().patchServerCards(0);
   await flushPromises();
   board.update();
-  expect(board.find(Modal).length).toEqual(1);
+  expect(board.find(Info).length).toEqual(1);
 });
 
-it('toggles ColumnModal component when toggleColumnModalHandler is called', () => {
+it('toggles ColumnCreateUpdate component when toggleColumnCreateUpdateHandler is called', () => {
   const state = {
     retrieving_data: false,
     columns: [
@@ -233,20 +233,20 @@ it('toggles ColumnModal component when toggleColumnModalHandler is called', () =
   const board = shallow(<BoardComponentOnly />);
   board.setState(state);
   // initially there is no modal
-  expect(board.find(ColumnModal).length).toBe(0);
+  expect(board.find(ColumnCreateUpdate).length).toBe(0);
 
   // display modal
-  board.instance().toggleColumnModalHandler(true);
+  board.instance().toggleColumnCreateUpdateHandler(true);
   board.update();
-  expect(board.find(ColumnModal).length).toBe(1);
+  expect(board.find(ColumnCreateUpdate).length).toBe(1);
 
   // close modal
-  board.instance().toggleColumnModalHandler(false);
+  board.instance().toggleColumnCreateUpdateHandler(false);
   board.update();
-  expect(board.find(ColumnModal).length).toBe(0);
+  expect(board.find(ColumnCreateUpdate).length).toBe(0);
 });
 
-it('toggles CardCrud component when toggleCardCrudHandler is called', () => {
+it('toggles CardCreateUpdate component when toggleCardCreateUpdateHandler is called', () => {
   const state = {
     retrieving_data: false,
     columns: [
@@ -263,17 +263,17 @@ it('toggles CardCrud component when toggleCardCrudHandler is called', () => {
   const board = shallow(<BoardComponentOnly />);
   board.setState(state);
   // initially there is no modal
-  expect(board.find(CardCrud).length).toBe(0);
+  expect(board.find(CardCreateUpdate).length).toBe(0);
 
   // display modal
-  board.instance().toggleCardCrudHandler(true, 0);
+  board.instance().toggleCardCreateUpdateHandler(true, 0);
   board.update();
-  expect(board.find(CardCrud).length).toBe(1);
+  expect(board.find(CardCreateUpdate).length).toBe(1);
 
   // close modal
-  board.instance().toggleCardCrudHandler(false);
+  board.instance().toggleCardCreateUpdateHandler(false);
   board.update();
-  expect(board.find(CardCrud).length).toBe(0);
+  expect(board.find(CardCreateUpdate).length).toBe(0);
 });
 
 it('creates new column when createColumnHandler is called', () => {
@@ -333,7 +333,7 @@ it('displays modal when editColumnNameHandler call to server fails', async () =>
   board.instance().editColumnNameHandler(0, 'new column name');
   await flushPromises();
   board.update();
-  expect(board.find(Modal).length).toEqual(1);
+  expect(board.find(Info).length).toEqual(1);
 });
 
 it('deletes card from state when deleteCardHandler is called with valid card', () => {
@@ -394,7 +394,7 @@ it('displays modal when editCardDetailHandler call to server fails', async () =>
   board.instance().editCardDetailHandler(0, 0, 'new task text');
   await flushPromises();
   board.update();
-  expect(board.find(Modal).length).toEqual(1);
+  expect(board.find(Info).length).toEqual(1);
 });
 
 it('create new card when createCardHandler is called with valid card', () => {
