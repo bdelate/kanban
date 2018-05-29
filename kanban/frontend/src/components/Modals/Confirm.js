@@ -7,7 +7,8 @@ import PropTypes from 'prop-types';
 
 const propTypes = {
   message: PropTypes.string.isRequired,
-  toggleInfo: PropTypes.func.isRequired
+  confirmFunction: PropTypes.func.isRequired,
+  toggleConfirm: PropTypes.func.isRequired
 };
 
 const Container = styled.div`
@@ -31,17 +32,23 @@ const Content = styled.div`
   background-color: #209028;
 `;
 
-const infoModal = (props) => (
+const confirmModal = (props) => (
   <Container>
     <Content>
       <div>{props.message}</div>
-      <button onClick={() => props.toggleInfo()}>
-        Close
+      <button onClick={() => props.toggleConfirm()}>
+        Cancel
+      </button>
+      <button
+        id="idConfirmFunction"
+        onClick={props.confirmFunction}
+      >
+        Confirm
       </button>
     </Content>
   </Container >
 );
 
-infoModal.propTypes = propTypes;
+confirmModal.propTypes = propTypes;
 
-export default infoModal;
+export default confirmModal;

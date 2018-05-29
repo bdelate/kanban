@@ -18,7 +18,10 @@ const propTypes = {
   reorderCard: PropTypes.func.isRequired,
   moveCard: PropTypes.func.isRequired,
   toggleColumn: PropTypes.func.isRequired,
-  toggleCardCreateUpdate: PropTypes.func.isRequired
+  toggleColumnCreateUpdate: PropTypes.func.isRequired,
+  toggleCardCreateUpdate: PropTypes.func.isRequired,
+  toggleConfirm: PropTypes.func.isRequired,
+  deleteColumn: PropTypes.func.isRequired
 }
 
 const ColumnContainer = styled.div`
@@ -91,6 +94,15 @@ const column = (props) => {
         title="Change Column Name"
         className="fas fa-edit"
         onClick={() => props.toggleColumnCreateUpdate(true, props.columnIndex)}
+      ></i>
+      <i
+        title="Delete Column"
+        className="fas fa-trash-alt"
+        onClick={() => props.toggleConfirm(
+          'Column along within all of its cards will be permanently deleted',
+          props.deleteColumn,
+          props.columnIndex
+        )}
       ></i>
       <h3>{props.name}</h3>
       {cards}

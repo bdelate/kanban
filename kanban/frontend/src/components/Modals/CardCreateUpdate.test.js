@@ -23,13 +23,13 @@ it('displays delete button only if editing an existing card', () => {
   };
 
   // delete button present
-  let cardCrud = shallow(<CardCreateUpdate {...props} />);
-  expect(cardCrud.find('#idDeleteCardButton').length).toBe(1);
+  let cardCreateUpdate = shallow(<CardCreateUpdate {...props} />);
+  expect(cardCreateUpdate.find('#idDeleteCardButton').length).toBe(1);
 
   // delete button not present
   props.cardIndex = -1;
-  cardCrud = shallow(<CardCreateUpdate {...props} />);
-  expect(cardCrud.find('#idDeleteCardButton').length).toBe(0);
+  cardCreateUpdate = shallow(<CardCreateUpdate {...props} />);
+  expect(cardCreateUpdate.find('#idDeleteCardButton').length).toBe(0);
 });
 
 it('calls createCard when save is clicked on new card', () => {
@@ -44,8 +44,8 @@ it('calls createCard when save is clicked on new card', () => {
     createCard: jest.fn()
   };
 
-  let cardCrud = shallow(<CardCreateUpdate {...props} />);
-  cardCrud.find('#idSaveCardButton').simulate('click');
+  let cardCreateUpdate = shallow(<CardCreateUpdate {...props} />);
+  cardCreateUpdate.find('#idSaveCardButton').simulate('click');
   expect(props.createCard).toHaveBeenCalled();
 });
 
@@ -61,7 +61,7 @@ it('calls editCardDetail when save is clicked on an existing card', () => {
     createCard: jest.fn()
   };
 
-  let cardCrud = shallow(<CardCreateUpdate {...props} />);
-  cardCrud.find('#idSaveCardButton').simulate('click');
+  let cardCreateUpdate = shallow(<CardCreateUpdate {...props} />);
+  cardCreateUpdate.find('#idSaveCardButton').simulate('click');
   expect(props.editCardDetail).toHaveBeenCalled();
 });

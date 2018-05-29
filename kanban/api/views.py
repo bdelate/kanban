@@ -21,7 +21,7 @@ class BoardDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class ColumnDetail(generics.RetrieveUpdateDestroyAPIView):
     """
-    Update or delete an existing card
+    Update or delete an existing column
     """
     queryset = Column.objects.all()
     serializer_class = ColumnSerializer

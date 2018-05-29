@@ -6,6 +6,7 @@ import Board, { BoardComponentOnly } from './Board';
 import Column from '../Column/Column';
 import Spinner from '../../components/Spinner/Spinner';
 import Info from '../../components/Modals/Info';
+import Confirm from '../../components/Modals/Confirm';
 import CardCreateUpdate from '../../components/Modals/CardCreateUpdate';
 import ColumnCreateUpdate from '../../components/Modals/ColumnCreateUpdate';
 
@@ -336,7 +337,27 @@ it('displays modal when editColumnNameHandler call to server fails', async () =>
   expect(board.find(Info).length).toEqual(1);
 });
 
-it('deletes card from state when deleteCardHandler is called with valid card', () => {
+it('deletes column from state when deleteColumnHandler is called', () => {
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        collapsed: false,
+        cards: [
+          { id: 0, task: 'first task' }
+        ]
+      }
+    ]
+  };
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  board.instance().deleteColumnHandler(0);
+  board.update();
+  expect(board.state().columns.length).toBe(0);
+});
+
+it('deletes card from state when deleteCardHandler is called', () => {
   const state = {
     columns: [
       {
@@ -647,6 +668,32 @@ it('should merge previous state if postServerCard fails', async () => {
   expect(board.state().value).toEqual('fake previous state value');
 });
 
+it('should merge previous state if deleteServerColumn fails', async () => {
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        collapsed: false,
+        cards: []
+      }
+    ],
+    previousState: {
+      value: 'fake previous state value'
+    }
+  };
+  moxios.stubRequest('/api/columns/100/', {
+    status: 404,
+    response: {}
+  })
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  expect(board.state().value).toBeUndefined();
+  board.instance().deleteServerColumn(100);
+  await flushPromises();
+  expect(board.state().value).toEqual('fake previous state value');
+});
+
 it('should merge previous state if deleteServerCard fails', async () => {
   const state = {
     columns: [
@@ -671,4 +718,20 @@ it('should merge previous state if deleteServerCard fails', async () => {
   board.instance().deleteServerCard(100);
   await flushPromises();
   expect(board.state().value).toEqual('fake previous state value');
+});
+
+it('hides confirm modal when toggleConfirmHandler called with no args', async () => {
+  const board = shallow(<BoardComponentOnly />);
+  board.instance().toggleConfirmHandler();
+  board.update();
+  expect(board.find(Confirm).length).toEqual(0);
+});
+
+it('displays confirm modal when toggleConfirmHandler called with args', async () => {
+  const board = shallow(<BoardComponentOnly />);
+  board.instance().toggleConfirmHandler('test message', jest.fn(), 0);
+  board.update();
+  expect(board.find(Confirm).length).toEqual(1);
+  expect(board.state().confirmModal.message).toEqual('test message');
+  expect(board.state().confirmModal.confirmFunction).toEqual(expect.any(Function));
 });

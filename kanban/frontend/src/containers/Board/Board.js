@@ -8,6 +8,7 @@ import ColumnCreateUpdate from '../../components/Modals/ColumnCreateUpdate';
 import CardCreateUpdate from '../../components/Modals/CardCreateUpdate';
 import Spinner from '../../components/Spinner/Spinner';
 import Info from '../../components/Modals/Info';
+import Confirm from '../../components/Modals/Confirm';
 import BoardControls from '../../containers/BoardControls/BoardControls';
 
 // 3rd party imports
@@ -34,11 +35,15 @@ class Board extends Component {
   state = {
     retrieving_data: true,
     infoModal: false,
-    columnCreateUpdateModal: {
+    confirmModal: {
+      message: null,
+      confirmFunction: null
+    },
+    columnCreateUpdate: {
       active: false,
       columnIndex: -1
     },
-    cardCrud: {
+    cardCreateUpdate: {
       active: false,
       columnIndex: -1,
       cardIndex: -1
@@ -212,6 +217,21 @@ class Board extends Component {
       })
   };
 
+  // delete column on the server
+  deleteServerColumn = (columnId) => {
+    axios.delete(`/api/columns/${columnId}/`)
+      .then(res => {
+        this.savePreviousState();
+      })
+      // restore previous valid state and display error message
+      .catch(error => {
+        const previousState = this.state.previousState;
+        this.setState(previousState);
+        const message = 'Error: Unable to delete column on the server';
+        this.toggleInfoHandler(message);
+      })
+  };
+
   // delete card on the server
   deleteServerCard = (cardId) => {
     axios.delete(`/api/cards/${cardId}/`)
@@ -302,23 +322,23 @@ class Board extends Component {
     this.patchServerCards(cards, spinnerCard);
   };
 
-  // update state.cardCrud which allows for displaying / hiding cardCrud modal
+  // update state.cardCreateUpdate which allows for displaying / hiding cardCreateUpdate modal
   toggleCardCreateUpdateHandler = (active, columnIndex = -1, cardIndex = -1) => {
-    const cardCrud = {
+    const cardCreateUpdate = {
       active: active,
       columnIndex: columnIndex,
       cardIndex: cardIndex
     }
-    this.setState({ cardCrud: cardCrud });
+    this.setState({ cardCreateUpdate: cardCreateUpdate });
   };
 
-  // update state.columnCreateUpdateModal which allows for displaying / hiding columnCreateUpdateModal
+  // update state.columnCreateUpdate which allows for displaying / hiding columnCreateUpdate
   toggleColumnCreateUpdateHandler = (active, columnIndex = -1) => {
-    const columnCreateUpdateModal = {
+    const columnCreateUpdate = {
       active: active,
       columnIndex: columnIndex
     };
-    this.setState({ columnCreateUpdateModal: columnCreateUpdateModal });
+    this.setState({ columnCreateUpdate: columnCreateUpdate });
   };
 
   // show / hide spinner within a specific card
@@ -380,6 +400,21 @@ class Board extends Component {
       () => this.patchServerColumnName(columnIndex)
     )
   }
+
+  // remove column from state and call deleteServerColumn
+  deleteColumnHandler = (columnIndex) => {
+    this.toggleConfirmHandler();
+
+    const columnId = this.state.columns[columnIndex].id;
+    this.setState({
+      columns: [
+        ...this.state.columns.slice(0, columnIndex),
+        ...this.state.columns.slice(columnIndex + 1)
+      ]
+    });
+
+    this.deleteServerColumn(columnId);
+  };
 
   // remove card from state and call deleteServerCard
   deleteCardHandler = (columnIndex, cardIndex) => {
@@ -453,9 +488,27 @@ class Board extends Component {
     this.postServerCard(columnIndex, new_card);
   };
 
-  // display / hide modal with message
+  // display / hide info modal with message
   toggleInfoHandler = (message = null) => {
     this.setState({ infoModal: message });
+  };
+
+  // display / hide confirm modal. Specify function and params to be executed
+  // if confirm is clicked
+  toggleConfirmHandler = (message, confirmFunction, params) => {
+    let confirmModal;
+    if (message) {
+      confirmModal = {
+        message: message,
+        confirmFunction: () => confirmFunction(params)
+      };
+    } else {
+      confirmModal = {
+        message: null,
+        confirmFunction: null
+      };
+    }
+    this.setState({ confirmModal: confirmModal });
   };
 
   render() {
@@ -480,17 +533,19 @@ class Board extends Component {
             toggleColumn={this.toggleColumnHandler}
             toggleCardCreateUpdate={this.toggleCardCreateUpdateHandler}
             toggleColumnCreateUpdate={this.toggleColumnCreateUpdateHandler}
+            deleteColumn={this.deleteColumnHandler}
+            toggleConfirm={this.toggleConfirmHandler}
           />
         }
       });
 
-      // display Column modal if this.state.columnCreateUpdateModal.active
-      let columnCreateUpdateModal = null;
-      if (this.state.columnCreateUpdateModal.active) {
+      // display Column modal if this.state.columnCreateUpdate.active
+      let columnCreateUpdate = null;
+      if (this.state.columnCreateUpdate.active) {
         const column = this.state.columns[
-          this.state.columnCreateUpdateModal.columnIndex];
-        columnCreateUpdateModal = <ColumnCreateUpdate
-          {...this.state.columnCreateUpdateModal}
+          this.state.columnCreateUpdate.columnIndex];
+        columnCreateUpdate = <ColumnCreateUpdate
+          {...this.state.columnCreateUpdate}
           name={column ? column.name : null}
           toggleColumnCreateUpdate={this.toggleColumnCreateUpdateHandler}
           createColumn={this.createColumnHandler}
@@ -498,14 +553,14 @@ class Board extends Component {
         />
       }
 
-      // display CardCreateUpdate modal if this.state.cardCrud.active
-      let cardCrud = null;
-      if (this.state.cardCrud.active) {
+      // display CardCreateUpdate modal if this.state.cardCreateUpdate.active
+      let cardCreateUpdate = null;
+      if (this.state.cardCreateUpdate.active) {
         const card = this.state.columns[
-          this.state.cardCrud.columnIndex]
-          .cards[this.state.cardCrud.cardIndex];
-        cardCrud = <CardCreateUpdate
-          {...this.state.cardCrud}
+          this.state.cardCreateUpdate.columnIndex]
+          .cards[this.state.cardCreateUpdate.cardIndex];
+        cardCreateUpdate = <CardCreateUpdate
+          {...this.state.cardCreateUpdate}
           task={card ? card.task : null}
           toggleCardCreateUpdate={this.toggleCardCreateUpdateHandler}
           editCardDetail={this.editCardDetailHandler}
@@ -520,8 +575,8 @@ class Board extends Component {
             toggleColumnCreateUpdate={this.toggleColumnCreateUpdateHandler}
           />
           <ColumnsContainer>
-            {columnCreateUpdateModal}
-            {cardCrud}
+            {columnCreateUpdate}
+            {cardCreateUpdate}
             {columns}
           </ColumnsContainer>
         </BoardContainer>
@@ -535,9 +590,18 @@ class Board extends Component {
         toggleInfo={this.toggleInfoHandler} />
     }
 
+    let confirmModal = null;
+    if (this.state.confirmModal.message) {
+      confirmModal = <Confirm
+        message={this.state.confirmModal.message}
+        confirmFunction={this.state.confirmModal.confirmFunction}
+        toggleConfirm={this.toggleConfirmHandler} />
+    }
+
     return (
       <Fragment>
         {infoModal}
+        {confirmModal}
         {output}
       </Fragment>
     )
