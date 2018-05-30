@@ -7,7 +7,7 @@ class BoardAdmin(admin.ModelAdmin):
 
 
 class ColumnAdmin(admin.ModelAdmin):
-    list_display = ('name', 'board', 'id')
+    list_display = ('name', 'board', 'id', 'position_id')
 
 
 class CardAdmin(admin.ModelAdmin):

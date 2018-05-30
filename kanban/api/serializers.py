@@ -26,13 +26,38 @@ class ExistingCardSerializer(serializers.ModelSerializer):
         list_serializer_class = CardListSerializer
 
 
-class NewCardSerializer(serializers.ModelSerializer):
+class CardSerializer(serializers.ModelSerializer):
 
     column_id = serializers.IntegerField()
 
     class Meta:
         model = Card
         fields = ('task', 'position_id', 'column_id')
+
+
+class ColumnListSerializer(serializers.ListSerializer):
+
+    def update(self, instance, validated_data):
+        column_mapping = {column.id: column for column in instance}
+        data_mapping = {item['id']: item for item in validated_data}
+        columns = []
+        for column_id, data in data_mapping.items():
+            column = column_mapping[column_id]
+            self.child.update(column, data)
+            columns.append(column)
+        return columns
+
+
+class ExistingColumnSerializer(serializers.ModelSerializer):
+
+    id = serializers.IntegerField()
+    cards = ExistingCardSerializer(many=True, read_only=True)
+    board_id = serializers.IntegerField()
+
+    class Meta:
+        model = Column
+        fields = ('name', 'id', 'position_id', 'board_id', 'cards')
+        list_serializer_class = ColumnListSerializer
 
 
 class ColumnSerializer(serializers.ModelSerializer):

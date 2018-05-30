@@ -105,6 +105,21 @@ class Board extends Component {
     });
   };
 
+  // update all specified columns
+  patchServerColumns = (columns) => {
+    axios.patch(`/api/columns/`, { columns })
+      .then(res => {
+        this.savePreviousState();
+      })
+      //restore previous valid state and display error message
+      .catch(error => {
+        const previousState = this.state.previousState;
+        this.setState(previousState);
+        const message = 'Error: Unable to update columns on the server';
+        this.toggleInfoHandler(message)
+      })
+  };
+
   // update all specified cards.
   // optionally display a card spinner if a spinnerCard is provided
   patchServerCards = (cards, spinnerCard) => {
@@ -217,11 +232,15 @@ class Board extends Component {
       })
   };
 
-  // delete column on the server
-  deleteServerColumn = (columnId) => {
+  // delete column on the server. If successful and 'columns' arg is provided
+  // update 'columns' on the server since they now have new position_ids
+  deleteServerColumn = (columnId, columns) => {
     axios.delete(`/api/columns/${columnId}/`)
       .then(res => {
         this.savePreviousState();
+      })
+      .then(res => {
+        if (columns) this.patchServerColumns(columns);
       })
       // restore previous valid state and display error message
       .catch(error => {
@@ -232,8 +251,8 @@ class Board extends Component {
       })
   };
 
-  // delete card on the server, if successful update remaining cards on server
-  // if 'cards' arg is provided since they now have new position_ids
+  // delete card on the server. If successful and 'cards' arg is provided
+  // update 'cards' on the server since they now have new position_ids
   deleteServerCard = (cardId, cards) => {
     axios.delete(`/api/cards/${cardId}/`)
       .then(res => {
@@ -406,22 +425,42 @@ class Board extends Component {
     )
   }
 
-  // remove column from state and call deleteServerColumn
+  // remove column from state, update remaining column position ids 
+  // if needed and call deleteServerColumn
   deleteColumnHandler = (columnIndex) => {
     this.toggleConfirmHandler();
 
+    // was the removed column the last one in the board
+    const was_last_column = true
+      ? this.state.columns[columnIndex].position_id === this.state.columns.length - 1
+      : false;
+
     const columnId = this.state.columns[columnIndex].id;
-    this.setState({
-      columns: [
+
+    // if removed column was last column, simply remove it
+    // else update remaining column position ids
+    if (was_last_column) {
+      this.setState({
+        columns: [
+          ...this.state.columns.slice(0, columnIndex)
+        ]
+      });
+      this.deleteServerColumn(columnId);
+    } else {
+      const columns = [
         ...this.state.columns.slice(0, columnIndex),
         ...this.state.columns.slice(columnIndex + 1)
-      ]
-    });
-
-    this.deleteServerColumn(columnId);
+      ];
+      for (let key in columns) {
+        columns[key]['position_id'] = parseInt(key, 10);
+      }
+      this.setState({ columns: columns });
+      this.deleteServerColumn(columnId, columns);
+    }
   };
 
-  // remove card from state and call deleteServerCard
+  // remove card from state, update remaining card posiion ids if needed
+  // and call deleteServerCard
   deleteCardHandler = (columnIndex, cardIndex) => {
     this.toggleCardCreateUpdateHandler(false);
 
@@ -434,7 +473,7 @@ class Board extends Component {
 
     // was the removed card the last one in the column
     const was_last_card = true
-      ? column.cards[cardIndex].position_id == column.cards.length - 1
+      ? column.cards[cardIndex].position_id === column.cards.length - 1
       : false;
 
     // get cardId then remove card

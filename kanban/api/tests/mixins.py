@@ -24,3 +24,7 @@ class TestDataMixin:
         Card.objects.create(column=c2, task="column 2 card 1", position_id=0)
         Card.objects.create(column=c2, task="column 2 card 2", position_id=1)
         Card.objects.create(column=c2, task="column 2 card 3", position_id=2)
+
+        c3 = Column.objects.create(board=board,
+                                   name='third column',
+                                   position_id=2)
