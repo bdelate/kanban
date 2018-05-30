@@ -13,7 +13,6 @@ const propTypes = {
   task: PropTypes.string,
   toggleCardCreateUpdate: PropTypes.func.isRequired,
   editCardDetail: PropTypes.func.isRequired,
-  deleteCard: PropTypes.func.isRequired,
   createCard: PropTypes.func.isRequired,
 }
 
@@ -56,7 +55,6 @@ class CardCreateUpdate extends Component {
 
   render() {
     let saveButton;
-    let deleteButton;
     if (this.props.cardIndex === -1) {
       saveButton = <button
         id="idSaveCardButton"
@@ -68,7 +66,6 @@ class CardCreateUpdate extends Component {
       >
         Save
       </button>
-      deleteButton = null;
     } else {
       saveButton = <button
         id="idSaveCardButton"
@@ -81,17 +78,6 @@ class CardCreateUpdate extends Component {
       >
         Save
       </button>
-      deleteButton = (
-        <button
-          id="idDeleteCardButton"
-          onClick={() => this.props.deleteCard(
-            this.props.columnIndex,
-            this.props.cardIndex
-          )}
-        >
-          Delete
-        </button>
-      )
     }
 
     return (
@@ -108,7 +94,6 @@ class CardCreateUpdate extends Component {
             onChange={(e) => this.setTaskHandler(e.target.value)}>
           </textarea>
           {saveButton}
-          {deleteButton}
           <button
             onClick={() => this.props.toggleCardCreateUpdate(false)}
           >

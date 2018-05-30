@@ -530,6 +530,7 @@ class Board extends Component {
             columnIndex={index}
             reorderCard={this.reorderCardHandler}
             moveCard={this.moveCardHandler}
+            deleteCard={this.deleteCardHandler}
             toggleColumn={this.toggleColumnHandler}
             toggleCardCreateUpdate={this.toggleCardCreateUpdateHandler}
             toggleColumnCreateUpdate={this.toggleColumnCreateUpdateHandler}

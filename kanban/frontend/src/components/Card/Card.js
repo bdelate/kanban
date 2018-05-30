@@ -134,6 +134,14 @@ const card = (props) => {
                   props.cardIndex
                 )}
               ></i>
+              <i
+                title="Delete Card"
+                className="fas fa-trash-alt"
+                onClick={() => props.deleteCard(
+                  props.columnIndex,
+                  props.cardIndex
+                )}
+              ></i>
             </CardContainer>
           </div>
         )

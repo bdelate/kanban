@@ -198,7 +198,7 @@ it('should call toggleConfirm with args when delete column icon clicked', () => 
     deleteColumn: jest.fn()
   };
   const column = mount(<ColumnContext {...props} />);
-  column.find('.fa-trash-alt').simulate('click');
+  column.find('.deleteColumn').simulate('click');
   expect(props.toggleConfirm).toHaveBeenCalledWith(
     'Column along within all of its cards will be permanently deleted',
     props.deleteColumn,

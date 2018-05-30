@@ -74,6 +74,7 @@ const column = (props) => {
         columnIndex={props.columnIndex}
         task={card.task}
         spinner={card.spinner}
+        deleteCard={props.deleteCard}
         reorderCard={props.reorderCard}
         toggleCardCreateUpdate={props.toggleCardCreateUpdate}
       />
@@ -97,7 +98,7 @@ const column = (props) => {
       ></i>
       <i
         title="Delete Column"
-        className="fas fa-trash-alt"
+        className="deleteColumn fas fa-trash-alt"
         onClick={() => props.toggleConfirm(
           'Column along within all of its cards will be permanently deleted',
           props.deleteColumn,
