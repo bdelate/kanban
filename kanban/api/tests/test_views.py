@@ -18,10 +18,11 @@ class BoardDetailTest(APITestCase, TestDataMixin):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_retrieve_board_data(self):
+        num_columns = Column.objects.count()
         url = reverse('api:board_detail', args=[1])
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['columns']), 2)
+        self.assertEqual(len(response.data['columns']), num_columns)
 
         # test correct column content and order
         self.assertEqual(len(response.data['columns'][0]['cards']), 3)
@@ -88,7 +89,7 @@ class ColumnDetailTest(APITestCase, TestDataMixin):
         self.assertEqual(columns, Column.objects.count())
 
 
-class ColumnCreateUpdateTest(APITestCase, TestDataMixin):
+class ColumnsCreateUpdateTest(APITestCase, TestDataMixin):
 
     @classmethod
     def setUpTestData(cls):
@@ -107,7 +108,7 @@ class ColumnCreateUpdateTest(APITestCase, TestDataMixin):
             'cards': []
         }
 
-        url = reverse('api:column_create_update')
+        url = reverse('api:columns_create_update')
         response = self.client.post(url, data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -117,9 +118,45 @@ class ColumnCreateUpdateTest(APITestCase, TestDataMixin):
 
     def test_create_column_fails(self):
         data = {}
-        url = reverse('api:column_create_update')
+        url = reverse('api:columns_create_update')
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_delete_column_then_update_position_ids(self):
+        # delete first column
+        num_columns = Column.objects.count()
+        first_column = Column.objects.first()
+        url = reverse('api:column_detail', args=[first_column.id])
+        response = self.client.delete(url, format='json')
+        self.assertEqual(num_columns - 1, Column.objects.count())
+
+        # 2 columns are left, update their position ids
+        first_column = Column.objects.first()
+        last_column = Column.objects.last()
+
+        columns = [{
+            'id': first_column.id,
+            'cards': [],
+            'board_id': first_column.board_id,
+            'name': first_column.name,
+            'position_id': 0
+        }, {
+            'id': last_column.id,
+            'cards': [],
+            'board_id': last_column.board_id,
+            'name': last_column.name,
+            'position_id': 1
+        }]
+        data = {'columns': columns}
+
+        url = reverse('api:columns_create_update')
+        response = self.client.patch(url, data, format='json')
+
+        first_column.refresh_from_db()
+        last_column.refresh_from_db()
+
+        self.assertEqual(first_column.position_id, 0)
+        self.assertEqual(last_column.position_id, 1)
 
 
 class CardDetailTest(APITestCase, TestDataMixin):
@@ -163,7 +200,7 @@ class CardDetailTest(APITestCase, TestDataMixin):
         self.assertEqual(cards, Card.objects.count())
 
 
-class CardCreateUpdateTest(APITestCase, TestDataMixin):
+class CardsCreateUpdateTest(APITestCase, TestDataMixin):
 
     @classmethod
     def setUpTestData(cls):

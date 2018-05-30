@@ -344,6 +344,7 @@ it('deletes column from state when deleteColumnHandler is called', () => {
         id: 0,
         name: 'first column',
         collapsed: false,
+        position_id: 0,
         cards: [
           { id: 0, task: 'first task' }
         ]
@@ -355,6 +356,52 @@ it('deletes column from state when deleteColumnHandler is called', () => {
   board.instance().deleteColumnHandler(0);
   board.update();
   expect(board.state().columns.length).toBe(0);
+});
+
+it('updates column positions ids when non last column is deleted', () => {
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        position_id: 0,
+        cards: []
+      },
+      {
+        id: 1,
+        name: 'second column',
+        position_id: 1,
+        cards: []
+      }
+    ]
+  };
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  board.instance().deleteColumnHandler(0);
+  board.update();
+  expect(board.state().columns[0].name).toEqual('second column');
+  expect(board.state().columns[0].position_id).toBe(0);
+});
+
+it('updates card positions ids when non last card is deleted', () => {
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        cards: [
+          { id: 0, position_id: 0, task: 'first task' },
+          { id: 1, position_id: 1, task: 'second task' }
+        ]
+      }
+    ]
+  };
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  board.instance().deleteCardHandler(0, 0);
+  board.update();
+  expect(board.state().columns[0].cards[0].task).toEqual('second task');
+  expect(board.state().columns[0].cards[0].position_id).toBe(0);
 });
 
 it('deletes card from state when deleteCardHandler is called', () => {
@@ -578,6 +625,40 @@ it('should merge previous state if patchServerColumnName fails', async () => {
   board.setState(state);
   expect(board.state().value).toBeUndefined();
   board.instance().patchServerColumnName(0);
+  await flushPromises();
+  expect(board.state().value).toEqual('fake previous state value');
+});
+
+it('should merge previous state if patchServerColumns fails', async () => {
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        collapsed: false,
+        cards: []
+      }
+    ],
+    previousState: {
+      value: 'fake previous state value'
+    }
+  };
+  const column_update = [
+    {
+      id: 0,
+      name: 'first column',
+      collapsed: false,
+      cards: []
+    }
+  ];
+  moxios.stubRequest('/api/columns/', {
+    status: 404,
+    response: {}
+  })
+  const board = shallow(<BoardComponentOnly />);
+  board.setState(state);
+  expect(board.state().value).toBeUndefined();
+  board.instance().patchServerColumns(column_update);
   await flushPromises();
   expect(board.state().value).toEqual('fake previous state value');
 });
