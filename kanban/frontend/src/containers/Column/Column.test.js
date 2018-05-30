@@ -36,7 +36,10 @@ it('contains 0 cards in props and renders name and 0 cards', () => {
       moveCard={jest.fn()}
       patchServerCards={jest.fn()}
       toggleColumn={jest.fn()}
-      toggleCardCrud={jest.fn()}
+      toggleColumnCreateUpdate={jest.fn()}
+      toggleCardCreateUpdate={jest.fn()}
+      toggleConfirm={jest.fn()}
+      deleteColumn={jest.fn()}
     />
   );
 
@@ -63,7 +66,10 @@ it('contains 2 cards in props and renders 2 cards', () => {
       moveCard={jest.fn()}
       patchServerCards={jest.fn()}
       toggleColumn={jest.fn()}
-      toggleCardCrud={jest.fn()}
+      toggleColumnCreateUpdate={jest.fn()}
+      toggleCardCreateUpdate={jest.fn()}
+      toggleConfirm={jest.fn()}
+      deleteColumn={jest.fn()}
     />
   );
 
@@ -83,7 +89,10 @@ it('calls moveCard when a different column card is dropped on it', () => {
     moveCard: jest.fn(),
     patchServerCards: jest.fn(),
     toggleColumn: jest.fn(),
-    toggleCardCrud: jest.fn(),
+    toggleColumnCreateUpdate: jest.fn(),
+    toggleCardCreateUpdate: jest.fn(),
+    toggleConfirm: jest.fn(),
+    deleteColumn: jest.fn()
   };
   const firstColumn = mount(<ColumnContext {...propsFirstColumn} />);
   const card = firstColumn.find(CardSource).instance();
@@ -99,7 +108,10 @@ it('calls moveCard when a different column card is dropped on it', () => {
     moveCard: jest.fn(),
     patchServerCards: jest.fn(),
     toggleColumn: jest.fn(),
-    toggleCardCrud: jest.fn(),
+    toggleColumnCreateUpdate: jest.fn(),
+    toggleCardCreateUpdate: jest.fn(),
+    toggleConfirm: jest.fn(),
+    deleteColumn: jest.fn()
   };
   const secondColumn = mount(<ColumnContext {...propsSecondColumn} />);
   const columnDropable = secondColumn.find(Column).instance();
@@ -127,7 +139,10 @@ it('does not call moveCard when a card is dropped on the same column', () => {
     moveCard: jest.fn(),
     patchServerCards: jest.fn(),
     toggleColumn: jest.fn(),
-    toggleCardCrud: jest.fn()
+    toggleColumnCreateUpdate: jest.fn(),
+    toggleCardCreateUpdate: jest.fn(),
+    toggleConfirm: jest.fn(),
+    deleteColumn: jest.fn()
   };
   const column = mount(<ColumnContext {...props} />);
   const card = column.find(CardSource).instance();
@@ -156,9 +171,37 @@ it('should call toggleColumn when compress icon is clicked', () => {
     moveCard: jest.fn(),
     patchServerCards: jest.fn(),
     toggleColumn: jest.fn(),
-    toggleCardCrud: jest.fn()
+    toggleColumnCreateUpdate: jest.fn(),
+    toggleCardCreateUpdate: jest.fn(),
+    toggleConfirm: jest.fn(),
+    deleteColumn: jest.fn()
   };
   const column = mount(<ColumnContext {...props} />);
   column.find('.fa-compress').simulate('click');
   expect(props.toggleColumn).toHaveBeenCalled();
+});
+
+it('should call toggleConfirm with args when delete column icon clicked', () => {
+  const ColumnContext = wrapInTestContext(Column);
+  const props = {
+    key: 0,
+    columnIndex: 0,
+    name: 'test',
+    cards: [{ id: 0, task: 'first task' }],
+    reorderCard: jest.fn(),
+    moveCard: jest.fn(),
+    patchServerCards: jest.fn(),
+    toggleColumn: jest.fn(),
+    toggleColumnCreateUpdate: jest.fn(),
+    toggleCardCreateUpdate: jest.fn(),
+    toggleConfirm: jest.fn(),
+    deleteColumn: jest.fn()
+  };
+  const column = mount(<ColumnContext {...props} />);
+  column.find('.deleteColumn').simulate('click');
+  expect(props.toggleConfirm).toHaveBeenCalledWith(
+    'Column along within all of its cards will be permanently deleted',
+    props.deleteColumn,
+    props.columnIndex
+  );
 });

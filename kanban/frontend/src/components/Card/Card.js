@@ -17,7 +17,7 @@ const propTypes = {
   task: PropTypes.string.isRequired,
   spinner: PropTypes.bool,
   reorderCard: PropTypes.func.isRequired,
-  toggleCardCrud: PropTypes.func.isRequired
+  toggleCardCreateUpdate: PropTypes.func.isRequired
 }
 
 const CardContainer = styled.div`
@@ -128,8 +128,16 @@ const card = (props) => {
               <i
                 title="Edit or Delete"
                 className="fas fa-edit"
-                onClick={() => props.toggleCardCrud(
+                onClick={() => props.toggleCardCreateUpdate(
                   true,
+                  props.columnIndex,
+                  props.cardIndex
+                )}
+              ></i>
+              <i
+                title="Delete Card"
+                className="fas fa-trash-alt"
+                onClick={() => props.deleteCard(
                   props.columnIndex,
                   props.cardIndex
                 )}

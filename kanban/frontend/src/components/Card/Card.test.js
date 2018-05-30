@@ -33,7 +33,7 @@ it('can be dragged', () => {
       columnIndex={0}
       task={'This is a task'}
       reorderCard={jest.fn()}
-      toggleCardCrud={jest.fn()}
+      toggleCardCreateUpdate={jest.fn()}
     />
   );
 

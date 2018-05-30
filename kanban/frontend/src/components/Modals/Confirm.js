@@ -3,6 +3,13 @@ import React from 'react';
 
 // 3rd party imports
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
+
+const propTypes = {
+  message: PropTypes.string.isRequired,
+  confirmFunction: PropTypes.func.isRequired,
+  toggleConfirm: PropTypes.func.isRequired
+};
 
 const Container = styled.div`
   position: fixed;
@@ -25,17 +32,23 @@ const Content = styled.div`
   background-color: #209028;
 `;
 
-const modal = (props) => (
+const confirmModal = (props) => (
   <Container>
     <Content>
       <div>{props.message}</div>
+      <button onClick={() => props.toggleConfirm()}>
+        Cancel
+      </button>
       <button
-        onClick={(t) => props.toggleModal()}
+        id="idConfirmFunction"
+        onClick={props.confirmFunction}
       >
-        Close
+        Confirm
       </button>
     </Content>
   </Container >
 );
 
-export default modal;
+confirmModal.propTypes = propTypes;
+
+export default confirmModal;

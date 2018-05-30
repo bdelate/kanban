@@ -18,7 +18,10 @@ const propTypes = {
   reorderCard: PropTypes.func.isRequired,
   moveCard: PropTypes.func.isRequired,
   toggleColumn: PropTypes.func.isRequired,
-  toggleCardCrud: PropTypes.func.isRequired
+  toggleColumnCreateUpdate: PropTypes.func.isRequired,
+  toggleCardCreateUpdate: PropTypes.func.isRequired,
+  toggleConfirm: PropTypes.func.isRequired,
+  deleteColumn: PropTypes.func.isRequired
 }
 
 const ColumnContainer = styled.div`
@@ -56,20 +59,28 @@ function collect(connect, monitor) {
 
 const column = (props) => {
   const { connectDropTarget } = props;
-  const cards = props.cards.map((card, index) => (
-    <Card
-      key={card.id}
-      cardIndex={index}
-      columnIndex={props.columnIndex}
-      task={card.task}
-      spinner={card.spinner}
-      reorderCard={props.reorderCard}
-      toggleCardCrud={props.toggleCardCrud}
-    />
-  ));
+  let output = null;
+  if (props.spinner) {
+    output = (
+      <ColumnContainer>
+        <i className="fas fa-spinner fa-spin"></i>
+      </ColumnContainer>
+    )
+  } else {
+    const cards = props.cards.map((card, index) => (
+      <Card
+        key={card.id}
+        cardIndex={index}
+        columnIndex={props.columnIndex}
+        task={card.task}
+        spinner={card.spinner}
+        deleteCard={props.deleteCard}
+        reorderCard={props.reorderCard}
+        toggleCardCreateUpdate={props.toggleCardCreateUpdate}
+      />
+    ));
 
-  return (
-    <ColumnContainer innerRef={node => connectDropTarget(node)}>
+    output = <ColumnContainer innerRef={node => connectDropTarget(node)}>
       <i
         title="Collapse Column"
         className="fas fa-compress"
@@ -78,12 +89,28 @@ const column = (props) => {
       <i
         title="Add Task"
         className="fas fa-plus"
-        onClick={() => props.toggleCardCrud(true, props.columnIndex)}
+        onClick={() => props.toggleCardCreateUpdate(true, props.columnIndex)}
+      ></i>
+      <i
+        title="Change Column Name"
+        className="fas fa-edit"
+        onClick={() => props.toggleColumnCreateUpdate(true, props.columnIndex)}
+      ></i>
+      <i
+        title="Delete Column"
+        className="deleteColumn fas fa-trash-alt"
+        onClick={() => props.toggleConfirm(
+          'Column along within all of its cards will be permanently deleted',
+          props.deleteColumn,
+          props.columnIndex
+        )}
       ></i>
       <h3>{props.name}</h3>
       {cards}
     </ColumnContainer>
-  )
+  }
+
+  return output;
 };
 
 column.propTypes = propTypes;

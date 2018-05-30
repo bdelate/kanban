@@ -2,7 +2,7 @@ from rest_framework.test import APITestCase
 from django.urls import reverse
 from rest_framework import status
 from .mixins import TestDataMixin
-from api.models import Card, Column
+from api.models import Board, Card, Column
 
 
 class BoardDetailTest(APITestCase, TestDataMixin):
@@ -38,6 +38,90 @@ class BoardDetailTest(APITestCase, TestDataMixin):
                          'column 1 card 3')
 
 
+class ColumnDetailTest(APITestCase, TestDataMixin):
+
+    @classmethod
+    def setUpTestData(cls):
+
+        cls.create_test_data()
+
+    def test_update_invalid_column(self):
+        url = reverse('api:column_detail', args=[100])
+        response = self.client.patch(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_task(self):
+        column = Column.objects.first()
+        url = reverse('api:column_detail', args=[column.id])
+        data = {
+            'id': column.id,
+            'name': 'new column name'
+        }
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        column.refresh_from_db()
+        self.assertEqual(column.name, 'new column name')
+
+    def test_delete_column_success(self):
+        """
+        Test that column and all associated cards are deleted
+        """
+        column = Column.objects.first()
+        column_id = column.id
+        num_cards = Card.objects.filter(column_id=column_id).count()
+        self.assertTrue(num_cards > 0)
+        url = reverse('api:column_detail', args=[column_id])
+        response = self.client.delete(url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        num_cards = Card.objects.filter(column_id=column_id).count()
+        self.assertTrue(num_cards == 0)
+        num_columns = Column.objects.filter(id=column_id).count()
+        self.assertEqual(0, num_columns)
+
+    def test_delete_column_failure(self):
+        columns = Column.objects.count()
+        url = reverse('api:column_detail', args=[500])
+        response = self.client.delete(url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(columns, Column.objects.count())
+
+
+class ColumnCreateUpdateTest(APITestCase, TestDataMixin):
+
+    @classmethod
+    def setUpTestData(cls):
+
+        cls.create_test_data()
+
+    def test_create_column(self):
+        board = Board.objects.first()
+        columns = Column.objects.filter(board_id=board.id).count()
+        data = {
+            'id': -1,
+            'spinner': 'true',
+            'name': 'new column',
+            'position_id': columns,
+            'board_id': board.id,
+            'cards': []
+        }
+
+        url = reverse('api:column_create_update')
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        new_column = Column.objects.last()
+        self.assertEqual(new_column.name, 'new column')
+        self.assertEqual(new_column.board_id, board.id)
+
+    def test_create_column_fails(self):
+        data = {}
+        url = reverse('api:column_create_update')
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
 class CardDetailTest(APITestCase, TestDataMixin):
 
     @classmethod
@@ -60,15 +144,23 @@ class CardDetailTest(APITestCase, TestDataMixin):
         card.refresh_from_db()
         self.assertEqual(card.task, 'updated')
 
-    def test_delete_card(self):
+    def test_delete_card_success(self):
         card = Card.objects.first()
         card_task = card.task
         url = reverse('api:card_detail', args=[card.id])
         response = self.client.delete(url, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        card = Card.objects.filter(task=card_task)
-        self.assertEqual(len(card), 0)
+        cards = Card.objects.filter(task=card_task).count()
+        self.assertEqual(cards, 0)
+
+    def test_delete_column_failure(self):
+        cards = Card.objects.count()
+        url = reverse('api:card_detail', args=[500])
+        response = self.client.delete(url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(cards, Card.objects.count())
 
 
 class CardCreateUpdateTest(APITestCase, TestDataMixin):
@@ -80,21 +172,21 @@ class CardCreateUpdateTest(APITestCase, TestDataMixin):
 
     def test_create_card(self):
         column = Column.objects.first()
-        before_cards = Card.objects.filter(column_id=column.id)
+        before_cards = Card.objects.filter(column_id=column.id).count()
         data = {
             'id': -1,
             'spinner': 'true',
             'task': 'newly created test task',
             'column_id': column.id,
-            'position_id': len(before_cards)
+            'position_id': before_cards
         }
 
         url = reverse('api:cards_create_update')
         response = self.client.post(url, data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        after_cards = Card.objects.filter(column_id=column.id)
-        self.assertEqual(len(before_cards) + 1, len(after_cards))
+        after_cards = Card.objects.filter(column_id=column.id).count()
+        self.assertEqual(before_cards + 1, after_cards)
         card = Card.objects.last()
         self.assertEqual(card.task, 'newly created test task')
         self.assertEqual(card.column_id, column.id)
@@ -152,19 +244,21 @@ class CardCreateUpdateTest(APITestCase, TestDataMixin):
         Move first card in first column to last column
         """
         first_column = Column.objects.first()
-        first_column_cards = Card.objects.filter(column_id=first_column.id)
-        num_first_column_cards = len(first_column_cards)
+        first_column_cards = Card.objects.filter(
+            column_id=first_column.id).count()
+        num_first_column_cards = first_column_cards
         first_card = Card.objects.get(column_id=first_column.id, position_id=0)
 
         last_column = Column.objects.last()
-        last_column_cards = Card.objects.filter(column_id=last_column.id)
-        num_last_column_cards = len(last_column_cards)
+        last_column_cards = Card.objects.filter(
+            column_id=last_column.id).count()
+        num_last_column_cards = last_column_cards
 
         # construct and send patch request
         cards = [{
             'id': first_card.id,
             'task': 'column 1 card 1',
-            'position_id': len(last_column_cards),
+            'position_id': last_column_cards,
             'column_id': last_column.id
         }]
         data = {'cards': cards}
@@ -173,10 +267,12 @@ class CardCreateUpdateTest(APITestCase, TestDataMixin):
 
         # refresh db data
         first_card.refresh_from_db()
-        first_column_cards = Card.objects.filter(column_id=first_column.id)
-        last_column_cards = Card.objects.filter(column_id=last_column.id)
+        first_column_cards = Card.objects.filter(
+            column_id=first_column.id).count()
+        last_column_cards = Card.objects.filter(
+            column_id=last_column.id).count()
 
         # assert that the card has moved to the last column
         self.assertEqual(first_card.column_id, last_column.id)
-        self.assertEqual(len(first_column_cards), num_first_column_cards - 1)
-        self.assertEqual(len(last_column_cards), num_last_column_cards + 1)
+        self.assertEqual(first_column_cards, num_first_column_cards - 1)
+        self.assertEqual(last_column_cards, num_last_column_cards + 1)

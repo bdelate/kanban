@@ -37,11 +37,12 @@ class NewCardSerializer(serializers.ModelSerializer):
 
 class ColumnSerializer(serializers.ModelSerializer):
 
-    cards = ExistingCardSerializer(many=True)
+    cards = ExistingCardSerializer(many=True, read_only=True)
+    board_id = serializers.IntegerField()
 
     class Meta:
         model = Column
-        fields = '__all__'
+        fields = ('name', 'id', 'position_id', 'board_id', 'cards')
 
 
 class BoardSerializer(serializers.ModelSerializer):
@@ -50,4 +51,4 @@ class BoardSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Board
-        exclude = ('user', 'id', 'name')
+        exclude = ('user',)

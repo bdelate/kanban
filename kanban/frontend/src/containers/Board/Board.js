@@ -4,9 +4,12 @@ import React, { Component, Fragment } from 'react';
 // project imports
 import Column from '../Column/Column';
 import CollapsedColumn from '../../components/CollapsedColumn/CollapsedColumn';
-import CardCrud from '../../components/CardCrud/CardCrud';
+import ColumnCreateUpdate from '../../components/Modals/ColumnCreateUpdate';
+import CardCreateUpdate from '../../components/Modals/CardCreateUpdate';
 import Spinner from '../../components/Spinner/Spinner';
-import Modal from '../../components/Modal/Modal';
+import Info from '../../components/Modals/Info';
+import Confirm from '../../components/Modals/Confirm';
+import BoardControls from '../../containers/BoardControls/BoardControls';
 
 // 3rd party imports
 import styled from 'styled-components';
@@ -14,6 +17,13 @@ import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import axios from 'axios';
 
+
+const BoardContainer = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  background-color: yellow;
+`;
 
 const ColumnsContainer = styled.div`
   display: flex;
@@ -24,8 +34,16 @@ class Board extends Component {
 
   state = {
     retrieving_data: true,
-    modal: false,
-    cardCrud: {
+    infoModal: false,
+    confirmModal: {
+      message: null,
+      confirmFunction: null
+    },
+    columnCreateUpdate: {
+      active: false,
+      columnIndex: -1
+    },
+    cardCreateUpdate: {
       active: false,
       columnIndex: -1,
       cardIndex: -1
@@ -43,6 +61,7 @@ class Board extends Component {
     await axios.get('/api/boards/2/')
       .then(res => {
         this.setState({
+          ...res.data,
           ...this.state,
           retrieving_data: false,
           columns: res.data.columns
@@ -51,7 +70,7 @@ class Board extends Component {
       .catch(error => {
         const message = 'Error: Unable to load board data';
         this.setState({ retrieveData: false });
-        this.toggleModalHandler(message)
+        this.toggleInfoHandler(message)
       })
   }
 
@@ -71,7 +90,7 @@ class Board extends Component {
     }
     delete currentState.previousState;
     this.setState({ previousState: currentState });
-  }
+  };
 
   // collapse / uncollapse column
   toggleColumnHandler = columnIndex => {
@@ -100,7 +119,54 @@ class Board extends Component {
         const previousState = this.state.previousState;
         this.setState(previousState);
         const message = 'Error: Unable to update cards on the server';
-        this.toggleModalHandler(message)
+        this.toggleInfoHandler(message)
+      })
+  };
+
+  // create new column on the server. Replace last column with response
+  // to get db id and hide spinner
+  postServerColumn = (column) => {
+    axios.post(`/api/columns/`, column)
+      .then(res => {
+        this.setState({
+          ...this.state,
+          columns: [
+            ...this.state.columns.slice(0, res.data.position_id),
+            { ...res.data }
+          ]
+        }, this.savePreviousState);
+      })
+      // restore previous valid state and display error message
+      .catch(error => {
+        const previousState = this.state.previousState;
+        this.setState(previousState);
+        const message = 'Error: Unable to create column on the server';
+        this.toggleInfoHandler(message)
+      })
+  }
+
+  // Update column name on the server
+  patchServerColumnName = (columnIndex) => {
+    const data = {
+      id: this.state.columns[columnIndex].id,
+      name: this.state.columns[columnIndex].name
+    };
+    axios.patch(`/api/columns/${data.id}/`, { ...data })
+      .then(res => {
+        this.setState({
+          columns: [
+            ...this.state.columns.slice(0, columnIndex),
+            { ...res.data },
+            ...this.state.columns.slice(columnIndex + 1)
+          ]
+        }, this.savePreviousState)
+      })
+      // restore previous valid state and display error message
+      .catch(error => {
+        const previousState = this.state.previousState;
+        this.setState(previousState);
+        const message = 'Error: Unable to update column on the server';
+        this.toggleInfoHandler(message);
       })
   };
 
@@ -118,16 +184,13 @@ class Board extends Component {
         const previousState = this.state.previousState;
         this.setState(previousState);
         const message = 'Error: Unable to update card on the server';
-        this.toggleModalHandler(message);
+        this.toggleInfoHandler(message);
       })
   };
 
   // create new card on the server, update state with response (to get db id)
   postServerCard = (columnIndex, card) => {
-    // deep copy card so that temporary id can be deleted before server call
-    const new_card = { ...card };
-
-    axios.post(`/api/cards/`, new_card)
+    axios.post(`/api/cards/`, card)
       .then(res => {
         const cardIndex = this.state.columns[columnIndex].cards.length - 1;
         this.setState({
@@ -150,7 +213,22 @@ class Board extends Component {
         const previousState = this.state.previousState;
         this.setState(previousState);
         const message = 'Error: Unable to create card on the server';
-        this.toggleModalHandler(message)
+        this.toggleInfoHandler(message)
+      })
+  };
+
+  // delete column on the server
+  deleteServerColumn = (columnId) => {
+    axios.delete(`/api/columns/${columnId}/`)
+      .then(res => {
+        this.savePreviousState();
+      })
+      // restore previous valid state and display error message
+      .catch(error => {
+        const previousState = this.state.previousState;
+        this.setState(previousState);
+        const message = 'Error: Unable to delete column on the server';
+        this.toggleInfoHandler(message);
       })
   };
 
@@ -158,7 +236,6 @@ class Board extends Component {
   deleteServerCard = (cardId) => {
     axios.delete(`/api/cards/${cardId}/`)
       .then(res => {
-        console.log('sfsdfsfdsf');
         this.savePreviousState();
       })
       // restore previous valid state and display error message
@@ -166,7 +243,7 @@ class Board extends Component {
         const previousState = this.state.previousState;
         this.setState(previousState);
         const message = 'Error: Unable to delete card on the server';
-        this.toggleModalHandler(message);
+        this.toggleInfoHandler(message);
       })
   };
 
@@ -245,15 +322,24 @@ class Board extends Component {
     this.patchServerCards(cards, spinnerCard);
   };
 
-  // update state.cardCrud which allows for displaying / hiding cardCrud modal
-  toggleCardCrudHandler = (active, columnIndex = -1, cardIndex = -1) => {
-    const cardCrud = {
+  // update state.cardCreateUpdate which allows for displaying / hiding cardCreateUpdate modal
+  toggleCardCreateUpdateHandler = (active, columnIndex = -1, cardIndex = -1) => {
+    const cardCreateUpdate = {
       active: active,
       columnIndex: columnIndex,
       cardIndex: cardIndex
     }
-    this.setState({ cardCrud: cardCrud });
-  }
+    this.setState({ cardCreateUpdate: cardCreateUpdate });
+  };
+
+  // update state.columnCreateUpdate which allows for displaying / hiding columnCreateUpdate
+  toggleColumnCreateUpdateHandler = (active, columnIndex = -1) => {
+    const columnCreateUpdate = {
+      active: active,
+      columnIndex: columnIndex
+    };
+    this.setState({ columnCreateUpdate: columnCreateUpdate });
+  };
 
   // show / hide spinner within a specific card
   toggleCardSpinner = (columnIndex, cardIndex) => {
@@ -277,11 +363,62 @@ class Board extends Component {
         ]
       }
     });
+  };
+
+  // create new column in state and call postServerColumn to create it on the server
+  createColumnHandler = (name) => {
+    this.toggleColumnCreateUpdateHandler(false);
+    const columns = [...this.state.columns];
+    const newColumn = {
+      id: -1, // temporary id used for Column keys until id received from db
+      spinner: true,
+      name: name,
+      position_id: this.state.columns.length,
+      board_id: this.state.id,
+      cards: []
+    };
+    columns.push(newColumn);
+    this.setState({ columns: columns });
+    this.postServerColumn(newColumn);
+  };
+
+  // edit existing column name on the server and update local state
+  editColumnNameHandler = (columnIndex, name) => {
+    this.toggleColumnCreateUpdateHandler(false);
+    this.setState({
+      columns: [
+        ...this.state.columns.slice(0, columnIndex),
+        {
+          ...this.state.columns[columnIndex],
+          name: name,
+          spinner: true
+        },
+        ...this.state.columns.slice(columnIndex + 1)
+      ]
+    },
+      // call back function executed after setState completes  
+      () => this.patchServerColumnName(columnIndex)
+    )
   }
+
+  // remove column from state and call deleteServerColumn
+  deleteColumnHandler = (columnIndex) => {
+    this.toggleConfirmHandler();
+
+    const columnId = this.state.columns[columnIndex].id;
+    this.setState({
+      columns: [
+        ...this.state.columns.slice(0, columnIndex),
+        ...this.state.columns.slice(columnIndex + 1)
+      ]
+    });
+
+    this.deleteServerColumn(columnId);
+  };
 
   // remove card from state and call deleteServerCard
   deleteCardHandler = (columnIndex, cardIndex) => {
-    this.toggleCardCrudHandler(false);
+    this.toggleCardCreateUpdateHandler(false);
 
     const column = { ...this.state.columns[columnIndex] };
     column.cards = [...this.state.columns[columnIndex].cards];
@@ -297,11 +434,11 @@ class Board extends Component {
     });
 
     this.deleteServerCard(cardId);
-  }
+  };
 
   // edit existing card on the server and update local state
   editCardDetailHandler = (columnIndex, cardIndex, task) => {
-    this.toggleCardCrudHandler(false);
+    this.toggleCardCreateUpdateHandler(false);
 
     const card = { ...this.state.columns[columnIndex].cards[cardIndex] };
     card.task = task;
@@ -323,11 +460,11 @@ class Board extends Component {
       // call back function executed after setState completes  
       () => this.patchServerCardDetail(columnIndex, cardIndex)
     );
-  }
+  };
 
   // create new card in state and call postServerCard to create it on the server
   createCardHandler = (columnIndex, task) => {
-    this.toggleCardCrudHandler(false);
+    this.toggleCardCreateUpdateHandler(false);
 
     const column = { ...this.state.columns[columnIndex] };
     column.cards = [...this.state.columns[columnIndex].cards];
@@ -349,12 +486,30 @@ class Board extends Component {
     });
 
     this.postServerCard(columnIndex, new_card);
-  }
+  };
 
-  // display / hide modal with message
-  toggleModalHandler = (message = null) => {
-    this.setState({ modal: message });
-  }
+  // display / hide info modal with message
+  toggleInfoHandler = (message = null) => {
+    this.setState({ infoModal: message });
+  };
+
+  // display / hide confirm modal. Specify function and params to be executed
+  // if confirm is clicked
+  toggleConfirmHandler = (message, confirmFunction, params) => {
+    let confirmModal;
+    if (message) {
+      confirmModal = {
+        message: message,
+        confirmFunction: () => confirmFunction(params)
+      };
+    } else {
+      confirmModal = {
+        message: null,
+        confirmFunction: null
+      };
+    }
+    this.setState({ confirmModal: confirmModal });
+  };
 
   render() {
     let output = <Spinner />;
@@ -362,36 +517,53 @@ class Board extends Component {
       const columns = this.state.columns.map((column, index) => {
         if (column.collapsed) {
           return <CollapsedColumn
+            {...column}
             key={column.id}
             columnIndex={index}
-            name={column.name}
             numCards={column.cards.length}
             toggleColumn={this.toggleColumnHandler}
           />
         } else {
           return <Column
+            {...column}
             key={column.id}
             columnIndex={index}
-            name={column.name}
-            cards={column.cards}
             reorderCard={this.reorderCardHandler}
             moveCard={this.moveCardHandler}
+            deleteCard={this.deleteCardHandler}
             toggleColumn={this.toggleColumnHandler}
-            toggleCardCrud={this.toggleCardCrudHandler}
+            toggleCardCreateUpdate={this.toggleCardCreateUpdateHandler}
+            toggleColumnCreateUpdate={this.toggleColumnCreateUpdateHandler}
+            deleteColumn={this.deleteColumnHandler}
+            toggleConfirm={this.toggleConfirmHandler}
           />
         }
       });
 
-      // display CardCrud modal if this.state.cardCrud.active
-      let cardCrud = null;
-      if (this.state.cardCrud.active) {
+      // display Column modal if this.state.columnCreateUpdate.active
+      let columnCreateUpdate = null;
+      if (this.state.columnCreateUpdate.active) {
+        const column = this.state.columns[
+          this.state.columnCreateUpdate.columnIndex];
+        columnCreateUpdate = <ColumnCreateUpdate
+          {...this.state.columnCreateUpdate}
+          name={column ? column.name : null}
+          toggleColumnCreateUpdate={this.toggleColumnCreateUpdateHandler}
+          createColumn={this.createColumnHandler}
+          editColumnName={this.editColumnNameHandler}
+        />
+      }
+
+      // display CardCreateUpdate modal if this.state.cardCreateUpdate.active
+      let cardCreateUpdate = null;
+      if (this.state.cardCreateUpdate.active) {
         const card = this.state.columns[
-          this.state.cardCrud.columnIndex]
-          .cards[this.state.cardCrud.cardIndex];
-        cardCrud = <CardCrud
-          {...this.state.cardCrud}
+          this.state.cardCreateUpdate.columnIndex]
+          .cards[this.state.cardCreateUpdate.cardIndex];
+        cardCreateUpdate = <CardCreateUpdate
+          {...this.state.cardCreateUpdate}
           task={card ? card.task : null}
-          toggleCardCrud={this.toggleCardCrudHandler}
+          toggleCardCreateUpdate={this.toggleCardCreateUpdateHandler}
           editCardDetail={this.editCardDetailHandler}
           deleteCard={this.deleteCardHandler}
           createCard={this.createCardHandler}
@@ -399,23 +571,38 @@ class Board extends Component {
       }
 
       output = (
-        <ColumnsContainer>
-          {cardCrud}
-          {columns}
-        </ColumnsContainer>
+        <BoardContainer>
+          <BoardControls
+            toggleColumnCreateUpdate={this.toggleColumnCreateUpdateHandler}
+          />
+          <ColumnsContainer>
+            {columnCreateUpdate}
+            {cardCreateUpdate}
+            {columns}
+          </ColumnsContainer>
+        </BoardContainer>
       )
     }
 
-    let modal = null;
-    if (this.state.modal) {
-      modal = <Modal
-        message={this.state.modal}
-        toggleModal={this.toggleModalHandler} />
+    let infoModal = null;
+    if (this.state.infoModal) {
+      infoModal = <Info
+        message={this.state.infoModal}
+        toggleInfo={this.toggleInfoHandler} />
+    }
+
+    let confirmModal = null;
+    if (this.state.confirmModal.message) {
+      confirmModal = <Confirm
+        message={this.state.confirmModal.message}
+        confirmFunction={this.state.confirmModal.confirmFunction}
+        toggleConfirm={this.toggleConfirmHandler} />
     }
 
     return (
       <Fragment>
-        {modal}
+        {infoModal}
+        {confirmModal}
         {output}
       </Fragment>
     )
