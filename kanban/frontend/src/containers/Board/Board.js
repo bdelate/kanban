@@ -232,11 +232,15 @@ class Board extends Component {
       })
   };
 
-  // delete card on the server
-  deleteServerCard = (cardId) => {
+  // delete card on the server, if successful update remaining cards on server
+  // if 'cards' arg is provided since they now have new position_ids
+  deleteServerCard = (cardId, cards) => {
     axios.delete(`/api/cards/${cardId}/`)
       .then(res => {
         this.savePreviousState();
+      })
+      .then(res => {
+        if (cards) this.patchServerCards(cards);
       })
       // restore previous valid state and display error message
       .catch(error => {
@@ -251,12 +255,15 @@ class Board extends Component {
   reorderCardHandler = ({ hasDropped, columnIndex, fromCardIndex, toCardIndex }) => {
     const column = { ...this.state.columns[columnIndex] };
     column.cards = [...this.state.columns[columnIndex].cards];
+    for (let card in this.state.columns[columnIndex].cards) {
+      column.cards[card] = { ...this.state.columns[columnIndex].cards[card] };
+    }
+
     // card has been dropped, update column on the server
     if (hasDropped) {
       const spinnerCard = [columnIndex, toCardIndex];
       this.patchServerCards(column.cards, spinnerCard);
-      // card hasn't been dropped yet, update local column state only
-    } else {
+    } else { // card hasn't been dropped yet, update local column state only
       // reorder card
       const card = column.cards.splice(fromCardIndex, 1)[0];
       column.cards.splice(toCardIndex, 0, card);
@@ -297,18 +304,16 @@ class Board extends Component {
       fromColumnIndex
     ].cards.splice(fromCardIndex, 1)[0];
 
-    // update card.column_id
+    // update card column_id and position_id
     card.column_id = updatedState.columns[toColumnIndex].id;
+    card.position_id = updatedState.columns[toColumnIndex].cards.length;
 
     // push card to toColumnIndex
     updatedState.columns[toColumnIndex].cards.push(card);
 
-    // update card position ids in fromColumnIndex and toColumnIndex columns
+    // update card position ids in fromColumnIndex
     for (let key in updatedState.columns[fromColumnIndex].cards) {
       updatedState.columns[fromColumnIndex].cards[key]['position_id'] = parseInt(key, 10);
-    }
-    for (let key in updatedState.columns[toColumnIndex].cards) {
-      updatedState.columns[toColumnIndex].cards[key]['position_id'] = parseInt(key, 10);
     }
 
     // update state
@@ -420,11 +425,29 @@ class Board extends Component {
   deleteCardHandler = (columnIndex, cardIndex) => {
     this.toggleCardCreateUpdateHandler(false);
 
+    // deep copy column with all of its cards
     const column = { ...this.state.columns[columnIndex] };
     column.cards = [...this.state.columns[columnIndex].cards];
-    const cardId = column.cards[cardIndex].id;
+    for (let card in this.state.columns[columnIndex].cards) {
+      column.cards[card] = { ...this.state.columns[columnIndex].cards[card] };
+    }
 
+    // was the removed card the last one in the column
+    const was_last_card = true
+      ? column.cards[cardIndex].position_id == column.cards.length - 1
+      : false;
+
+    // get cardId then remove card
+    const cardId = column.cards[cardIndex].id;
     column.cards.splice(cardIndex, 1);
+
+    // update remaining card position ids if removed card was not the last one
+    if (!was_last_card) {
+      for (let key in column.cards) {
+        column.cards[key]['position_id'] = parseInt(key, 10);
+      }
+    }
+
     this.setState({
       columns: [
         ...this.state.columns.slice(0, columnIndex),
@@ -433,7 +456,11 @@ class Board extends Component {
       ]
     });
 
-    this.deleteServerCard(cardId);
+    if (!was_last_card) {
+      this.deleteServerCard(cardId, column.cards);
+    } else {
+      this.deleteServerCard(cardId);
+    }
   };
 
   // edit existing card on the server and update local state
