@@ -1,9 +1,11 @@
 from django.urls import include, path
 from . import views
+from rest_framework_jwt.views import obtain_jwt_token
 
 app_name = 'api'
 
 urlpatterns = [
+    path('obtain-token/', obtain_jwt_token),
     path('boards/<int:pk>/',
          views.BoardDetail.as_view(),
          name='board_detail'),

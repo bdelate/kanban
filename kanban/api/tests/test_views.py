@@ -1,6 +1,7 @@
 from rest_framework.test import APITestCase
 from django.urls import reverse
 from rest_framework import status
+from django.contrib.auth import get_user_model
 from .mixins import TestDataMixin
 from api.models import Board, Card, Column
 
@@ -11,6 +12,10 @@ class BoardDetailTest(APITestCase, TestDataMixin):
     def setUpTestData(cls):
 
         cls.create_test_data()
+
+    def setUp(self):
+        user = get_user_model().objects.get(username='john')
+        self.client.force_authenticate(user=user)
 
     def test_retrieve_invalid_board(self):
         url = reverse('api:board_detail', args=[100])
@@ -46,12 +51,16 @@ class ColumnDetailTest(APITestCase, TestDataMixin):
 
         cls.create_test_data()
 
+    def setUp(self):
+        user = get_user_model().objects.get(username='john')
+        self.client.force_authenticate(user=user)
+
     def test_update_invalid_column(self):
         url = reverse('api:column_detail', args=[100])
         response = self.client.patch(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_update_task(self):
+    def test_update_name(self):
         column = Column.objects.first()
         url = reverse('api:column_detail', args=[column.id])
         data = {
@@ -96,6 +105,10 @@ class ColumnsCreateUpdateTest(APITestCase, TestDataMixin):
 
         cls.create_test_data()
 
+    def setUp(self):
+        user = get_user_model().objects.get(username='john')
+        self.client.force_authenticate(user=user)
+
     def test_create_column(self):
         board = Board.objects.first()
         columns = Column.objects.filter(board_id=board.id).count()
@@ -117,7 +130,10 @@ class ColumnsCreateUpdateTest(APITestCase, TestDataMixin):
         self.assertEqual(new_column.board_id, board.id)
 
     def test_create_column_fails(self):
-        data = {}
+        board = Board.objects.first()
+        data = {
+            'board_id': board.id
+        }
         url = reverse('api:columns_create_update')
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -166,6 +182,10 @@ class CardDetailTest(APITestCase, TestDataMixin):
 
         cls.create_test_data()
 
+    def setUp(self):
+        user = get_user_model().objects.get(username='john')
+        self.client.force_authenticate(user=user)
+
     def test_update_invalid_card(self):
         url = reverse('api:card_detail', args=[100])
         response = self.client.patch(url, format='json')
@@ -207,6 +227,10 @@ class CardsCreateUpdateTest(APITestCase, TestDataMixin):
 
         cls.create_test_data()
 
+    def setUp(self):
+        user = get_user_model().objects.get(username='john')
+        self.client.force_authenticate(user=user)
+
     def test_create_card(self):
         column = Column.objects.first()
         before_cards = Card.objects.filter(column_id=column.id).count()
@@ -229,7 +253,10 @@ class CardsCreateUpdateTest(APITestCase, TestDataMixin):
         self.assertEqual(card.column_id, column.id)
 
     def test_create_card_fails(self):
-        data = {}
+        column = Column.objects.first()
+        data = {
+            'column_id': column.id
+        }
         url = reverse('api:cards_create_update')
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

@@ -1,11 +1,15 @@
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from rest_framework.views import APIView
 from .models import Board, Column, Card
-from.serializers import (BoardSerializer,
-                         ColumnSerializer,
-                         ExistingColumnSerializer,
-                         ExistingCardSerializer,
-                         CardSerializer)
+from.permissions import (CanRetrieveUpdateDestroy,
+                         CanCreateUpdateCards,
+                         CanCreateUpdateColumns)
+from .serializers import (BoardSerializer,
+                          ColumnSerializer,
+                          ExistingColumnSerializer,
+                          ExistingCardSerializer,
+                          CardSerializer)
 from rest_framework import status
 from rest_framework.response import Response
 
@@ -14,6 +18,7 @@ class BoardDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     Retrieve an existing board along with the associated columns and cards
     """
+    permission_classes = (IsAuthenticated, CanRetrieveUpdateDestroy)
     queryset = Board.objects.prefetch_related('columns', 'columns__cards')
     serializer_class = BoardSerializer
 
@@ -22,11 +27,14 @@ class ColumnDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     Update or delete an existing column
     """
-    queryset = Column.objects.all()
+    permission_classes = (IsAuthenticated, CanRetrieveUpdateDestroy)
+    queryset = Column.objects.select_related('board')
     serializer_class = ColumnSerializer
 
 
 class ColumnsCreateUpdate(APIView):
+
+    permission_classes = (IsAuthenticated, CanCreateUpdateColumns)
 
     def post(self, request):
         """
@@ -59,11 +67,15 @@ class CardDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     Update or delete an existing card
     """
-    queryset = Card.objects.all()
+    permission_classes = (IsAuthenticated, CanRetrieveUpdateDestroy)
+
+    queryset = Card.objects.select_related('column', 'column__board')
     serializer_class = ExistingCardSerializer
 
 
 class CardsCreateUpdate(APIView):
+
+    permission_classes = (IsAuthenticated, CanCreateUpdateCards)
 
     def post(self, request):
         """
