@@ -19,6 +19,12 @@ import moxios from 'moxios'
 
 configure({ adapter: new Adapter() });
 
+beforeAll(function () {
+  const isLoggedIn = jest.fn();
+  isLoggedIn.mockReturnValue(true);
+  BoardComponentOnly.prototype.isLoggedIn = isLoggedIn;
+})
+
 beforeEach(function () {
   // mock axios calls to the server
   moxios.install();
