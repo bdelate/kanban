@@ -16,6 +16,7 @@ import styled from 'styled-components';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import axios from 'axios';
+import jwtDecode from 'jwt-decode';
 
 
 const BoardContainer = styled.div`
@@ -53,8 +54,21 @@ class Board extends Component {
   }
 
   componentDidMount() {
-    this.retrieveData();
+    if (this.isLoggedIn()) {
+      this.retrieveData();
+    } else {
+      this.props.history.push('/auth');
+    }
   }
+
+  isLoggedIn() {
+    const authToken = localStorage.getItem('authToken');
+    if (authToken) {
+      const decodedToken = jwtDecode(authToken);
+      return new Date() <= new Date(decodedToken.exp * 1000);
+    }
+    return false;
+  };
 
   // retrieve all board data from the server
   async retrieveData() {
