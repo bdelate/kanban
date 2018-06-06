@@ -54,18 +54,19 @@ class Board extends Component {
   }
 
   componentDidMount() {
-    if (this.isLoggedIn()) {
-      this.retrieveData();
-    } else {
-      this.props.history.push('/auth');
-    }
+    if (this.isLoggedIn()) this.retrieveData();
+    else this.props.history.push('/auth');
   }
 
+  // if authToken exists and has not expired, user is considered logged in
   isLoggedIn() {
     const authToken = localStorage.getItem('authToken');
     if (authToken) {
       const decodedToken = jwtDecode(authToken);
-      return new Date() <= new Date(decodedToken.exp * 1000);
+      if (new Date() <= new Date(decodedToken.exp * 1000)) {
+        axios.defaults.headers.common['Authorization'] = `JWT ${authToken}`;
+        return true;
+      }
     }
     return false;
   };
