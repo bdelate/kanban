@@ -5,11 +5,13 @@
   "proxy": "http://127.0.0.1:8000",
   "dependencies": {
     "axios": "^0.18.0",
+    "jwt-decode": "^2.2.0",
     "proptypes": "^1.1.0",
     "react": "^16.3.1",
     "react-dnd": "^2.6.0",
     "react-dnd-html5-backend": "^2.6.0",
     "react-dom": "^16.3.1",
+    "react-router-dom": "^4.2.2",
     "react-scripts": "1.1.4",
     "styled-components": "^3.2.5"
   },

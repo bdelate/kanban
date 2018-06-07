@@ -1,11 +1,13 @@
 // react imports
 import React, { Component } from 'react';
 
-// container imports
+// project imports
 import Board from './containers/Board/Board';
+import Auth from './components/Auth/Auth';
 
 // 3rd party imports
 import styled from 'styled-components';
+import { Route, Switch } from 'react-router-dom';
 
 const UIContainer = styled.div`
   height: 100vh;
@@ -18,7 +20,10 @@ class App extends Component {
   render() {
     return (
       <UIContainer>
-        <Board></Board>
+        <Switch>
+          <Route path="/auth" component={Auth} />
+          <Route path="/" exact component={Board} />
+        </Switch>
       </UIContainer>
     );
   }

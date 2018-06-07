@@ -16,6 +16,7 @@ import styled from 'styled-components';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import axios from 'axios';
+import jwtDecode from 'jwt-decode';
 
 
 const BoardContainer = styled.div`
@@ -53,8 +54,22 @@ class Board extends Component {
   }
 
   componentDidMount() {
-    this.retrieveData();
+    if (this.isLoggedIn()) this.retrieveData();
+    else this.props.history.push('/auth');
   }
+
+  // if authToken exists and has not expired, user is considered logged in
+  isLoggedIn() {
+    const authToken = localStorage.getItem('authToken');
+    if (authToken) {
+      const decodedToken = jwtDecode(authToken);
+      if (new Date() <= new Date(decodedToken.exp * 1000)) {
+        axios.defaults.headers.common['Authorization'] = `JWT ${authToken}`;
+        return true;
+      }
+    }
+    return false;
+  };
 
   // retrieve all board data from the server
   async retrieveData() {

@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import Board, Column, Card
+from django.contrib.auth import get_user_model
+from rest_framework_jwt.settings import api_settings
 
 
 class CardListSerializer(serializers.ListSerializer):
@@ -77,3 +79,20 @@ class BoardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Board
         exclude = ('user',)
+
+
+class CreateUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = get_user_model()
+        fields = ('username', 'password')
+
+    def create(self, validated_data):
+        user = get_user_model().objects.create(
+            username=validated_data['username'],
+            password=validated_data['password'])
+        jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+        jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+        payload = jwt_payload_handler(user)
+        token = jwt_encode_handler(payload)
+        return token
