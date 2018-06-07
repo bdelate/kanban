@@ -8,6 +8,36 @@ from .mixins import TestDataMixin
 from api.models import Board, Card, Column
 
 
+class SignUpTest(APITestCase):
+
+    def setUp(self):
+        self.jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+        self.jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+
+    def test_create_user_success(self):
+        data = {
+            'username': 'newuser',
+            'password': 'p@ssw0rd'
+        }
+
+        url = reverse('api:signup')
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        user = get_user_model().objects.filter(username='newuser').count()
+        self.assertEqual(user, 1)
+
+    def test_create_user_failure(self):
+        data = {
+            'username': 'newuser'
+        }
+
+        url = reverse('api:signup')
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        user = get_user_model().objects.filter(username='newuser').count()
+        self.assertEqual(user, 0)
+
+
 class BoardAuthTest(APITestCase, TestDataMixin):
 
     @classmethod

@@ -79,6 +79,61 @@ it('Saves token when getAuthToken server call succeeds', async () => {
   expect(global.localStorage.getItem('authToken')).toEqual('testTokenValue');
 });
 
+it('Updates error state if signUp server call fails', async () => {
+  moxios.stubRequest('/api/signup/', {
+    status: 400
+  })
+  const auth = shallow(<Auth />);
+  const event = {
+    preventDefault() { },
+    target: {
+      username: { value: 'john' },
+      password: { password: 'password' }
+    }
+  };
+  auth.instance().signUp(event);
+  await flushPromises();
+  auth.update();
+  expect(auth.state().error).toBeTruthy();
+});
+
+it('Saves token when signUp server call succeeds', async () => {
+  moxios.stubRequest('/api/signup/', {
+    status: 200,
+    response: {
+      token: 'testTokenValue'
+    }
+  })
+  const auth = shallow(<Auth />);
+  const event = {
+    preventDefault() { },
+    target: {
+      username: { value: 'john' },
+      password: { password: 'password' }
+    }
+  };
+
+  class LocalStorageMock {
+    constructor() {
+      this.store = {};
+    }
+
+    getItem(key) {
+      return this.store[key] || null;
+    }
+
+    setItem(key, value) {
+      this.store[key] = value.toString();
+    }
+  };
+  global.localStorage = new LocalStorageMock;
+
+  auth.instance().signUp(event);
+  await flushPromises();
+  auth.update();
+  expect(global.localStorage.getItem('authToken')).toEqual('testTokenValue');
+});
+
 it('Can toggle between signup / login and set correct submit function', () => {
   const auth = shallow(<Auth />);
   auth.instance().signUp = jest.fn();

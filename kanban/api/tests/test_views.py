@@ -23,8 +23,9 @@ class BoardDetailTest(APITestCase, TestDataMixin):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_retrieve_board_data(self):
+        board = Board.objects.first()
         num_columns = Column.objects.count()
-        url = reverse('api:board_detail', args=[1])
+        url = reverse('api:board_detail', args=[board.id])
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['columns']), num_columns)

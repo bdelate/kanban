@@ -32,12 +32,26 @@ class Auth extends Component {
         this.props.history.push('/');
       })
       .catch(error => {
-        this.setState({ error: true });
+        this.setState({ error: 'Unable to login. Check Credentials' });
       })
   }
 
   signUp = (event) => {
     event.preventDefault();
+    this.setState({ error: false });
+    const userData = {
+      username: event.target.username.value,
+      password: event.target.password.value
+    };
+
+    axios.post('/api/signup/', userData)
+      .then(res => {
+        localStorage.setItem('authToken', res.data.token);
+        this.props.history.push('/');
+      })
+      .catch(error => {
+        this.setState({ error: 'Unable to create user.' });
+      })
   }
 
   // toggle between login or signup submit section and actions
@@ -57,7 +71,7 @@ class Auth extends Component {
 
   render() {
     const error = this.state.error
-      ? <div>Unable to login. Check Credentials</div>
+      ? <div>{this.state.error}</div>
       : null;
 
     let submitSection;
