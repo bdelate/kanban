@@ -1,12 +1,11 @@
 // 3rd party imports
-import React, { Component } from 'react';
+import React from 'react';
 
 // project imports
 import Auth from './Auth';
-import { BoardComponentOnly } from '../../containers/Board/Board';
 
 // 3rd party imports
-import { configure, shallow, mount } from 'enzyme';
+import { configure, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import moxios from 'moxios'
 
@@ -78,4 +77,27 @@ it('Saves token when getAuthToken server call succeeds', async () => {
   await flushPromises();
   auth.update();
   expect(global.localStorage.getItem('authToken')).toEqual('testTokenValue');
+});
+
+it('Can toggle between signup / login and set correct submit function', () => {
+  const auth = shallow(<Auth />);
+  auth.instance().signUp = jest.fn();
+  auth.instance().getAuthToken = jest.fn();
+
+  // toggle to signup form and test submission
+  auth.find('#idShowSignUp').simulate('click');
+  expect(auth.state().newUser).toBeTruthy();
+  expect(auth.find('#idShowSignUp').length).toBe(0);
+  expect(auth.find('#idShowLogIn').length).toBe(1);
+  auth.find('#idAuthForm').simulate('submit');
+  expect(auth.instance().signUp).toHaveBeenCalledTimes(1);
+
+
+  // toggle to login form and test submission
+  auth.find('#idShowLogIn').simulate('click');
+  expect(auth.state().newUser).toBeFalsy();
+  expect(auth.find('#idShowLogIn').length).toBe(0);
+  expect(auth.find('#idShowSignUp').length).toBe(1);
+  auth.find('#idAuthForm').simulate('submit');
+  expect(auth.instance().getAuthToken).toHaveBeenCalledTimes(1);
 });

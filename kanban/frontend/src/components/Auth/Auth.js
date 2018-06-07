@@ -13,7 +13,9 @@ const AuthContainer = styled.div`
 class Auth extends Component {
 
   state = {
-    error: false
+    error: false,
+    submit: (event) => this.getAuthToken(event),
+    newUser: false  // used to differentiate login vs signup
   };
 
   getAuthToken = (event) => {
@@ -34,17 +36,60 @@ class Auth extends Component {
       })
   }
 
+  signUp = (event) => {
+    event.preventDefault();
+  }
+
+  // toggle between login or signup submit section and actions
+  toggleSubmitAction = (newUser) => {
+    if (newUser) {
+      this.setState({
+        submit: (event) => this.signUp(event),
+        newUser: newUser
+      })
+    } else {
+      this.setState({
+        submit: (event) => this.getAuthToken(event),
+        newUser: newUser
+      })
+    }
+  };
+
   render() {
     const error = this.state.error
       ? <div>Unable to login. Check Credentials</div>
       : null;
+
+    let submitSection;
+    if (this.state.newUser) {
+      submitSection = <div>
+        <button type="submit">Sign Up</button>
+        <span>
+          Existing user?
+          <b
+            id="idShowLogIn"
+            onClick={() => this.toggleSubmitAction(false)}>Log in here</b>
+        </span>
+      </div>;
+    } else {
+      submitSection = <div>
+        <button type="submit">Log In</button>
+        <span>
+          New user?
+          <b
+            id="idShowSignUp"
+            onClick={() => this.toggleSubmitAction(true)}>Sign up here</b>
+        </span>
+      </div>;
+    }
+
     return (
       <AuthContainer>
         {error}
-        <form onSubmit={(event) => this.getAuthToken(event)}>
+        <form id="idAuthForm" onSubmit={this.state.submit}>
           <input type="text" name="username" required placeholder="Username" />
           <input type="password" name="password" required placeholder="Password" />
-          <button type="submit">Login</button>
+          {submitSection}
         </form>
       </AuthContainer>
     )
