@@ -19,6 +19,11 @@ import moxios from 'moxios'
 
 configure({ adapter: new Adapter() });
 
+const props = {
+  id: 1,
+  authToken: 'authToken'
+};
+
 beforeAll(function () {
   const isLoggedIn = jest.fn();
   isLoggedIn.mockReturnValue(true);
@@ -43,21 +48,21 @@ function wrapInTestContext(DecoratedComponent) {
   return DragDropContext(TestBackend)(
     class TestContextContainer extends Component {
       render() {
-        return <DecoratedComponent {...this.props} />;
+        return <DecoratedComponent {...props} />;
       }
     }
   );
 }
 
 it('only displays a spinner when mounted (ie: retrieving data)', () => {
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   expect(board.find(Column).length).toEqual(0);
   expect(board.find(Spinner).length).toEqual(1);
 });
 
 it('calls retrieveData when mounted', () => {
   const spy = jest.spyOn(BoardComponentOnly.prototype, 'retrieveData');
-  const wrapper = shallow(<BoardComponentOnly />);
+  const wrapper = shallow(<BoardComponentOnly {...props} />);
   expect(spy).toHaveBeenCalledTimes(1);
 });
 
@@ -75,7 +80,7 @@ it('should have column instance when not retrieving data', () => {
     ]
   };
 
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   board.update();
   expect(board.find(Column).length).toEqual(1);
@@ -106,7 +111,7 @@ it('should move card when moveCardHandler is called', () => {
     ]
   };
 
-  const board = shallow(<Board />);
+  const board = shallow(<Board {...props} />);
   const boardInstance = board.dive().instance();
   boardInstance.setState(state);
   boardInstance.moveCardHandler(0, 0, 1);
@@ -136,7 +141,7 @@ it('should reorder cards when reorderCardHandler is called while hovering', () =
     fromCardIndex: 0,
     toCardIndex: 1
   };
-  const board = shallow(<Board />);
+  const board = shallow(<Board {...props} />);
   const boardInstance = board.dive().instance();
   boardInstance.setState(state);
   boardInstance.reorderCardHandler(args);
@@ -173,7 +178,7 @@ it('should call patchServerCards when reorderCardHandler on card drop', () => {
     }
   }
 
-  const board = shallow(<BoardWrapper />);
+  const board = shallow(<BoardWrapper  {...props} />);
   const boardInstance = board.instance();
   boardInstance.setState(state);
   boardInstance.reorderCardHandler(args);
@@ -194,7 +199,7 @@ it('should toggle column.collapsed when toggleColumnHandler is called', () => {
     ]
   };
 
-  const board = shallow(<Board />);
+  const board = shallow(<Board {...props} />);
   const boardInstance = board.dive().instance();
   boardInstance.setState(state);
   boardInstance.toggleColumnHandler(0);
@@ -215,7 +220,7 @@ it('should display error modal if patchServerCards Fails', async () => {
       }
     ]
   };
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   board.instance().patchServerCards(0);
   await flushPromises();
@@ -237,7 +242,7 @@ it('toggles ColumnCreateUpdate component when toggleColumnCreateUpdateHandler is
       }
     ]
   };
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   // initially there is no modal
   expect(board.find(ColumnCreateUpdate).length).toBe(0);
@@ -267,7 +272,7 @@ it('toggles CardCreateUpdate component when toggleCardCreateUpdateHandler is cal
       }
     ]
   };
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   // initially there is no modal
   expect(board.find(CardCreateUpdate).length).toBe(0);
@@ -294,7 +299,7 @@ it('creates new column when createColumnHandler is called', () => {
       }
     ]
   };
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   board.instance().createColumnHandler('new column');
   board.update();
@@ -313,7 +318,7 @@ it('update column name when editColumnNameHandler is called', async () => {
       }
     ]
   };
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   board.instance().editColumnNameHandler(0, 'new column name');
   await flushPromises();
@@ -335,7 +340,7 @@ it('displays modal when editColumnNameHandler call to server fails', async () =>
       }
     ]
   };
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   board.instance().editColumnNameHandler(0, 'new column name');
   await flushPromises();
@@ -357,7 +362,7 @@ it('deletes column from state when deleteColumnHandler is called', () => {
       }
     ]
   };
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   board.instance().deleteColumnHandler(0);
   board.update();
@@ -381,7 +386,7 @@ it('updates column positions ids when non last column is deleted', () => {
       }
     ]
   };
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   board.instance().deleteColumnHandler(0);
   board.update();
@@ -402,7 +407,7 @@ it('updates card positions ids when non last card is deleted', () => {
       }
     ]
   };
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   board.instance().deleteCardHandler(0, 0);
   board.update();
@@ -423,7 +428,7 @@ it('deletes card from state when deleteCardHandler is called', () => {
       }
     ]
   };
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   board.instance().deleteCardHandler(0, 0);
   board.update();
@@ -441,7 +446,7 @@ it('update card task when editCardDetailHandler is called', async () => {
       }
     ]
   };
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   board.instance().editCardDetailHandler(0, 0, 'new task text');
   await flushPromises();
@@ -463,7 +468,7 @@ it('displays modal when editCardDetailHandler call to server fails', async () =>
       }
     ]
   };
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   board.instance().editCardDetailHandler(0, 0, 'new task text');
   await flushPromises();
@@ -482,7 +487,7 @@ it('create new card when createCardHandler is called with valid card', () => {
       }
     ]
   };
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   board.instance().createCardHandler(0, 'new task');
   board.update();
@@ -516,7 +521,7 @@ it('should merge previous state if postServerColumn fails', async () => {
     board_id: 1,
     cards: []
   };
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   expect(board.state().value).toBeUndefined();
   board.instance().postServerColumn(newColumn);
@@ -565,7 +570,7 @@ it('should replace last column with response from postServerColumn', async () =>
       cards: []
     }
   })
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   expect(board.state().value).toBeUndefined();
   board.instance().postServerColumn(newColumn);
@@ -600,7 +605,7 @@ it('should merge previous state if postServerColumn fails', async () => {
     status: 400,
     response: {}
   })
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   expect(board.state().value).toBeUndefined();
   board.instance().postServerColumn(newColumn);
@@ -627,7 +632,7 @@ it('should merge previous state if patchServerColumnName fails', async () => {
     status: 404,
     response: {}
   })
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   expect(board.state().value).toBeUndefined();
   board.instance().patchServerColumnName(0);
@@ -661,7 +666,7 @@ it('should merge previous state if patchServerColumns fails', async () => {
     status: 404,
     response: {}
   })
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   expect(board.state().value).toBeUndefined();
   board.instance().patchServerColumns(column_update);
@@ -687,7 +692,7 @@ it('should merge previous state if patchServerCards fails', async () => {
     status: 404,
     response: {}
   })
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   expect(board.state().value).toBeUndefined();
   board.instance().patchServerCards([]);
@@ -713,7 +718,7 @@ it('should merge previous state if patchServerCardDetail fails', async () => {
     status: 404,
     response: {}
   })
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   expect(board.state().value).toBeUndefined();
   board.instance().patchServerCardDetail(0, 0);
@@ -746,7 +751,7 @@ it('should merge previous state if postServerCard fails', async () => {
     column_id: 0,
     position_id: 0
   }
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   expect(board.state().value).toBeUndefined();
   board.instance().postServerCard(0, new_card);
@@ -773,7 +778,7 @@ it('should merge previous state if deleteServerColumn fails', async () => {
     status: 404,
     response: {}
   })
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   expect(board.state().value).toBeUndefined();
   board.instance().deleteServerColumn(100);
@@ -799,7 +804,7 @@ it('should merge previous state if deleteServerCard fails', async () => {
     status: 404,
     response: {}
   })
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   expect(board.state().value).toBeUndefined();
   board.instance().deleteServerCard(100);
@@ -808,14 +813,14 @@ it('should merge previous state if deleteServerCard fails', async () => {
 });
 
 it('hides confirm modal when toggleConfirmHandler called with no args', async () => {
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.instance().toggleConfirmHandler();
   board.update();
   expect(board.find(Confirm).length).toEqual(0);
 });
 
 it('displays confirm modal when toggleConfirmHandler called with args', async () => {
-  const board = shallow(<BoardComponentOnly />);
+  const board = shallow(<BoardComponentOnly {...props} />);
   board.instance().toggleConfirmHandler('test message', jest.fn(), 0);
   board.update();
   expect(board.find(Confirm).length).toEqual(1);

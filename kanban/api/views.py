@@ -15,6 +15,16 @@ from rest_framework import status
 from rest_framework.response import Response
 
 
+class BoardList(APIView):
+    """
+    Retrieve all boards for the specified user
+    """
+
+    def get(self, request):
+        boards = Board.objects.filter(user=request.user)
+        return Response([board.name for board in boards])
+
+
 class BoardDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     Retrieve an existing board along with the associated columns and cards

@@ -16,8 +16,13 @@ import styled from 'styled-components';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import axios from 'axios';
-import jwtDecode from 'jwt-decode';
+import PropTypes from 'prop-types';
 
+
+const propTypes = {
+  id: PropTypes.number.isRequired,
+  authToken: PropTypes.string.isRequired
+}
 
 const BoardContainer = styled.div`
   display: flex;
@@ -54,26 +59,13 @@ class Board extends Component {
   }
 
   componentDidMount() {
-    if (this.isLoggedIn()) this.retrieveData();
-    else this.props.history.push('/auth');
+    axios.defaults.headers.common['Authorization'] = `JWT ${this.props.authToken}`;
+    this.retrieveData();
   }
-
-  // if authToken exists and has not expired, user is considered logged in
-  isLoggedIn() {
-    const authToken = localStorage.getItem('authToken');
-    if (authToken) {
-      const decodedToken = jwtDecode(authToken);
-      if (new Date() <= new Date(decodedToken.exp * 1000)) {
-        axios.defaults.headers.common['Authorization'] = `JWT ${authToken}`;
-        return true;
-      }
-    }
-    return false;
-  };
 
   // retrieve all board data from the server
   async retrieveData() {
-    await axios.get('/api/boards/2/')
+    await axios.get(`/api/boards/${this.props.id}/`)
       .then(res => {
         this.setState({
           ...res.data,
@@ -689,6 +681,9 @@ class Board extends Component {
     )
   }
 }
+
+Board.propTypes = propTypes;
+
 
 export const BoardComponentOnly = Board; // used for shallow unit testing
 export default DragDropContext(HTML5Backend)(Board);
