@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 // project imports
 import Info from '../../components/Modals/Info';
 import Board from '../Board/Board';
+import Select from '../../components/UI/Select';
 
 // 3rd party imports
 import styled from 'styled-components';
@@ -23,7 +24,8 @@ class Home extends Component {
   state = {
     infoModal: false,
     authToken: null,
-    board_id: 2  // board_id of the selected board
+    availableBoards: {},
+    selectedBoardId: null  // database board id of the selected board
   };
 
   componentDidMount() {
@@ -49,7 +51,7 @@ class Home extends Component {
   async retrieveData() {
     await axios.get('/api/boards/')
       .then(res => {
-        console.log(res.data);
+        this.setState({ availableBoards: res.data });
       })
       .catch(error => {
         const message = 'Error: Unable to load board data';
@@ -62,6 +64,10 @@ class Home extends Component {
     this.setState({ infoModal: message });
   };
 
+  loadBoard = (id) => {
+    this.setState({ selectedBoardId: parseInt(id, 10) });
+  }
+
   render() {
     let infoModal = null;
     if (this.state.infoModal) {
@@ -70,14 +76,17 @@ class Home extends Component {
         toggleInfo={this.toggleInfoHandler} />
     }
 
-    const board = (this.state.authToken && this.state.board_id)
-      ? <Board authToken={this.state.authToken} id={this.state.board_id} />
+    const board = (this.state.authToken && this.state.selectedBoardId)
+      ? <Board authToken={this.state.authToken} id={this.state.selectedBoardId} />
       : null;
 
     return (
       <HomeContainer>
         {infoModal}
-        test
+        <Select
+          onChangeFunc={this.loadBoard}
+          options={this.state.availableBoards}
+        />
         {board}
       </HomeContainer>
     );

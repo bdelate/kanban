@@ -22,7 +22,7 @@ class BoardList(APIView):
 
     def get(self, request):
         boards = Board.objects.filter(user=request.user)
-        return Response([board.name for board in boards])
+        return Response({board.id: board.name for board in boards})
 
 
 class BoardDetail(generics.RetrieveUpdateDestroyAPIView):

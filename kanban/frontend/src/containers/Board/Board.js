@@ -39,7 +39,8 @@ const ColumnsContainer = styled.div`
 class Board extends Component {
 
   state = {
-    retrieving_data: true,
+    id: null,
+    retrievingData: true,
     infoModal: false,
     confirmModal: {
       message: null,
@@ -58,25 +59,39 @@ class Board extends Component {
     previousState: {}
   }
 
+  // set auth token and retrieve data on initial mount
   componentDidMount() {
     axios.defaults.headers.common['Authorization'] = `JWT ${this.props.authToken}`;
     this.retrieveData();
   }
 
+  // called when the props change (eg: a different boardId was selected)
+  static getDerivedStateFromProps(nextProps, prevState) {
+    return { ...nextProps }
+  }
+
+  // if board id has changed, call retrieveData to laod the new board
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.id !== this.state.id) {
+      this.retrieveData();
+    }
+  }
+
   // retrieve all board data from the server
   async retrieveData() {
-    await axios.get(`/api/boards/${this.props.id}/`)
+    this.setState({ retrievingData: true });
+    await axios.get(`/api/boards/${this.state.id}/`)
       .then(res => {
         this.setState({
           ...res.data,
           ...this.state,
-          retrieving_data: false,
+          retrievingData: false,
           columns: res.data.columns
         }, this.savePreviousState);
       })
       .catch(error => {
         const message = 'Error: Unable to load board data';
-        this.setState({ retrieveData: false });
+        this.setState({ retrievingData: false });
         this.toggleInfoHandler(message)
       })
   }
@@ -586,7 +601,7 @@ class Board extends Component {
 
   render() {
     let output = <Spinner />;
-    if (!this.state.retrieving_data) {
+    if (!this.state.retrievingData) {
       const columns = this.state.columns.map((column, index) => {
         if (column.collapsed) {
           return <CollapsedColumn

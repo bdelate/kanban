@@ -24,12 +24,6 @@ const props = {
   authToken: 'authToken'
 };
 
-beforeAll(function () {
-  const isLoggedIn = jest.fn();
-  isLoggedIn.mockReturnValue(true);
-  BoardComponentOnly.prototype.isLoggedIn = isLoggedIn;
-})
-
 beforeEach(function () {
   // mock axios calls to the server
   moxios.install();
@@ -68,7 +62,7 @@ it('calls retrieveData when mounted', () => {
 
 it('should have column instance when not retrieving data', () => {
   const state = {
-    retrieving_data: false,
+    retrievingData: false,
     columns: [
       {
         id: 0,
@@ -230,7 +224,7 @@ it('should display error modal if patchServerCards Fails', async () => {
 
 it('toggles ColumnCreateUpdate component when toggleColumnCreateUpdateHandler is called', () => {
   const state = {
-    retrieving_data: false,
+    retrievingData: false,
     columns: [
       {
         id: 0,
@@ -260,7 +254,7 @@ it('toggles ColumnCreateUpdate component when toggleColumnCreateUpdateHandler is
 
 it('toggles CardCreateUpdate component when toggleCardCreateUpdateHandler is called', () => {
   const state = {
-    retrieving_data: false,
+    retrievingData: false,
     columns: [
       {
         id: 0,
@@ -812,18 +806,35 @@ it('should merge previous state if deleteServerCard fails', async () => {
   expect(board.state().value).toEqual('fake previous state value');
 });
 
-it('hides confirm modal when toggleConfirmHandler called with no args', async () => {
+it('hides confirm modal when toggleConfirmHandler called with no args', () => {
   const board = shallow(<BoardComponentOnly {...props} />);
   board.instance().toggleConfirmHandler();
   board.update();
   expect(board.find(Confirm).length).toEqual(0);
 });
 
-it('displays confirm modal when toggleConfirmHandler called with args', async () => {
+it('displays confirm modal when toggleConfirmHandler called with args', () => {
   const board = shallow(<BoardComponentOnly {...props} />);
   board.instance().toggleConfirmHandler('test message', jest.fn(), 0);
   board.update();
   expect(board.find(Confirm).length).toEqual(1);
   expect(board.state().confirmModal.message).toEqual('test message');
   expect(board.state().confirmModal.confirmFunction).toEqual(expect.any(Function));
+});
+
+it('updates state and calls retrieveData when board id prop changes', () => {
+  const retrieveData = jest.fn();
+  BoardComponentOnly.prototype.retrieveData = retrieveData;
+
+  const board = shallow(<BoardComponentOnly {...props} />);
+  expect(retrieveData).toHaveBeenCalledTimes(1);
+
+  // change board id
+  board.setProps({ id: 2 });
+  expect(board.state().id).toBe(2);
+  expect(retrieveData).toHaveBeenCalledTimes(2);
+
+  // board id doesn't change, therefore dont call retrieveData
+  board.setProps({ id: 2 });
+  expect(retrieveData).toHaveBeenCalledTimes(2);
 });
