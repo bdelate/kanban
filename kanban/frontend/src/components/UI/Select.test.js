@@ -16,7 +16,8 @@ it('Renders select with options from props', () => {
     options: {
       0: 'first board',
       1: 'second board'
-    }
+    },
+    selectedValue: -1
   };
   const select = shallow(<Select {...props} />);
   expect(select.children().length).toBe(3);  // includes default value
@@ -32,7 +33,8 @@ it('Calls onChangeFunc passed in from props when option is selected', () => {
     options: {
       0: 'first board',
       1: 'second board'
-    }
+    },
+    selectedValue: -1
   };
 
   const event = {

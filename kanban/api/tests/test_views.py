@@ -6,6 +6,32 @@ from .mixins import TestDataMixin
 from api.models import Board, Card, Column
 
 
+class BoardListCreateTest(APITestCase, TestDataMixin):
+
+    @classmethod
+    def setUpTestData(cls):
+
+        cls.create_test_data()
+
+    def setUp(self):
+        user = get_user_model().objects.get(username='john')
+        self.client.force_authenticate(user=user)
+
+    def test_list_user_boards(self):
+        board = Board.objects.first()
+        url = reverse('api:board_list_create')
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data[board.id], 'test board')
+
+    def test_create_board(self):
+        boards = Board.objects.count()
+        data = {'name': 'new board'}
+        url = reverse('api:board_list_create')
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Board.objects.count(), boards + 1)
+
+
 class BoardDetailTest(APITestCase, TestDataMixin):
 
     @classmethod

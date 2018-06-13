@@ -15,14 +15,28 @@ from rest_framework import status
 from rest_framework.response import Response
 
 
-class BoardList(APIView):
+class BoardListCreate(APIView):
     """
-    Retrieve all boards for the specified user
+    List all existing boards for a user or create a new one
     """
+
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request):
         boards = Board.objects.filter(user=request.user)
         return Response({board.id: board.name for board in boards})
+        # return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    def post(self, request):
+        data = request.data
+        data['user'] = request.user.id
+        serializer = BoardSerializer(data=data)
+        if serializer.is_valid():
+            instance = serializer.save()
+            data = {'id': instance.id}
+            data.update(serializer.data)
+            return Response(data, status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class BoardDetail(generics.RetrieveUpdateDestroyAPIView):

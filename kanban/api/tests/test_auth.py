@@ -49,6 +49,17 @@ class BoardAuthTest(APITestCase, TestDataMixin):
         self.jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
         self.jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
+    def test_list(self):
+        url = reverse('api:board_list_create')
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_create(self):
+        data = {'name': 'new board'}
+        url = reverse('api:board_list_create')
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
     def test_detail(self):
         board = Board.objects.first()
 
