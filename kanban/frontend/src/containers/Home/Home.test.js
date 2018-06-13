@@ -104,3 +104,16 @@ it("createBoardHandler display Info modal on failure", async () => {
   expect(home.state().selectedBoardId).toBeNull();
   expect(home.find(Info).length).toEqual(1);
 });
+
+it("toggleBoardCreateUpdateHandler updates state name only if updating", () => {
+  const availableBoards = { 1: "board name" };
+  const home = shallow(<Home />);
+  home.setState({
+    availableBoards: availableBoards,
+    selectedBoardId: 1
+  });
+  home.instance().toggleBoardCreateUpdateHandler();
+  expect(home.state().boardCreateUpdate.name).toBeNull();
+  home.instance().toggleBoardCreateUpdateHandler(true);
+  expect(home.state().boardCreateUpdate.name).toBe("board name");
+});

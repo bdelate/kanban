@@ -23,7 +23,10 @@ const HomeContainer = styled.div`
 class Home extends Component {
   state = {
     infoModal: false,
-    boardCreateUpdate: false,
+    boardCreateUpdate: {
+      active: false,
+      name: null
+    },
     authToken: null,
     availableBoards: {},
     selectedBoardId: null // database board id of the selected board
@@ -91,13 +94,25 @@ class Home extends Component {
   };
 
   // change the boards name
-  updateBoardHandler = () => {
+  updateBoardHandler = name => {
     this.toggleBoardCreateUpdateHandler();
+    if (name !== this.state.availableBoards[this.state.selectedBoardId]) {
+      console.log(name);
+    }
   };
 
   // used to display / hide boardCreateUpdate modal
-  toggleBoardCreateUpdateHandler = () => {
-    this.setState({ boardCreateUpdate: !this.state.boardCreateUpdate });
+  toggleBoardCreateUpdateHandler = update => {
+    const name = update
+      ? this.state.availableBoards[this.state.selectedBoardId]
+      : null;
+
+    const boardCreateUpdate = {
+      active: !this.state.boardCreateUpdate.active,
+      name: name
+    };
+
+    this.setState({ boardCreateUpdate: boardCreateUpdate });
   };
 
   render() {
@@ -111,11 +126,12 @@ class Home extends Component {
       );
     }
 
-    // display modal if this.state.boardCreateUpdate == true
+    // display modal if this.state.boardCreateUpdate.active == true
     let boardCreateUpdate = null;
-    if (this.state.boardCreateUpdate) {
+    if (this.state.boardCreateUpdate.active) {
       boardCreateUpdate = (
         <BoardCreateUpdate
+          name={this.state.boardCreateUpdate.name}
           toggleBoardCreateUpdate={this.toggleBoardCreateUpdateHandler}
           createBoard={this.createBoardHandler}
           updateBoard={this.updateBoardHandler}
@@ -131,6 +147,15 @@ class Home extends Component {
         />
       ) : null;
 
+    let editBoardButton = null;
+    if (this.state.selectedBoardId) {
+      editBoardButton = (
+        <Button clicked={() => this.toggleBoardCreateUpdateHandler(true)}>
+          Edit Board Name
+        </Button>
+      );
+    }
+
     return (
       <HomeContainer>
         {infoModal}
@@ -140,9 +165,10 @@ class Home extends Component {
           options={this.state.availableBoards}
           selectedValue={this.state.selectedBoardId || -1}
         />
-        <Button clicked={this.toggleBoardCreateUpdateHandler}>
+        <Button clicked={() => this.toggleBoardCreateUpdateHandler()}>
           Create Board
         </Button>
+        {editBoardButton}
         {board}
       </HomeContainer>
     );

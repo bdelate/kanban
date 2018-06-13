@@ -25,7 +25,6 @@ class BoardListCreate(APIView):
     def get(self, request):
         boards = Board.objects.filter(user=request.user)
         return Response({board.id: board.name for board in boards})
-        # return Response(status=status.HTTP_401_UNAUTHORIZED)
 
     def post(self, request):
         data = request.data
