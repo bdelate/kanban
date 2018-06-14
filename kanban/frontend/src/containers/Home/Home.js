@@ -80,9 +80,9 @@ class Home extends Component {
   };
 
   // create a new board
-  createBoardHandler = name => {
+  createBoardHandler = async name => {
     this.toggleBoardCreateUpdateHandler();
-    axios
+    await axios
       .post('/api/boards/', { name: name })
       .then(res => {
         const availableBoards = { ...this.state.availableBoards };
@@ -99,11 +99,11 @@ class Home extends Component {
   };
 
   // change the boards name
-  updateBoardHandler = name => {
+  updateBoardHandler = async name => {
     this.toggleBoardCreateUpdateHandler();
     if (name !== this.state.availableBoards[this.state.selectedBoardId]) {
       this.toggleBoardCreateUpdateHandler();
-      axios
+      await axios
         .patch(`/api/boards/${this.state.selectedBoardId}/`, { name: name })
         .then(res => {
           const availableBoards = { ...this.state.availableBoards };
@@ -118,9 +118,9 @@ class Home extends Component {
   };
 
   // delete board
-  deleteBoardHandler = () => {
+  deleteBoardHandler = async () => {
     this.toggleConfirmHandler();
-    axios
+    await axios
       .delete(`/api/boards/${this.state.selectedBoardId}/`)
       .then(res => {
         const availableBoards = { ...this.state.availableBoards };
