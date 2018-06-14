@@ -41,6 +41,7 @@ class BoardListCreate(APIView):
 class BoardDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     Retrieve an existing board along with the associated columns and cards
+    or Update / Delete a board
     """
     permission_classes = (IsAuthenticated, CanRetrieveUpdateDestroy)
     queryset = Board.objects.prefetch_related('columns', 'columns__cards')

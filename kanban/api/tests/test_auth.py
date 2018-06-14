@@ -49,12 +49,12 @@ class BoardAuthTest(APITestCase, TestDataMixin):
         self.jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
         self.jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
-    def test_list(self):
+    def test_list_unauth_user_fails(self):
         url = reverse('api:board_list_create')
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_create(self):
+    def test_create_unauth_user_fails(self):
         data = {'name': 'new board'}
         url = reverse('api:board_list_create')
         response = self.client.post(url, data, format='json')
@@ -62,7 +62,6 @@ class BoardAuthTest(APITestCase, TestDataMixin):
 
     def test_detail(self):
         board = Board.objects.first()
-
         url = reverse('api:board_detail', args=[board.id])
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -74,6 +73,14 @@ class BoardAuthTest(APITestCase, TestDataMixin):
 
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_delete_unauth_user_fails(self):
+        board = Board.objects.first()
+        num_boards = Board.objects.count()
+        url = reverse('api:board_detail', args=[board.id])
+        response = self.client.delete(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(num_boards, Board.objects.count())
 
 
 class ColumnAuthTest(APITestCase, TestDataMixin):
