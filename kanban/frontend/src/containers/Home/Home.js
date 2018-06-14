@@ -136,6 +136,12 @@ class Home extends Component {
       });
   };
 
+  // logout user by deleting localStorage authToken and redirect to /auth
+  logout = () => {
+    localStorage.removeItem('authToken');
+    this.props.history.push('/auth');
+  };
+
   // Display / hide boardCreateUpdate modal
   toggleBoardCreateUpdateHandler = update => {
     const name = update
@@ -226,6 +232,8 @@ class Home extends Component {
       );
     }
 
+    const logoutButton = <Button clicked={this.logout}>Logout</Button>;
+
     let deleteBoardButton = null;
     if (this.state.selectedBoardId) {
       deleteBoardButton = (
@@ -256,6 +264,7 @@ class Home extends Component {
           {createBoardButton}
           {editBoardButton}
           {deleteBoardButton}
+          {logoutButton}
         </div>
         {board}
       </HomeContainer>
