@@ -6,6 +6,32 @@ from .mixins import TestDataMixin
 from api.models import Board, Card, Column
 
 
+class BoardListCreateTest(APITestCase, TestDataMixin):
+
+    @classmethod
+    def setUpTestData(cls):
+
+        cls.create_test_data()
+
+    def setUp(self):
+        user = get_user_model().objects.get(username='john')
+        self.client.force_authenticate(user=user)
+
+    def test_list_user_boards(self):
+        board = Board.objects.first()
+        url = reverse('api:board_list_create')
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.data[board.id], 'test board')
+
+    def test_create_board(self):
+        boards = Board.objects.count()
+        data = {'name': 'new board'}
+        url = reverse('api:board_list_create')
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Board.objects.count(), boards + 1)
+
+
 class BoardDetailTest(APITestCase, TestDataMixin):
 
     @classmethod
@@ -43,6 +69,15 @@ class BoardDetailTest(APITestCase, TestDataMixin):
                          'column 1 card 2')
         self.assertEqual(response.data['columns'][0]['cards'][2]['task'],
                          'column 1 card 3')
+
+    def test_update_name(self):
+        board = Board.objects.first()
+        url = reverse('api:board_detail', args=[board.id])
+        data = {'name': 'new board name'}
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        board.refresh_from_db()
+        self.assertEqual(board.name, 'new board name')
 
 
 class ColumnDetailTest(APITestCase, TestDataMixin):

@@ -74,11 +74,11 @@ class ColumnSerializer(serializers.ModelSerializer):
 
 class BoardSerializer(serializers.ModelSerializer):
 
-    columns = ColumnSerializer(many=True)
+    columns = ColumnSerializer(many=True, required=False)
 
     class Meta:
         model = Board
-        exclude = ('user',)
+        fields = ('user', 'name', 'columns')
 
 
 class CreateUserSerializer(serializers.ModelSerializer):

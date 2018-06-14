@@ -16,8 +16,13 @@ import styled from 'styled-components';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import axios from 'axios';
-import jwtDecode from 'jwt-decode';
+import PropTypes from 'prop-types';
 
+
+const propTypes = {
+  id: PropTypes.number.isRequired,
+  authToken: PropTypes.string.isRequired
+}
 
 const BoardContainer = styled.div`
   display: flex;
@@ -34,7 +39,8 @@ const ColumnsContainer = styled.div`
 class Board extends Component {
 
   state = {
-    retrieving_data: true,
+    id: null,
+    retrievingData: true,
     infoModal: false,
     confirmModal: {
       message: null,
@@ -53,38 +59,39 @@ class Board extends Component {
     previousState: {}
   }
 
+  // set auth token and retrieve data on initial mount
   componentDidMount() {
-    if (this.isLoggedIn()) this.retrieveData();
-    else this.props.history.push('/auth');
+    axios.defaults.headers.common['Authorization'] = `JWT ${this.props.authToken}`;
+    this.retrieveData();
   }
 
-  // if authToken exists and has not expired, user is considered logged in
-  isLoggedIn() {
-    const authToken = localStorage.getItem('authToken');
-    if (authToken) {
-      const decodedToken = jwtDecode(authToken);
-      if (new Date() <= new Date(decodedToken.exp * 1000)) {
-        axios.defaults.headers.common['Authorization'] = `JWT ${authToken}`;
-        return true;
-      }
+  // called when the props change (eg: a different boardId was selected)
+  static getDerivedStateFromProps(nextProps, prevState) {
+    return { ...nextProps }
+  }
+
+  // if board id has changed, call retrieveData to laod the new board
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.id !== this.state.id) {
+      this.retrieveData();
     }
-    return false;
-  };
+  }
 
   // retrieve all board data from the server
   async retrieveData() {
-    await axios.get('/api/boards/2/')
+    this.setState({ retrievingData: true });
+    await axios.get(`/api/boards/${this.state.id}/`)
       .then(res => {
         this.setState({
           ...res.data,
           ...this.state,
-          retrieving_data: false,
+          retrievingData: false,
           columns: res.data.columns
         }, this.savePreviousState);
       })
       .catch(error => {
         const message = 'Error: Unable to load board data';
-        this.setState({ retrieveData: false });
+        this.setState({ retrievingData: false });
         this.toggleInfoHandler(message)
       })
   }
@@ -594,7 +601,7 @@ class Board extends Component {
 
   render() {
     let output = <Spinner />;
-    if (!this.state.retrieving_data) {
+    if (!this.state.retrievingData) {
       const columns = this.state.columns.map((column, index) => {
         if (column.collapsed) {
           return <CollapsedColumn
@@ -689,6 +696,9 @@ class Board extends Component {
     )
   }
 }
+
+Board.propTypes = propTypes;
+
 
 export const BoardComponentOnly = Board; // used for shallow unit testing
 export default DragDropContext(HTML5Backend)(Board);

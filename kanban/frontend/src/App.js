@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 
 // project imports
-import Board from './containers/Board/Board';
+import Home from './containers/Home/Home';
 import Auth from './components/Auth/Auth';
 
 // 3rd party imports
@@ -22,7 +22,7 @@ class App extends Component {
       <UIContainer>
         <Switch>
           <Route path="/auth" component={Auth} />
-          <Route path="/" exact component={Board} />
+          <Route path="/" exact component={Home} />
         </Switch>
       </UIContainer>
     );
