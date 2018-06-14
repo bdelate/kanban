@@ -97,7 +97,18 @@ class Home extends Component {
   updateBoardHandler = name => {
     this.toggleBoardCreateUpdateHandler();
     if (name !== this.state.availableBoards[this.state.selectedBoardId]) {
-      console.log(name);
+      this.toggleBoardCreateUpdateHandler();
+      axios
+        .patch(`/api/boards/${this.state.selectedBoardId}/`, { name: name })
+        .then(res => {
+          const availableBoards = { ...this.state.availableBoards };
+          availableBoards[this.state.selectedBoardId] = res.data.name;
+          this.setState({ availableBoards: availableBoards });
+        })
+        .catch(error => {
+          const message = "Error: Unable to update board";
+          this.toggleInfoHandler(message);
+        });
     }
   };
 

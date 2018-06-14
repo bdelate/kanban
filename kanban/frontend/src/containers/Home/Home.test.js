@@ -85,7 +85,7 @@ it("createBoardHandler updates availableBoards and selectedBoardId", async () =>
   expect(home.state().selectedBoardId).toEqual(5);
 });
 
-it("createBoardHandler display Info modal on failure", async () => {
+it("createBoardHandler displays Info modal on failure", async () => {
   moxios.stubRequest("/api/boards/", {
     status: 400,
     response: {
@@ -108,12 +108,47 @@ it("createBoardHandler display Info modal on failure", async () => {
 it("toggleBoardCreateUpdateHandler updates state name only if updating", () => {
   const availableBoards = { 1: "board name" };
   const home = shallow(<Home />);
-  home.setState({
-    availableBoards: availableBoards,
-    selectedBoardId: 1
-  });
+  home.setState({ availableBoards: availableBoards, selectedBoardId: 1 });
   home.instance().toggleBoardCreateUpdateHandler();
   expect(home.state().boardCreateUpdate.name).toBeNull();
   home.instance().toggleBoardCreateUpdateHandler(true);
   expect(home.state().boardCreateUpdate.name).toBe("board name");
+});
+
+it("updateBoardHandler updates board name", async () => {
+  moxios.stubRequest("/api/boards/5/", {
+    status: 200,
+    response: {
+      id: 5,
+      name: "new name"
+    }
+  });
+
+  const availableBoards = { 5: "old name" };
+
+  const home = shallow(<Home />);
+  home.setState({ availableBoards: availableBoards, selectedBoardId: 5 });
+  home.instance().updateBoardHandler("new name");
+  await flushPromises();
+  expect(home.state().availableBoards[5]).toEqual("new name");
+});
+
+it("updateBoardHandler displays Info modal on failure", async () => {
+  moxios.stubRequest("/api/boards/5/", {
+    status: 400,
+    response: {
+      id: 5,
+      name: "new name"
+    }
+  });
+
+  const availableBoards = { 5: "old name" };
+
+  const home = shallow(<Home />);
+  home.setState({ availableBoards: availableBoards, selectedBoardId: 5 });
+  home.instance().updateBoardHandler("new name");
+  await flushPromises();
+  home.update();
+  expect(home.state().availableBoards).toEqual(availableBoards);
+  expect(home.find(Info).length).toEqual(1);
 });

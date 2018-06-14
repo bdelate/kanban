@@ -70,6 +70,15 @@ class BoardDetailTest(APITestCase, TestDataMixin):
         self.assertEqual(response.data['columns'][0]['cards'][2]['task'],
                          'column 1 card 3')
 
+    def test_update_name(self):
+        board = Board.objects.first()
+        url = reverse('api:board_detail', args=[board.id])
+        data = {'name': 'new board name'}
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        board.refresh_from_db()
+        self.assertEqual(board.name, 'new board name')
+
 
 class ColumnDetailTest(APITestCase, TestDataMixin):
 
