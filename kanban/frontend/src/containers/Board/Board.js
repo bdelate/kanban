@@ -273,16 +273,12 @@ class Board extends Component {
       });
   };
 
-  // delete column on the server. If successful and 'columns' arg is provided
-  // update 'columns' on the server since they now have new position_ids
+  // delete column on the server
   deleteServerColumn = async (columnId, columns) => {
     await axios
       .delete(`/api/columns/${columnId}/`)
       .then(res => {
         this.savePreviousState();
-      })
-      .then(res => {
-        if (columns) this.patchServerColumns(columns);
       })
       // restore previous valid state and display error message
       .catch(error => {
@@ -482,8 +478,10 @@ class Board extends Component {
     );
   };
 
-  // remove column from state, update remaining column position ids
-  // if needed and call deleteServerColumn
+  // remove column from state.
+  // if: deleted column is the last column - just delete it
+  // else: update position_ids of remaining columns and flag column for
+  // deletion. Use patchServerColumn in this case.
   deleteColumnHandler = columnIndex => {
     this.toggleConfirmHandler();
 
@@ -493,25 +491,32 @@ class Board extends Component {
         this.state.columns.length - 1
       : false;
 
-    const columnId = this.state.columns[columnIndex].id;
-
-    // if removed column was last column, simply remove it
-    // else update remaining column position ids
     if (was_last_column) {
+      // delete last column. Remaining columns remain unchanged.
+      const columnId = this.state.columns[columnIndex].id;
       this.setState({
         columns: [...this.state.columns.slice(0, columnIndex)]
       });
       this.deleteServerColumn(columnId);
     } else {
+      // add delete flag to deleted column
+      const deletedColumn = {
+        ...this.state.columns[columnIndex],
+        delete: true
+      };
+      // remove deleted column from existing columns
       const columns = [
         ...this.state.columns.slice(0, columnIndex),
         ...this.state.columns.slice(columnIndex + 1)
       ];
-      for (let key in columns) {
-        columns[key]['position_id'] = parseInt(key, 10);
+      // update remaining column position_id's
+      for (let i = 0; i < columns.length; i++) {
+        columns[i]['position_id'] = parseInt(i, 10);
       }
+      // update remaining columns in state
       this.setState({ columns: columns });
-      this.deleteServerColumn(columnId, columns);
+      // update server columns along with column flagged for deletion
+      this.patchServerColumns([...columns, deletedColumn]);
     }
   };
 

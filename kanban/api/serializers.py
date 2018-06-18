@@ -40,13 +40,30 @@ class CardSerializer(serializers.ModelSerializer):
 class ColumnListSerializer(serializers.ListSerializer):
 
     def update(self, instance, validated_data):
+        """
+        Update (and optionally delete) multiple existing columns
+        """
         column_mapping = {column.id: column for column in instance}
         data_mapping = {item['id']: item for item in validated_data}
+
+        # identify and delete columns that have the 'delete' flag
+        deleted_columns = [
+            column['id']
+            for column
+            in self.initial_data
+            if column.get('delete', False)
+        ]
+        for column_id in deleted_columns:
+            column = column_mapping[column_id]
+            column.delete()
+
+        # update and return columns that were not deleted
         columns = []
         for column_id, data in data_mapping.items():
-            column = column_mapping[column_id]
-            self.child.update(column, data)
-            columns.append(column)
+            if column_id not in deleted_columns:
+                column = column_mapping[column_id]
+                self.child.update(column, data)
+                columns.append(column)
         return columns
 
 

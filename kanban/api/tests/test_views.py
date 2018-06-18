@@ -174,24 +174,24 @@ class ColumnsCreateUpdateTest(APITestCase, TestDataMixin):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_delete_column_then_update_position_ids(self):
-        # delete first column
+    def test_delete_column_and_update_remaining_position_ids(self):
+        """
+        Test data contains 3 columns. Delete the second column and
+        update the last columns position_id
+        """
         num_columns = Column.objects.count()
-        first_column = Column.objects.first()
-        url = reverse('api:column_detail', args=[first_column.id])
-        response = self.client.delete(url, format='json')
-        self.assertEqual(num_columns - 1, Column.objects.count())
-
-        # 2 columns are left, update their position ids
-        first_column = Column.objects.first()
+        second_column = Column.objects.get(name='second column')
         last_column = Column.objects.last()
 
+        self.assertEqual(last_column.position_id, 2)
+
         columns = [{
-            'id': first_column.id,
+            'id': second_column.id,
             'cards': [],
-            'board_id': first_column.board_id,
-            'name': first_column.name,
-            'position_id': 0
+            'board_id': second_column.board_id,
+            'name': second_column.name,
+            'position_id': 1,
+            'delete': True
         }, {
             'id': last_column.id,
             'cards': [],
@@ -204,10 +204,9 @@ class ColumnsCreateUpdateTest(APITestCase, TestDataMixin):
         url = reverse('api:columns_create_update')
         response = self.client.patch(url, data, format='json')
 
-        first_column.refresh_from_db()
         last_column.refresh_from_db()
 
-        self.assertEqual(first_column.position_id, 0)
+        self.assertEqual(num_columns - 1, Column.objects.count())
         self.assertEqual(last_column.position_id, 1)
 
 

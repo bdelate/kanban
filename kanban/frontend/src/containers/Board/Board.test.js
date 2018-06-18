@@ -15,7 +15,7 @@ import TestBackend from 'react-dnd-test-backend';
 import { DragDropContext } from 'react-dnd';
 import { configure, shallow, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import moxios from 'moxios'
+import moxios from 'moxios';
 
 configure({ adapter: new Adapter() });
 
@@ -24,14 +24,14 @@ const props = {
   authToken: 'authToken'
 };
 
-beforeEach(function () {
+beforeEach(function() {
   // mock axios calls to the server
   moxios.install();
-})
+});
 
-afterEach(function () {
+afterEach(function() {
   moxios.uninstall();
-})
+});
 
 function flushPromises() {
   return new Promise(resolve => setImmediate(resolve));
@@ -67,9 +67,7 @@ it('should have column instance when not retrieving data', () => {
       {
         id: 0,
         name: 'first column',
-        cards: [
-          { id: 0, task: 'first column first task' }
-        ]
+        cards: [{ id: 0, task: 'first column first task' }]
       }
     ]
   };
@@ -89,15 +87,20 @@ it('should move card when moveCardHandler is called', () => {
         name: 'first column',
         cards: [
           {
-            id: 0, task: 'first column first task',
-            position_id: 0, column_id: 0
+            id: 0,
+            task: 'first column first task',
+            position_id: 0,
+            column_id: 0
           },
           {
-            id: 1, task: 'first column second task',
-            position_id: 1, column_id: 0
+            id: 1,
+            task: 'first column second task',
+            position_id: 1,
+            column_id: 0
           }
         ]
-      }, {
+      },
+      {
         id: 1,
         name: 'second column',
         cards: []
@@ -111,7 +114,9 @@ it('should move card when moveCardHandler is called', () => {
   boardInstance.moveCardHandler(0, 0, 1);
   expect(boardInstance.state.columns[0].cards.length).toBe(1);
   expect(boardInstance.state.columns[1].cards.length).toBe(1);
-  expect(boardInstance.state.columns[1].cards[0].task).toBe('first column first task');
+  expect(boardInstance.state.columns[1].cards[0].task).toBe(
+    'first column first task'
+  );
   expect(boardInstance.state.columns[1].cards[0].position_id).toBe(0);
   expect(boardInstance.state.columns[1].cards[0].column_id).toBe(1);
 });
@@ -172,7 +177,7 @@ it('should call patchServerCards when reorderCardHandler on card drop', () => {
     }
   }
 
-  const board = shallow(<BoardWrapper  {...props} />);
+  const board = shallow(<BoardWrapper {...props} />);
   const boardInstance = board.instance();
   boardInstance.setState(state);
   boardInstance.reorderCardHandler(args);
@@ -186,9 +191,7 @@ it('should toggle column.collapsed when toggleColumnHandler is called', () => {
         id: 0,
         name: 'first column',
         collapsed: false,
-        cards: [
-          { id: 0, task: 'first task' }
-        ]
+        cards: [{ id: 0, task: 'first task' }]
       }
     ]
   };
@@ -203,7 +206,7 @@ it('should toggle column.collapsed when toggleColumnHandler is called', () => {
 it('should display error modal if patchServerCards Fails', async () => {
   moxios.stubRequest('/api/cards/', {
     status: 404
-  })
+  });
   const state = {
     columns: [
       {
@@ -230,9 +233,7 @@ it('toggles ColumnCreateUpdate component when toggleColumnCreateUpdateHandler is
         id: 0,
         name: 'first column',
         collapsed: false,
-        cards: [
-          { id: 0, task: 'first task' }
-        ]
+        cards: [{ id: 0, task: 'first task' }]
       }
     ]
   };
@@ -260,9 +261,7 @@ it('toggles CardCreateUpdate component when toggleCardCreateUpdateHandler is cal
         id: 0,
         name: 'first column',
         collapsed: false,
-        cards: [
-          { id: 0, task: 'first task' }
-        ]
+        cards: [{ id: 0, task: 'first task' }]
       }
     ]
   };
@@ -323,7 +322,7 @@ it('update column name when editColumnNameHandler is called', async () => {
 it('displays modal when editColumnNameHandler call to server fails', async () => {
   moxios.stubRequest(/api\/columns\/*/, {
     status: 404
-  })
+  });
   const state = {
     columns: [
       {
@@ -340,27 +339,6 @@ it('displays modal when editColumnNameHandler call to server fails', async () =>
   await flushPromises();
   board.update();
   expect(board.find(Info).length).toEqual(1);
-});
-
-it('deletes column from state when deleteColumnHandler is called', () => {
-  const state = {
-    columns: [
-      {
-        id: 0,
-        name: 'first column',
-        collapsed: false,
-        position_id: 0,
-        cards: [
-          { id: 0, task: 'first task' }
-        ]
-      }
-    ]
-  };
-  const board = shallow(<BoardComponentOnly {...props} />);
-  board.setState(state);
-  board.instance().deleteColumnHandler(0);
-  board.update();
-  expect(board.state().columns.length).toBe(0);
 });
 
 it('updates column positions ids when non last column is deleted', () => {
@@ -384,8 +362,35 @@ it('updates column positions ids when non last column is deleted', () => {
   board.setState(state);
   board.instance().deleteColumnHandler(0);
   board.update();
+  expect(board.state().columns.length).toEqual(1);
   expect(board.state().columns[0].name).toEqual('second column');
-  expect(board.state().columns[0].position_id).toBe(0);
+  expect(board.state().columns[0].position_id).toEqual(0);
+});
+
+it('deletes column with no other updates if last column is deleted', () => {
+  const state = {
+    columns: [
+      {
+        id: 0,
+        name: 'first column',
+        position_id: 0,
+        cards: []
+      },
+      {
+        id: 1,
+        name: 'second column',
+        position_id: 1,
+        cards: []
+      }
+    ]
+  };
+  const board = shallow(<BoardComponentOnly {...props} />);
+  board.setState(state);
+  board.instance().deleteColumnHandler(1);
+  board.update();
+  expect(board.state().columns.length).toEqual(1);
+  expect(board.state().columns[0].name).toEqual('first column');
+  expect(board.state().columns[0].position_id).toEqual(0);
 });
 
 it('updates card positions ids when non last card is deleted', () => {
@@ -416,9 +421,7 @@ it('deletes card from state when deleteCardHandler is called', () => {
         id: 0,
         name: 'first column',
         collapsed: false,
-        cards: [
-          { id: 0, task: 'first task' }
-        ]
+        cards: [{ id: 0, task: 'first task' }]
       }
     ]
   };
@@ -451,7 +454,7 @@ it('update card task when editCardDetailHandler is called', async () => {
 it('displays modal when editCardDetailHandler call to server fails', async () => {
   moxios.stubRequest(/api\/cards\/*/, {
     status: 404
-  })
+  });
   const state = {
     columns: [
       {
@@ -506,7 +509,7 @@ it('should merge previous state if postServerColumn fails', async () => {
   moxios.stubRequest('/api/columns/', {
     status: 400,
     response: {}
-  })
+  });
   const newColumn = {
     id: -1,
     spinner: true,
@@ -553,7 +556,7 @@ it('should replace last column with response from postServerColumn', async () =>
     position_id: 1,
     board_id: 1,
     cards: []
-  }
+  };
   moxios.stubRequest('/api/columns/', {
     status: 201,
     response: {
@@ -563,7 +566,7 @@ it('should replace last column with response from postServerColumn', async () =>
       board_id: 1,
       cards: []
     }
-  })
+  });
   const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   expect(board.state().value).toBeUndefined();
@@ -594,11 +597,11 @@ it('should merge previous state if postServerColumn fails', async () => {
     position_id: 1,
     board_id: 1,
     cards: []
-  }
+  };
   moxios.stubRequest('/api/columns/', {
     status: 400,
     response: {}
-  })
+  });
   const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   expect(board.state().value).toBeUndefined();
@@ -625,7 +628,7 @@ it('should merge previous state if patchServerColumnName fails', async () => {
   moxios.stubRequest('/api/columns/0/', {
     status: 404,
     response: {}
-  })
+  });
   const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   expect(board.state().value).toBeUndefined();
@@ -659,7 +662,7 @@ it('should merge previous state if patchServerColumns fails', async () => {
   moxios.stubRequest('/api/columns/', {
     status: 404,
     response: {}
-  })
+  });
   const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   expect(board.state().value).toBeUndefined();
@@ -685,7 +688,7 @@ it('should merge previous state if patchServerCards fails', async () => {
   moxios.stubRequest('/api/cards/', {
     status: 404,
     response: {}
-  })
+  });
   const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   expect(board.state().value).toBeUndefined();
@@ -711,7 +714,7 @@ it('should merge previous state if patchServerCardDetail fails', async () => {
   moxios.stubRequest('/api/cards/0/', {
     status: 404,
     response: {}
-  })
+  });
   const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   expect(board.state().value).toBeUndefined();
@@ -737,14 +740,14 @@ it('should merge previous state if postServerCard fails', async () => {
   moxios.stubRequest('/api/cards/', {
     status: 400,
     response: {}
-  })
+  });
   const new_card = {
     id: -1,
     spinner: true,
     task: 'test task',
     column_id: 0,
     position_id: 0
-  }
+  };
   const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   expect(board.state().value).toBeUndefined();
@@ -771,7 +774,7 @@ it('should merge previous state if deleteServerColumn fails', async () => {
   moxios.stubRequest('/api/columns/100/', {
     status: 404,
     response: {}
-  })
+  });
   const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   expect(board.state().value).toBeUndefined();
@@ -797,7 +800,7 @@ it('should merge previous state if deleteServerCard fails', async () => {
   moxios.stubRequest('/api/cards/100/', {
     status: 404,
     response: {}
-  })
+  });
   const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
   expect(board.state().value).toBeUndefined();
@@ -819,7 +822,9 @@ it('displays confirm modal when toggleConfirmHandler called with args', () => {
   board.update();
   expect(board.find(Confirm).length).toEqual(1);
   expect(board.state().confirmModal.message).toEqual('test message');
-  expect(board.state().confirmModal.confirmFunction).toEqual(expect.any(Function));
+  expect(board.state().confirmModal.confirmFunction).toEqual(
+    expect.any(Function)
+  );
 });
 
 it('updates state and calls retrieveData when board id prop changes', () => {

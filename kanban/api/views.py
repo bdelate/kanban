@@ -75,7 +75,7 @@ class ColumnsCreateUpdate(APIView):
 
     def patch(self, request):
         """
-        Update multiple existing columns
+        Update (and optionally delete) multiple existing columns
         """
         column_ids = [column['id'] for column in request.data['columns']]
         columns = Column.objects.filter(id__in=column_ids)
