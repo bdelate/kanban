@@ -289,16 +289,12 @@ class Board extends Component {
       });
   };
 
-  // delete card on the server. If successful and 'cards' arg is provided
-  // update 'cards' on the server since they now have new position_ids
-  deleteServerCard = async (cardId, cards) => {
+  // delete card on the server
+  deleteServerCard = async cardId => {
     await axios
       .delete(`/api/cards/${cardId}/`)
       .then(res => {
         this.savePreviousState();
-      })
-      .then(res => {
-        if (cards) this.patchServerCards(cards);
       })
       // restore previous valid state and display error message
       .catch(error => {
@@ -520,8 +516,10 @@ class Board extends Component {
     }
   };
 
-  // remove card from state, update remaining card posiion ids if needed
-  // and call deleteServerCard
+  // remove card from state.
+  // if: deleted card is the last card - just delete it
+  // else: update position_ids of remaining cards and flag card for
+  // deletion. Use patchServerCard in this case.
   deleteCardHandler = (columnIndex, cardIndex) => {
     this.toggleCardCreateUpdateHandler(false);
 
@@ -537,8 +535,10 @@ class Board extends Component {
       ? column.cards[cardIndex].position_id === column.cards.length - 1
       : false;
 
-    // get cardId then remove card
-    const cardId = column.cards[cardIndex].id;
+    // retrieve deleted card and flag for deletion
+    const deletedCard = { ...column.cards[cardIndex], delete: true };
+
+    // remove card from column
     column.cards.splice(cardIndex, 1);
 
     // update remaining card position ids if removed card was not the last one
@@ -557,9 +557,9 @@ class Board extends Component {
     });
 
     if (!was_last_card) {
-      this.deleteServerCard(cardId, column.cards);
+      this.patchServerCards([...column.cards, deletedCard]);
     } else {
-      this.deleteServerCard(cardId);
+      this.deleteServerCard(deletedCard.id);
     }
   };
 

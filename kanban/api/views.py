@@ -116,7 +116,7 @@ class CardsCreateUpdate(APIView):
 
     def patch(self, request):
         """
-        Update multiple existing cards
+        Update (and optionally delete) multiple existing cards
         """
         card_ids = [card['id'] for card in request.data['cards']]
         cards = Card.objects.filter(id__in=card_ids)

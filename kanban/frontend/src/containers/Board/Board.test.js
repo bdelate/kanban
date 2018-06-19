@@ -410,26 +410,29 @@ it('updates card positions ids when non last card is deleted', () => {
   board.setState(state);
   board.instance().deleteCardHandler(0, 0);
   board.update();
+  expect(board.state().columns[0].cards.length).toEqual(1);
   expect(board.state().columns[0].cards[0].task).toEqual('second task');
-  expect(board.state().columns[0].cards[0].position_id).toBe(0);
+  expect(board.state().columns[0].cards[0].position_id).toEqual(0);
 });
 
-it('deletes card from state when deleteCardHandler is called', () => {
+it('deletes card with no other updates if last column card is deleted', () => {
   const state = {
     columns: [
       {
         id: 0,
         name: 'first column',
         collapsed: false,
-        cards: [{ id: 0, task: 'first task' }]
+        cards: [{ id: 0, task: 'first task' }, { id: 1, task: 'second task' }]
       }
     ]
   };
   const board = shallow(<BoardComponentOnly {...props} />);
   board.setState(state);
-  board.instance().deleteCardHandler(0, 0);
+  board.instance().deleteCardHandler(0, 1);
   board.update();
-  expect(board.state().columns[0].cards.length).toBe(0);
+  expect(board.state().columns[0].cards.length).toEqual(1);
+  expect(board.state().columns[0].cards[0].task).toEqual('first task');
+  expect(board.state().columns[0].cards[0].position_id).toEqual(0);
 });
 
 it('update card task when editCardDetailHandler is called', async () => {

@@ -246,7 +246,7 @@ class CardDetailTest(APITestCase, TestDataMixin):
         cards = Card.objects.filter(task=card_task).count()
         self.assertEqual(cards, 0)
 
-    def test_delete_column_failure(self):
+    def test_delete_card_failure(self):
         cards = Card.objects.count()
         url = reverse('api:card_detail', args=[500])
         response = self.client.delete(url, format='json')
@@ -375,3 +375,40 @@ class CardsCreateUpdateTest(APITestCase, TestDataMixin):
         self.assertEqual(first_card.column_id, last_column.id)
         self.assertEqual(first_column_cards, num_first_column_cards - 1)
         self.assertEqual(last_column_cards, num_last_column_cards + 1)
+
+    def test_delete_card_and_update_remaining_position_ids(self):
+        column = Column.objects.first()
+        first_card = Card.objects.get(column_id=column.id, position_id=0)
+        second_card = Card.objects.get(column_id=column.id, position_id=1)
+        third_card = Card.objects.get(column_id=column.id, position_id=2)
+        num_cards = Card.objects.filter(column_id=column.id).count()
+
+        cards = [{
+            'id': first_card.id,
+            'task': 'column 1 card 1',
+            'position_id': 0,
+            'column_id': column.id,
+            'delete': 'true'
+        }, {
+            'id': second_card.id,
+            'task': 'column 1 card 2',
+            'position_id': 0,
+            'column_id': column.id
+        }, {
+            'id': third_card.id,
+            'task': 'column 1 card 3',
+            'position_id': 1,
+            'column_id': column.id
+        }]
+        data = {'cards': cards}
+
+        url = reverse('api:cards_create_update')
+        response = self.client.patch(url, data, format='json')
+
+        first_card = Card.objects.get(column_id=column.id, position_id=0)
+        second_card = Card.objects.get(column_id=column.id, position_id=1)
+
+        self.assertEqual(num_cards - 1,
+                         Card.objects.filter(column_id=column.id).count())
+        self.assertEqual(first_card.task, 'column 1 card 2')
+        self.assertEqual(second_card.task, 'column 1 card 3')
