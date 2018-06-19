@@ -75,7 +75,7 @@ class ColumnsCreateUpdate(APIView):
 
     def patch(self, request):
         """
-        Update multiple existing columns
+        Update (and optionally delete) multiple existing columns
         """
         column_ids = [column['id'] for column in request.data['columns']]
         columns = Column.objects.filter(id__in=column_ids)
@@ -116,7 +116,7 @@ class CardsCreateUpdate(APIView):
 
     def patch(self, request):
         """
-        Update multiple existing cards
+        Update (and optionally delete) multiple existing cards
         """
         card_ids = [card['id'] for card in request.data['cards']]
         cards = Card.objects.filter(id__in=card_ids)
