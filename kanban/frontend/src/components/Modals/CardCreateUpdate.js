@@ -5,7 +5,6 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
-
 const propTypes = {
   active: PropTypes.bool.isRequired,
   columnIndex: PropTypes.number.isRequired,
@@ -13,8 +12,8 @@ const propTypes = {
   task: PropTypes.string,
   toggleCardCreateUpdate: PropTypes.func.isRequired,
   editCardDetail: PropTypes.func.isRequired,
-  createCard: PropTypes.func.isRequired,
-}
+  createCard: PropTypes.func.isRequired
+};
 
 const Container = styled.div`
   position: fixed;
@@ -34,14 +33,13 @@ const Content = styled.div`
   transform: translate(-50%, -50%);
   border-radius: 2px;
   padding: 1rem;
-  background-color: #209028;
+  background-color: #005792;
 `;
 
 class CardCreateUpdate extends Component {
-
   state = {
     task: ''
-  }
+  };
 
   componentDidMount() {
     if (this.props.task) {
@@ -49,35 +47,40 @@ class CardCreateUpdate extends Component {
     }
   }
 
-  setTaskHandler = (task) => {
+  setTaskHandler = task => {
     this.setState({ task: task });
-  }
+  };
 
   render() {
     let saveButton;
     if (this.props.cardIndex === -1) {
-      saveButton = <button
-        id="idSaveCardButton"
-        disabled={this.state.task.length === 0}
-        onClick={() => this.props.createCard(
-          this.props.columnIndex,
-          this.state.task
-        )}
-      >
-        Save
-      </button>
+      saveButton = (
+        <button
+          id="idSaveCardButton"
+          disabled={this.state.task.length === 0}
+          onClick={() =>
+            this.props.createCard(this.props.columnIndex, this.state.task)
+          }
+        >
+          Save
+        </button>
+      );
     } else {
-      saveButton = <button
-        id="idSaveCardButton"
-        disabled={this.state.task.length === 0}
-        onClick={() => this.props.editCardDetail(
-          this.props.columnIndex,
-          this.props.cardIndex,
-          this.state.task
-        )}
-      >
-        Save
-      </button>
+      saveButton = (
+        <button
+          id="idSaveCardButton"
+          disabled={this.state.task.length === 0}
+          onClick={() =>
+            this.props.editCardDetail(
+              this.props.columnIndex,
+              this.props.cardIndex,
+              this.state.task
+            )
+          }
+        >
+          Save
+        </button>
+      );
     }
 
     return (
@@ -91,17 +94,15 @@ class CardCreateUpdate extends Component {
             id="idTaskText"
             placeholder="Task details..."
             defaultValue={this.props.task}
-            onChange={(e) => this.setTaskHandler(e.target.value)}>
-          </textarea>
+            onChange={e => this.setTaskHandler(e.target.value)}
+          />
           {saveButton}
-          <button
-            onClick={() => this.props.toggleCardCreateUpdate(false)}
-          >
+          <button onClick={() => this.props.toggleCardCreateUpdate(false)}>
             Cancel
           </button>
         </Content>
       </Container>
-    )
+    );
   }
 }
 

@@ -22,7 +22,7 @@ const ColumnContainer = styled.div`
   text-orientation: sideways;
   writing-mode: vertical-lr;
   .fas {
-    color: #fd5f00;
+    color: #c3d9e8;
   }
 `;
 
@@ -36,7 +36,7 @@ const collapsedColumn = props => {
     <ColumnContainer>
       <i
         title="Expand Column"
-        className="fas fa-expand fa-lg"
+        className="fas fa-expand"
         onClick={() => props.toggleColumn(props.columnIndex)}
       />
       <Header>

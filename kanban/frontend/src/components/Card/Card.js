@@ -22,9 +22,9 @@ const propTypes = {
 const CardContainer = styled.div`
   margin: 15px;
   background: #005792;
-  border-radius: 5px;
+  border-radius: 2px;
   .fas {
-    color: #00204a;
+    color: #c3d9e8;
     &.fa-spinner {
       color: #fd5f00;
     }
@@ -34,9 +34,9 @@ const CardContainer = styled.div`
 const Controls = styled.div`
   display: flex;
   margin-bottom: 10px;
-  border-radius: 5px 5px 0 0;
+  border-radius: 2px 2px 0 0;
   padding: 5px;
-  background-color: #fd5f00;
+  background-color: #9a2b37;
 `;
 
 const FlexEnd = styled.div`
@@ -141,7 +141,7 @@ const card = props => {
       <CardContainer>
         <Controls />
         <Task>
-          <i className="fas fa-spinner fa-spin fa-lg" />
+          <i className="fas fa-spinner fa-spin" />
         </Task>
       </CardContainer>
     );
@@ -153,16 +153,13 @@ const card = props => {
             <Controls>
               <div>
                 {connectDragSource(
-                  <i
-                    title="Move Card"
-                    className="fas fa-expand-arrows-alt fa-lg"
-                  />
+                  <i title="Move Card" className="fas fa-expand-arrows-alt" />
                 )}
               </div>
               <FlexEnd>
                 <i
                   title="Edit Task"
-                  className="fas fa-edit fa-lg"
+                  className="fas fa-edit"
                   onClick={() =>
                     props.toggleCardCreateUpdate(
                       true,
@@ -173,7 +170,7 @@ const card = props => {
                 />
                 <i
                   title="Delete Card"
-                  className="fas fa-trash-alt fa-lg"
+                  className="fas fa-trash-alt"
                   onClick={() =>
                     props.deleteCard(props.columnIndex, props.cardIndex)
                   }

@@ -26,7 +26,7 @@ const propTypes = {
 
 const ColumnContainer = styled.div`
   margin: 10px;
-  border-radius: 5px;
+  border-radius: 2px;
   background-color: #00204a;
   display: flex;
   flex-direction: column;
@@ -38,7 +38,7 @@ const ColumnContainer = styled.div`
 
 const Header = styled.h2`
   align-self: center;
-  border-bottom: 2px solid #fd5f00;
+  border-bottom: 1px solid #fd5f00;
 `;
 
 const columnTarget = {
@@ -70,7 +70,7 @@ const column = props => {
   const { connectDropTarget } = props;
   const header = props.spinner ? (
     <Header>
-      <i className="fas fa-spinner fa-spin fa-lg" />
+      <i className="fas fa-spinner fa-spin" />
     </Header>
   ) : (
     <Header>{props.name}</Header>

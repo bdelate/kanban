@@ -28,18 +28,16 @@ const Content = styled.div`
   transform: translate(-50%, -50%);
   border-radius: 2px;
   padding: 1rem;
-  background-color: #209028;
+  background-color: #005792;
 `;
 
-const infoModal = (props) => (
+const infoModal = props => (
   <Container>
     <Content>
       <div>{props.message}</div>
-      <button onClick={() => props.toggleInfo()}>
-        Close
-      </button>
+      <button onClick={() => props.toggleInfo()}>Close</button>
     </Content>
-  </Container >
+  </Container>
 );
 
 infoModal.propTypes = propTypes;

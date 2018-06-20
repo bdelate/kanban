@@ -10,7 +10,7 @@ const Container = styled.div`
   left: 0;
   height: 100vh;
   width: 100%;
-  background-color: #000;
+  background-color: #005792;
   opacity: 0.9;
   z-index: 100;
 `;
@@ -22,13 +22,15 @@ const Content = styled.div`
   transform: translate(-50%, -50%);
   border-radius: 2px;
   padding: 1rem;
-  background-color: #209028;
+  .fa-spinner {
+    color: #fd5f00;
+  }
 `;
 
-const spinner = (props) => (
+const spinner = props => (
   <Container>
     <Content>
-      <i className="fas fa-spinner fa-spin"></i>
+      <i className="fas fa-spinner fa-spin fa-3x" />
     </Content>
   </Container>
 );

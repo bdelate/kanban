@@ -1,9 +1,9 @@
 // react imports
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
 // 3rd party imports
-import styled from "styled-components";
-import PropTypes from "prop-types";
+import styled from 'styled-components';
+import PropTypes from 'prop-types';
 
 const propTypes = {
   name: PropTypes.string,
@@ -29,13 +29,14 @@ const Content = styled.div`
   position: fixed;
   transform: translate(-50%, -50%);
   border-radius: 2px;
-  padding: 1rem;
-  background-color: #209028;
+  opacity: 1;
+  padding: 15px;
+  background-color: #005792;
 `;
 
 class BoardCreateUpdate extends Component {
   state = {
-    name: ""
+    name: ''
   };
 
   componentDidMount() {

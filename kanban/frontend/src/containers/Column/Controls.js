@@ -17,11 +17,11 @@ const propTypes = {
 const Container = styled.div`
   display: flex;
   margin-bottom: 10px;
-  border-radius: 5px 5px 0 0;
+  border-radius: 2px 2px 0 0;
   padding: 8px;
-  background-color: #fd5f00;
+  background-color: #9a2b37;
   .fas {
-    color: #00204a;
+    color: #c3d9e8;
   }
 `;
 
@@ -38,23 +38,23 @@ const Controls = props => (
   <Container>
     <i
       title="Collapse Column"
-      className="fas fa-compress fa-lg"
+      className="fas fa-compress"
       onClick={() => props.toggleColumn(props.columnIndex)}
     />
     <FlexEnd>
       <i
         title="Add Task"
-        className="fas fa-plus fa-lg"
+        className="fas fa-plus"
         onClick={() => props.toggleCardCreateUpdate(true, props.columnIndex)}
       />
       <i
         title="Change Column Name"
-        className="fas fa-edit fa-lg"
+        className="fas fa-edit"
         onClick={() => props.toggleColumnCreateUpdate(true, props.columnIndex)}
       />
       <i
         title="Delete Column"
-        className="deleteColumn fas fa-trash-alt fa-lg"
+        className="deleteColumn fas fa-trash-alt"
         onClick={() =>
           props.toggleConfirm(
             'Column along within all of its cards will be permanently deleted',

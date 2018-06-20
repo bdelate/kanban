@@ -5,13 +5,12 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
-
 const propTypes = {
   active: PropTypes.bool.isRequired,
   toggleColumnCreateUpdate: PropTypes.func.isRequired,
   editColumnName: PropTypes.func.isRequired,
-  createColumn: PropTypes.func.isRequired,
-}
+  createColumn: PropTypes.func.isRequired
+};
 
 const Container = styled.div`
   position: fixed;
@@ -31,14 +30,13 @@ const Content = styled.div`
   transform: translate(-50%, -50%);
   border-radius: 2px;
   padding: 1rem;
-  background-color: #209028;
+  background-color: #005792;
 `;
 
 class ColumnCreateUpdate extends Component {
-
   state = {
     name: ''
-  }
+  };
 
   componentDidMount() {
     if (this.props.name) {
@@ -46,31 +44,34 @@ class ColumnCreateUpdate extends Component {
     }
   }
 
-  setTaskHandler = (name) => {
+  setTaskHandler = name => {
     this.setState({ name: name });
-  }
+  };
 
   render() {
     let saveButton;
     if (this.props.columnIndex === -1) {
-      saveButton = <button
-        id="idSaveColumnButton"
-        disabled={this.state.name.length === 0}
-        onClick={() => this.props.createColumn(this.state.name)}
-      >
-        Save
-      </button>
+      saveButton = (
+        <button
+          id="idSaveColumnButton"
+          disabled={this.state.name.length === 0}
+          onClick={() => this.props.createColumn(this.state.name)}
+        >
+          Save
+        </button>
+      );
     } else {
-      saveButton = <button
-        id="idSaveColumnButton"
-        disabled={this.state.name.length === 0}
-        onClick={() => this.props.editColumnName(
-          this.props.columnIndex,
-          this.state.name
-        )}
-      >
-        Save
-      </button>
+      saveButton = (
+        <button
+          id="idSaveColumnButton"
+          disabled={this.state.name.length === 0}
+          onClick={() =>
+            this.props.editColumnName(this.props.columnIndex, this.state.name)
+          }
+        >
+          Save
+        </button>
+      );
     }
 
     return (
@@ -82,17 +83,15 @@ class ColumnCreateUpdate extends Component {
             id="idName"
             placeholder="Column name..."
             defaultValue={this.props.name}
-            onChange={(e) => this.setTaskHandler(e.target.value)}>
-          </input>
+            onChange={e => this.setTaskHandler(e.target.value)}
+          />
           {saveButton}
-          <button
-            onClick={() => this.props.toggleColumnCreateUpdate(false)}
-          >
+          <button onClick={() => this.props.toggleColumnCreateUpdate(false)}>
             Cancel
           </button>
         </Content>
       </Container>
-    )
+    );
   }
 }
 

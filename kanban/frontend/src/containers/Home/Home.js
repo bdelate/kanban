@@ -254,12 +254,12 @@ class Home extends Component {
         {infoModal}
         {confirmModal}
         {boardCreateUpdate}
-        <Select
-          onChangeFunc={this.selectBoard}
-          options={this.state.availableBoards}
-          selectedValue={this.state.selectedBoardId || -1}
-        />
         <div>
+          <Select
+            onChangeFunc={this.selectBoard}
+            options={this.state.availableBoards}
+            selectedValue={this.state.selectedBoardId || -1}
+          />
           {createBoardButton}
           {editBoardButton}
           {deleteBoardButton}

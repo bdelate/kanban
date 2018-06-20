@@ -29,7 +29,7 @@ const BoardContainer = styled.div`
   flex-direction: column;
   margin: 10px;
   background-color: #c3d9e8;
-  border-radius: 5px;
+  border-radius: 2px;
 `;
 
 const ColumnsContainer = styled.div`
