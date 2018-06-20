@@ -30,7 +30,7 @@ it('contains 0 cards in props and renders name and 0 cards', () => {
   const column = mount(
     <ColumnContext
       columnIndex={0}
-      name={'This is a column name'}
+      name={'column name'}
       cards={[]}
       reorderCard={jest.fn()}
       moveCard={jest.fn()}
@@ -43,11 +43,10 @@ it('contains 0 cards in props and renders name and 0 cards', () => {
     />
   );
 
-  const manager = column.instance().getManager()
-  const backend = manager.getBackend()
+  const manager = column.instance().getManager();
+  const backend = manager.getBackend();
 
-  const name = <h3>This is a column name</h3>;
-  expect(column.contains(name)).toEqual(true);
+  expect(column.contains('column name')).toEqual(true);
   expect(column.find(Card).length).toBe(0);
 });
 
@@ -58,10 +57,7 @@ it('contains 2 cards in props and renders 2 cards', () => {
       key={0}
       columnIndex={0}
       name={'This is a column name'}
-      cards={[
-        { id: 0, task: 'first task' },
-        { id: 1, task: 'second task' },
-      ]}
+      cards={[{ id: 0, task: 'first task' }, { id: 1, task: 'second task' }]}
       reorderCard={jest.fn()}
       moveCard={jest.fn()}
       patchServerCards={jest.fn()}
