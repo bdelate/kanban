@@ -18,6 +18,7 @@ const ColumnContainer = styled.div`
   padding: 10px;
   margin: 10px;
   background-color: #00204a;
+  border-radius: 5px;
   text-orientation: sideways;
   writing-mode: vertical-lr;
   .fas {

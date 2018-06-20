@@ -27,7 +27,9 @@ const BoardContainer = styled.div`
   display: flex;
   flex: 1;
   flex-direction: column;
-  background-color: yellow;
+  margin: 10px;
+  background-color: #c3d9e8;
+  border-radius: 5px;
 `;
 
 const ColumnsContainer = styled.div`
