@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 
 // project imports
 import Button from '../UI/Button';
+import Input from '../UI/Input';
 
 // 3rd party imports
 import styled from 'styled-components';
@@ -83,13 +84,15 @@ class BoardCreateUpdate extends Component {
     return (
       <Container>
         <Content>
-          <input
-            name="name"
-            required=""
-            id="idName"
-            placeholder="Board name..."
-            defaultValue={this.props.name}
-            onChange={e => this.setTaskHandler(e.target.value)}
+          <Input
+            domProps={{
+              name: 'name',
+              required: '',
+              id: 'idName',
+              placeholder: 'Board name...',
+              defaultValue: this.props.name,
+              onChange: e => this.setTaskHandler(e.target.value)
+            }}
           />
           {saveButton}
           <Button

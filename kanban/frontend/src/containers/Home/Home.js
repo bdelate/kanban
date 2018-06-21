@@ -239,7 +239,9 @@ class Home extends Component {
       );
     }
 
-    const logoutButton = <Button clicked={this.logout}>Logout</Button>;
+    const logoutButton = (
+      <Button domProps={{ onClick: this.logout }}>Logout</Button>
+    );
 
     let deleteBoardButton = null;
     if (this.state.selectedBoardId) {

@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 
 // project imports
 import Button from '../UI/Button';
+import Textarea from '../UI/Textarea';
 
 // 3rd party imports
 import styled from 'styled-components';
@@ -91,24 +92,28 @@ class CardCreateUpdate extends Component {
     return (
       <Container>
         <Content>
-          <textarea
-            name="task"
-            cols="40"
-            rows="10"
-            required=""
-            id="idTaskText"
-            placeholder="Task details..."
-            defaultValue={this.props.task}
-            onChange={e => this.setTaskHandler(e.target.value)}
-          />
-          {saveButton}
-          <Button
+          <Textarea
             domProps={{
-              onClick: () => this.props.toggleCardCreateUpdate(false)
+              name: 'task',
+              cols: '40',
+              rows: '10',
+              required: '',
+              id: 'idTaskText',
+              placeholder: 'Task details...',
+              defaultValue: this.props.task,
+              onChange: e => this.setTaskHandler(e.target.value)
             }}
-          >
-            Cancel
-          </Button>
+          />
+          <div>
+            {saveButton}
+            <Button
+              domProps={{
+                onClick: () => this.props.toggleCardCreateUpdate(false)
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
         </Content>
       </Container>
     );

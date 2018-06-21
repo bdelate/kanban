@@ -30,7 +30,7 @@ const FlexEnd = styled.div`
   flex: 1;
   justify-content: flex-end;
   .fas {
-    padding-left: 2px;
+    padding-left: 10px;
   }
 `;
 
