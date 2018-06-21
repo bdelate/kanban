@@ -10,7 +10,7 @@ import Adapter from 'enzyme-adapter-react-16';
 
 configure({ adapter: new Adapter() });
 
-it('calls createColumn when save is clicked on new column', () => {
+it('Create button is present when creating a new column', () => {
   const props = {
     active: true,
     columnIndex: -1,
@@ -21,11 +21,10 @@ it('calls createColumn when save is clicked on new column', () => {
   };
 
   let columnCreateUpdate = shallow(<ColumnCreateUpdate {...props} />);
-  columnCreateUpdate.find('#idSaveColumnButton').simulate('click');
-  expect(props.createColumn).toHaveBeenCalled();
+  expect(columnCreateUpdate.contains('Create')).toBeTruthy();
 });
 
-it('calls editColumnName when save is clicked on an existing column', () => {
+it('Save button is present when editing an existing column', () => {
   const props = {
     active: true,
     columnIndex: 1,
@@ -36,6 +35,5 @@ it('calls editColumnName when save is clicked on an existing column', () => {
   };
 
   let columnCreateUpdate = shallow(<ColumnCreateUpdate {...props} />);
-  columnCreateUpdate.find('#idSaveColumnButton').simulate('click');
-  expect(props.editColumnName).toHaveBeenCalled();
+  expect(columnCreateUpdate.contains('Save')).toBeTruthy();
 });

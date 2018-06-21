@@ -1,6 +1,9 @@
 // react imports
 import React, { Component } from 'react';
 
+// project imports
+import Button from '../UI/Button';
+
 // 3rd party imports
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
@@ -52,25 +55,28 @@ class ColumnCreateUpdate extends Component {
     let saveButton;
     if (this.props.columnIndex === -1) {
       saveButton = (
-        <button
-          id="idSaveColumnButton"
-          disabled={this.state.name.length === 0}
-          onClick={() => this.props.createColumn(this.state.name)}
+        <Button
+          domProps={{
+            id: 'idSaveColumnButton',
+            disabled: this.state.name.length === 0,
+            onClick: () => this.props.createColumn(this.state.name)
+          }}
         >
-          Save
-        </button>
+          Create
+        </Button>
       );
     } else {
       saveButton = (
-        <button
-          id="idSaveColumnButton"
-          disabled={this.state.name.length === 0}
-          onClick={() =>
-            this.props.editColumnName(this.props.columnIndex, this.state.name)
-          }
+        <Button
+          domProps={{
+            id: 'idSaveColumnButton',
+            disabled: this.state.name.length === 0,
+            onClick: () =>
+              this.props.editColumnName(this.props.columnIndex, this.state.name)
+          }}
         >
           Save
-        </button>
+        </Button>
       );
     }
 
@@ -86,9 +92,13 @@ class ColumnCreateUpdate extends Component {
             onChange={e => this.setTaskHandler(e.target.value)}
           />
           {saveButton}
-          <button onClick={() => this.props.toggleColumnCreateUpdate(false)}>
+          <Button
+            domProps={{
+              onClick: () => this.props.toggleColumnCreateUpdate(false)
+            }}
+          >
             Cancel
-          </button>
+          </Button>
         </Content>
       </Container>
     );

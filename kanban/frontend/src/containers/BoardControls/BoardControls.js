@@ -13,7 +13,11 @@ const ControlsContainer = styled.div`
 
 const boardControls = props => (
   <ControlsContainer>
-    <Button clicked={props.toggleColumnCreateUpdate} onClickArgs={true}>
+    <Button
+      domProps={{
+        onClick: () => props.toggleColumnCreateUpdate(true)
+      }}
+    >
       Create Column
     </Button>
   </ControlsContainer>

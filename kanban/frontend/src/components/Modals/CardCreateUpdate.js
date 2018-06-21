@@ -1,6 +1,9 @@
 // react imports
 import React, { Component } from 'react';
 
+// project imports
+import Button from '../UI/Button';
+
 // 3rd party imports
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
@@ -55,31 +58,33 @@ class CardCreateUpdate extends Component {
     let saveButton;
     if (this.props.cardIndex === -1) {
       saveButton = (
-        <button
-          id="idSaveCardButton"
-          disabled={this.state.task.length === 0}
-          onClick={() =>
-            this.props.createCard(this.props.columnIndex, this.state.task)
-          }
+        <Button
+          domProps={{
+            id: 'idSaveCardButton',
+            disabled: this.state.task.length === 0,
+            onClick: () =>
+              this.props.createCard(this.props.columnIndex, this.state.task)
+          }}
         >
-          Save
-        </button>
+          Create
+        </Button>
       );
     } else {
       saveButton = (
-        <button
-          id="idSaveCardButton"
-          disabled={this.state.task.length === 0}
-          onClick={() =>
-            this.props.editCardDetail(
-              this.props.columnIndex,
-              this.props.cardIndex,
-              this.state.task
-            )
-          }
+        <Button
+          domProps={{
+            id: 'idSaveCardButton',
+            disabled: this.state.task.length === 0,
+            onClick: () =>
+              this.props.editCardDetail(
+                this.props.columnIndex,
+                this.props.cardIndex,
+                this.state.task
+              )
+          }}
         >
           Save
-        </button>
+        </Button>
       );
     }
 
@@ -97,9 +102,13 @@ class CardCreateUpdate extends Component {
             onChange={e => this.setTaskHandler(e.target.value)}
           />
           {saveButton}
-          <button onClick={() => this.props.toggleCardCreateUpdate(false)}>
+          <Button
+            domProps={{
+              onClick: () => this.props.toggleCardCreateUpdate(false)
+            }}
+          >
             Cancel
-          </button>
+          </Button>
         </Content>
       </Container>
     );

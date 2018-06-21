@@ -217,7 +217,11 @@ class Home extends Component {
       ) : null;
 
     const createBoardButton = (
-      <Button clicked={this.toggleBoardCreateUpdateHandler}>
+      <Button
+        domProps={{
+          onClick: () => this.toggleBoardCreateUpdateHandler(false)
+        }}
+      >
         Create Board
       </Button>
     );
@@ -225,7 +229,11 @@ class Home extends Component {
     let editBoardButton = null;
     if (this.state.selectedBoardId) {
       editBoardButton = (
-        <Button clicked={() => this.toggleBoardCreateUpdateHandler(true)}>
+        <Button
+          domProps={{
+            onClick: () => this.toggleBoardCreateUpdateHandler(true)
+          }}
+        >
           Edit Board Name
         </Button>
       );
@@ -237,12 +245,13 @@ class Home extends Component {
     if (this.state.selectedBoardId) {
       deleteBoardButton = (
         <Button
-          clicked={() =>
-            this.toggleConfirmHandler(
-              'Board and all content will be deleted',
-              this.deleteBoardHandler
-            )
-          }
+          domProps={{
+            onClick: () =>
+              this.toggleConfirmHandler(
+                'Board and all content will be deleted',
+                this.deleteBoardHandler
+              )
+          }}
         >
           Delete Board
         </Button>

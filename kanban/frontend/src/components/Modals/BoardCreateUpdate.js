@@ -1,6 +1,9 @@
 // react imports
 import React, { Component } from 'react';
 
+// project imports
+import Button from '../UI/Button';
+
 // 3rd party imports
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
@@ -53,23 +56,27 @@ class BoardCreateUpdate extends Component {
     let saveButton;
     if (this.props.name) {
       saveButton = (
-        <button
-          id="idSaveBoardButton"
-          disabled={this.state.name.length === 0}
-          onClick={() => this.props.updateBoard(this.state.name)}
+        <Button
+          domProps={{
+            id: 'idSaveBoardButton',
+            disabled: this.state.name.length === 0,
+            onClick: () => this.props.updateBoard(this.state.name)
+          }}
         >
           Save
-        </button>
+        </Button>
       );
     } else {
       saveButton = (
-        <button
-          id="idSaveBoardButton"
-          disabled={this.state.name.length === 0}
-          onClick={() => this.props.createBoard(this.state.name)}
+        <Button
+          domProps={{
+            id: 'idSaveBoardButton',
+            disabled: this.state.name.length === 0,
+            onClick: () => this.props.createBoard(this.state.name)
+          }}
         >
-          Save
-        </button>
+          Create
+        </Button>
       );
     }
 
@@ -85,9 +92,13 @@ class BoardCreateUpdate extends Component {
             onChange={e => this.setTaskHandler(e.target.value)}
           />
           {saveButton}
-          <button onClick={() => this.props.toggleBoardCreateUpdate(false)}>
+          <Button
+            domProps={{
+              onClick: () => this.props.toggleBoardCreateUpdate(false)
+            }}
+          >
             Cancel
-          </button>
+          </Button>
         </Content>
       </Container>
     );

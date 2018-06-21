@@ -1,16 +1,16 @@
 // react imports
-import React from "react";
+import React from 'react';
 
 // project imports
-import BoardCreateUpdate from "./BoardCreateUpdate";
+import BoardCreateUpdate from './BoardCreateUpdate';
 
 // 3rd party imports
-import { configure, shallow } from "enzyme";
-import Adapter from "enzyme-adapter-react-16";
+import { configure, shallow } from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
 
 configure({ adapter: new Adapter() });
 
-it("calls createBoard when save is clicked on new board", () => {
+it('Create button is present when creating a new board', () => {
   const props = {
     toggleBoardCreateUpdate: jest.fn(),
     createBoard: jest.fn(),
@@ -18,6 +18,17 @@ it("calls createBoard when save is clicked on new board", () => {
   };
 
   let boardCreateUpdate = shallow(<BoardCreateUpdate {...props} />);
-  boardCreateUpdate.find("#idSaveBoardButton").simulate("click");
-  expect(props.createBoard).toHaveBeenCalled();
+  expect(boardCreateUpdate.contains('Create')).toBeTruthy();
+});
+
+it('Save button is present when editing an existing board', () => {
+  const props = {
+    toggleBoardCreateUpdate: jest.fn(),
+    createBoard: jest.fn(),
+    updateBoard: jest.fn(),
+    name: 'existing board'
+  };
+
+  let boardCreateUpdate = shallow(<BoardCreateUpdate {...props} />);
+  expect(boardCreateUpdate.contains('Save')).toBeTruthy();
 });
