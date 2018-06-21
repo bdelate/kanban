@@ -13,7 +13,7 @@ import ColumnCreateUpdate from '../../components/Modals/ColumnCreateUpdate';
 // 3rd party imports
 import TestBackend from 'react-dnd-test-backend';
 import { DragDropContext } from 'react-dnd';
-import { configure, shallow, mount } from 'enzyme';
+import { configure, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import moxios from 'moxios';
 

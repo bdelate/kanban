@@ -1,9 +1,13 @@
 // react imports
-import React, { Component } from "react";
+import React, { Component } from 'react';
+
+// project imports
+import Button from '../UI/Button';
+import Input from '../UI/Input';
 
 // 3rd party imports
-import styled from "styled-components";
-import PropTypes from "prop-types";
+import styled from 'styled-components';
+import PropTypes from 'prop-types';
 
 const propTypes = {
   name: PropTypes.string,
@@ -29,13 +33,14 @@ const Content = styled.div`
   position: fixed;
   transform: translate(-50%, -50%);
   border-radius: 2px;
-  padding: 1rem;
-  background-color: #209028;
+  opacity: 1;
+  padding: 15px;
+  background-color: #005792;
 `;
 
 class BoardCreateUpdate extends Component {
   state = {
-    name: ""
+    name: ''
   };
 
   componentDidMount() {
@@ -52,41 +57,51 @@ class BoardCreateUpdate extends Component {
     let saveButton;
     if (this.props.name) {
       saveButton = (
-        <button
-          id="idSaveBoardButton"
-          disabled={this.state.name.length === 0}
-          onClick={() => this.props.updateBoard(this.state.name)}
+        <Button
+          domProps={{
+            id: 'idSaveBoardButton',
+            disabled: this.state.name.length === 0,
+            onClick: () => this.props.updateBoard(this.state.name)
+          }}
         >
           Save
-        </button>
+        </Button>
       );
     } else {
       saveButton = (
-        <button
-          id="idSaveBoardButton"
-          disabled={this.state.name.length === 0}
-          onClick={() => this.props.createBoard(this.state.name)}
+        <Button
+          domProps={{
+            id: 'idSaveBoardButton',
+            disabled: this.state.name.length === 0,
+            onClick: () => this.props.createBoard(this.state.name)
+          }}
         >
-          Save
-        </button>
+          Create
+        </Button>
       );
     }
 
     return (
       <Container>
         <Content>
-          <input
-            name="name"
-            required=""
-            id="idName"
-            placeholder="Board name..."
-            defaultValue={this.props.name}
-            onChange={e => this.setTaskHandler(e.target.value)}
+          <Input
+            domProps={{
+              name: 'name',
+              required: '',
+              id: 'idName',
+              placeholder: 'Board name...',
+              defaultValue: this.props.name,
+              onChange: e => this.setTaskHandler(e.target.value)
+            }}
           />
           {saveButton}
-          <button onClick={() => this.props.toggleBoardCreateUpdate(false)}>
+          <Button
+            domProps={{
+              onClick: () => this.props.toggleBoardCreateUpdate(false)
+            }}
+          >
             Cancel
-          </button>
+          </Button>
         </Content>
       </Container>
     );

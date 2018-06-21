@@ -18,7 +18,6 @@ const HomeContainer = styled.div`
   display: flex;
   flex: 1;
   flex-direction: column;
-  background-color: green;
 `;
 
 class Home extends Component {
@@ -218,7 +217,11 @@ class Home extends Component {
       ) : null;
 
     const createBoardButton = (
-      <Button clicked={this.toggleBoardCreateUpdateHandler}>
+      <Button
+        domProps={{
+          onClick: () => this.toggleBoardCreateUpdateHandler(false)
+        }}
+      >
         Create Board
       </Button>
     );
@@ -226,24 +229,31 @@ class Home extends Component {
     let editBoardButton = null;
     if (this.state.selectedBoardId) {
       editBoardButton = (
-        <Button clicked={() => this.toggleBoardCreateUpdateHandler(true)}>
+        <Button
+          domProps={{
+            onClick: () => this.toggleBoardCreateUpdateHandler(true)
+          }}
+        >
           Edit Board Name
         </Button>
       );
     }
 
-    const logoutButton = <Button clicked={this.logout}>Logout</Button>;
+    const logoutButton = (
+      <Button domProps={{ onClick: this.logout }}>Logout</Button>
+    );
 
     let deleteBoardButton = null;
     if (this.state.selectedBoardId) {
       deleteBoardButton = (
         <Button
-          clicked={() =>
-            this.toggleConfirmHandler(
-              'Board and all content will be deleted',
-              this.deleteBoardHandler
-            )
-          }
+          domProps={{
+            onClick: () =>
+              this.toggleConfirmHandler(
+                'Board and all content will be deleted',
+                this.deleteBoardHandler
+              )
+          }}
         >
           Delete Board
         </Button>
@@ -255,12 +265,12 @@ class Home extends Component {
         {infoModal}
         {confirmModal}
         {boardCreateUpdate}
-        <Select
-          onChangeFunc={this.selectBoard}
-          options={this.state.availableBoards}
-          selectedValue={this.state.selectedBoardId || -1}
-        />
         <div>
+          <Select
+            onChangeFunc={this.selectBoard}
+            options={this.state.availableBoards}
+            selectedValue={this.state.selectedBoardId || -1}
+          />
           {createBoardButton}
           {editBoardButton}
           {deleteBoardButton}

@@ -1,6 +1,9 @@
 // react imports
 import React from 'react';
 
+// project imports
+import Button from '../UI/Button';
+
 // 3rd party imports
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
@@ -29,24 +32,30 @@ const Content = styled.div`
   transform: translate(-50%, -50%);
   border-radius: 2px;
   padding: 1rem;
-  background-color: #209028;
+  background-color: #005792;
 `;
 
-const confirmModal = (props) => (
+const confirmModal = props => (
   <Container>
     <Content>
       <div>{props.message}</div>
-      <button onClick={() => props.toggleConfirm()}>
-        Cancel
-      </button>
-      <button
-        id="idConfirmFunction"
-        onClick={props.confirmFunction}
+      <Button
+        domProps={{
+          id: 'idConfirmFunction',
+          onClick: props.confirmFunction
+        }}
       >
         Confirm
-      </button>
+      </Button>
+      <Button
+        domProps={{
+          onClick: () => props.toggleConfirm()
+        }}
+      >
+        Cancel
+      </Button>
     </Content>
-  </Container >
+  </Container>
 );
 
 confirmModal.propTypes = propTypes;

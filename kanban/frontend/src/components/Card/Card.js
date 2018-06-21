@@ -1,6 +1,6 @@
 // react imports
 import React from 'react';
-import { findDOMNode } from 'react-dom'
+import { findDOMNode } from 'react-dom';
 
 // project imports
 import { DragTypes } from '../../DragTypes';
@@ -10,7 +10,6 @@ import styled from 'styled-components';
 import { DragSource, DropTarget } from 'react-dnd';
 import PropTypes from 'prop-types';
 
-
 const propTypes = {
   cardIndex: PropTypes.number.isRequired,
   columnIndex: PropTypes.number.isRequired,
@@ -18,13 +17,41 @@ const propTypes = {
   spinner: PropTypes.bool,
   reorderCard: PropTypes.func.isRequired,
   toggleCardCreateUpdate: PropTypes.func.isRequired
-}
+};
 
 const CardContainer = styled.div`
-  padding: 15px;
   margin: 15px;
+  background: #005792;
+  border-radius: 2px;
+  .fas {
+    color: #c3d9e8;
+    &.fa-spinner {
+      color: #fd5f00;
+    }
+  }
+`;
+
+const Controls = styled.div`
+  display: flex;
+  margin-bottom: 10px;
+  border-radius: 2px 2px 0 0;
+  padding: 5px;
+  background-color: #9a2b37;
+`;
+
+const FlexEnd = styled.div`
+  display: flex;
   flex: 1;
-  background: red;
+  justify-content: flex-end;
+  .fas {
+    padding-left: 10px;
+  }
+`;
+
+const Task = styled.div`
+  width: 80%;
+  padding: 5px;
+  margin: auto;
 `;
 
 const cardSource = {
@@ -53,7 +80,8 @@ const cardTarget = {
       const hoverBoundingRect = findDOMNode(component).getBoundingClientRect();
 
       // Get vertical middle
-      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      const hoverMiddleY =
+        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
 
       // Determine mouse position
       const clientOffset = monitor.getClientOffset();
@@ -79,7 +107,7 @@ const cardTarget = {
         toCardIndex: hoverIndex
       };
       props.reorderCard(args);
-      monitor.getItem().cardIndex = hoverIndex
+      monitor.getItem().cardIndex = hoverIndex;
     }
   }
 };
@@ -89,63 +117,71 @@ function collectSource(connect, monitor) {
     connectDragSource: connect.dragSource(),
     connectDragPreview: connect.dragPreview(),
     isDragging: monitor.isDragging()
-  }
+  };
 }
 
 function collectTarget(connect, monitor) {
   return {
     connectDropTarget: connect.dropTarget()
-  }
+  };
 }
 
-const card = (props) => {
+const card = props => {
   const {
     connectDragSource,
     connectDropTarget,
     connectDragPreview,
-    isDragging } = props;
+    isDragging
+  } = props;
   const opacity = isDragging ? 0 : 1;
 
   let output = null;
   if (props.spinner) {
     output = (
       <CardContainer>
-        <i className="fas fa-spinner fa-spin"></i>
+        <Controls />
+        <Task>
+          <i className="fas fa-spinner fa-spin" />
+        </Task>
       </CardContainer>
-    )
+    );
   } else {
-    output =
-      connectDropTarget(
-        connectDragPreview(
-          <div>
-            <CardContainer style={{ opacity }}>
-              {connectDragSource(
-                <div
-                  style={{ 'backgroundColor': '#19634e', 'height': '15px' }}>
-                </div>
-              )}
-              <span>{props.task}</span>
-              <i
-                title="Edit or Delete"
-                className="fas fa-edit"
-                onClick={() => props.toggleCardCreateUpdate(
-                  true,
-                  props.columnIndex,
-                  props.cardIndex
+    output = connectDropTarget(
+      connectDragPreview(
+        <div>
+          <CardContainer style={{ opacity }}>
+            <Controls>
+              <div>
+                {connectDragSource(
+                  <i title="Move Card" className="fas fa-expand-arrows-alt" />
                 )}
-              ></i>
-              <i
-                title="Delete Card"
-                className="fas fa-trash-alt"
-                onClick={() => props.deleteCard(
-                  props.columnIndex,
-                  props.cardIndex
-                )}
-              ></i>
-            </CardContainer>
-          </div>
-        )
+              </div>
+              <FlexEnd>
+                <i
+                  title="Edit Task"
+                  className="fas fa-edit"
+                  onClick={() =>
+                    props.toggleCardCreateUpdate(
+                      true,
+                      props.columnIndex,
+                      props.cardIndex
+                    )
+                  }
+                />
+                <i
+                  title="Delete Card"
+                  className="fas fa-trash-alt"
+                  onClick={() =>
+                    props.deleteCard(props.columnIndex, props.cardIndex)
+                  }
+                />
+              </FlexEnd>
+            </Controls>
+            <Task>{props.task}</Task>
+          </CardContainer>
+        </div>
       )
+    );
   }
   return output;
 };
@@ -153,10 +189,10 @@ const card = (props) => {
 card.propTypes = propTypes;
 
 // export CardSource separately to be used in tests
-export const CardSource = DragSource(
-  DragTypes.CARD, cardSource, collectSource
-)(card);
+export const CardSource = DragSource(DragTypes.CARD, cardSource, collectSource)(
+  card
+);
 
-export default DropTarget(
-  DragTypes.CARD, cardTarget, collectTarget
-)(CardSource);
+export default DropTarget(DragTypes.CARD, cardTarget, collectTarget)(
+  CardSource
+);

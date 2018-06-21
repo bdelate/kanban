@@ -4,12 +4,12 @@ import React from 'react';
 // project imports
 import Card from '../../components/Card/Card';
 import { DragTypes } from '../../DragTypes';
+import Controls from './Controls';
 
 // 3rd party imports
 import styled from 'styled-components';
 import { DropTarget } from 'react-dnd';
 import PropTypes from 'prop-types';
-
 
 const propTypes = {
   columnIndex: PropTypes.number.isRequired,
@@ -22,31 +22,40 @@ const propTypes = {
   toggleCardCreateUpdate: PropTypes.func.isRequired,
   toggleConfirm: PropTypes.func.isRequired,
   deleteColumn: PropTypes.func.isRequired
-}
+};
 
 const ColumnContainer = styled.div`
-  padding: 10px;
   margin: 10px;
-  background-color: blue;
+  border-radius: 2px;
+  background-color: #00204a;
+  display: flex;
+  flex-direction: column;
   flex: 1;
+  .fa-spinner {
+    color: #fd5f00;
+  }
+`;
+
+const Header = styled.h2`
+  align-self: center;
+  border-bottom: 1px solid #fd5f00;
 `;
 
 const columnTarget = {
-
   drop(props, monitor, component) {
     if (monitor.getItem().columnIndex !== props.columnIndex) {
       props.moveCard(
         monitor.getItem().columnIndex,
         monitor.getItem().cardIndex,
         props.columnIndex
-      )
+      );
     } else {
       const args = {
         hasDropped: true,
         columnIndex: monitor.getItem().columnIndex,
         toCardIndex: monitor.getItem().cardIndex
       };
-      props.reorderCard(args)
+      props.reorderCard(args);
     }
   }
 };
@@ -57,60 +66,43 @@ function collect(connect, monitor) {
   };
 }
 
-const column = (props) => {
+const column = props => {
   const { connectDropTarget } = props;
-  let output = null;
-  if (props.spinner) {
-    output = (
-      <ColumnContainer>
-        <i className="fas fa-spinner fa-spin"></i>
-      </ColumnContainer>
-    )
-  } else {
-    const cards = props.cards.map((card, index) => (
-      <Card
-        key={card.id}
-        cardIndex={index}
-        columnIndex={props.columnIndex}
-        task={card.task}
-        spinner={card.spinner}
-        deleteCard={props.deleteCard}
-        reorderCard={props.reorderCard}
-        toggleCardCreateUpdate={props.toggleCardCreateUpdate}
-      />
-    ));
+  const header = props.spinner ? (
+    <Header>
+      <i className="fas fa-spinner fa-spin" />
+    </Header>
+  ) : (
+    <Header>{props.name}</Header>
+  );
 
-    output = <ColumnContainer innerRef={node => connectDropTarget(node)}>
-      <i
-        title="Collapse Column"
-        className="fas fa-compress"
-        onClick={() => props.toggleColumn(props.columnIndex)}
-      ></i>
-      <i
-        title="Add Task"
-        className="fas fa-plus"
-        onClick={() => props.toggleCardCreateUpdate(true, props.columnIndex)}
-      ></i>
-      <i
-        title="Change Column Name"
-        className="fas fa-edit"
-        onClick={() => props.toggleColumnCreateUpdate(true, props.columnIndex)}
-      ></i>
-      <i
-        title="Delete Column"
-        className="deleteColumn fas fa-trash-alt"
-        onClick={() => props.toggleConfirm(
-          'Column along within all of its cards will be permanently deleted',
-          props.deleteColumn,
-          props.columnIndex
-        )}
-      ></i>
-      <h3>{props.name}</h3>
+  const cards = props.cards.map((card, index) => (
+    <Card
+      key={card.id}
+      cardIndex={index}
+      columnIndex={props.columnIndex}
+      task={card.task}
+      spinner={card.spinner}
+      deleteCard={props.deleteCard}
+      reorderCard={props.reorderCard}
+      toggleCardCreateUpdate={props.toggleCardCreateUpdate}
+    />
+  ));
+
+  return (
+    <ColumnContainer innerRef={node => connectDropTarget(node)}>
+      <Controls
+        toggleColumn={props.toggleColumn}
+        toggleCardCreateUpdate={props.toggleCardCreateUpdate}
+        toggleColumnCreateUpdate={props.toggleColumnCreateUpdate}
+        toggleConfirm={props.toggleConfirm}
+        columnIndex={props.columnIndex}
+        deleteColumn={props.deleteColumn}
+      />
+      {header}
       {cards}
     </ColumnContainer>
-  }
-
-  return output;
+  );
 };
 
 column.propTypes = propTypes;
