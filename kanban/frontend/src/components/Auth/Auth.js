@@ -4,13 +4,33 @@ import React, { Component } from 'react';
 // project imports
 import Button from '../../components/UI/Button';
 import Input from '../../components/UI/Input';
+import Info from './Info';
 
 // 3rd party imports
 import styled from 'styled-components';
 import axios from 'axios';
 
-const AuthContainer = styled.div`
-  background-color: blue;
+const Container = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+
+const Card = styled.div`
+  max-width: 30vw;
+  margin: 15px;
+  padding: 5px;
+  border-radius: 2px;
+  background-color: #c3d9e8;
+  color: #000;
+`;
+
+const Link = styled.span`
+  color: #00204a;
+  font-weight: bold;
+  &:hover {
+    cursor: pointer;
+    text-decoration: underline;
+  }
 `;
 
 class Auth extends Component {
@@ -81,51 +101,62 @@ class Auth extends Component {
       submitSection = (
         <div>
           <Button domProps={{ type: 'submit' }}>Sign Up</Button>
-          <span>
-            Existing user?
-            <b id="idShowLogIn" onClick={() => this.toggleSubmitAction(false)}>
+          <p>
+            <span>Existing user? </span>
+            <Link
+              id="idShowLogIn"
+              onClick={() => this.toggleSubmitAction(false)}
+            >
               Log in here
-            </b>
-          </span>
+            </Link>
+          </p>
         </div>
       );
     } else {
       submitSection = (
         <div>
           <Button domProps={{ type: 'submit' }}>Log In</Button>
-          <span>
-            New user?
-            <b id="idShowSignUp" onClick={() => this.toggleSubmitAction(true)}>
+          <p>
+            <span>New user? </span>
+            <Link
+              id="idShowSignUp"
+              onClick={() => this.toggleSubmitAction(true)}
+            >
               Sign up here
-            </b>
-          </span>
+            </Link>
+          </p>
         </div>
       );
     }
 
     return (
-      <AuthContainer>
-        {error}
-        <form id="idAuthForm" onSubmit={this.state.submit}>
-          <Input
-            domProps={{
-              type: 'text',
-              name: 'username',
-              required: 'required',
-              placeholder: 'Username'
-            }}
-          />
-          <Input
-            domProps={{
-              type: 'password',
-              name: 'password',
-              required: 'required',
-              placeholder: 'Password'
-            }}
-          />
-          {submitSection}
-        </form>
-      </AuthContainer>
+      <Container>
+        <Card>
+          <Info />
+        </Card>
+        <Card>
+          {error}
+          <form id="idAuthForm" onSubmit={this.state.submit}>
+            <Input
+              domProps={{
+                type: 'text',
+                name: 'username',
+                required: 'required',
+                placeholder: 'Username'
+              }}
+            />
+            <Input
+              domProps={{
+                type: 'password',
+                name: 'password',
+                required: 'required',
+                placeholder: 'Password'
+              }}
+            />
+            {submitSection}
+          </form>
+        </Card>
+      </Container>
     );
   }
 }
