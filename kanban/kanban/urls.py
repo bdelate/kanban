@@ -23,3 +23,7 @@ urlpatterns = [
     path('api/', include('api.urls', namespace='api')),
     path(ADMIN_URL, admin.site.urls),
 ]
+
+# urls specific to the live or dev environment, such as build/index.html
+# in production that serves the frontend react app
+urlpatterns.extend(settings.ENV_URLS)
