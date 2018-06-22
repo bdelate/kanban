@@ -314,6 +314,7 @@ class Board extends Component {
     fromCardIndex,
     toCardIndex
   }) => {
+    // deep copy single column with all of its cards
     const column = { ...this.state.columns[columnIndex] };
     column.cards = [...this.state.columns[columnIndex].cards];
     for (let card in this.state.columns[columnIndex].cards) {
