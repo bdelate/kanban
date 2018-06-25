@@ -5,10 +5,12 @@ import React, { Component } from 'react';
 import Button from '../../components/UI/Button';
 import Input from '../../components/UI/Input';
 import Info from './Info';
+import * as actions from './actions';
 
 // 3rd party imports
 import styled from 'styled-components';
 import axios from 'axios';
+import { connect } from 'react-redux';
 
 const Container = styled.div`
   display: flex;
@@ -52,6 +54,7 @@ class Auth extends Component {
       .post('/api/obtain-token/', authData)
       .then(res => {
         localStorage.setItem('authToken', res.data.token);
+        this.props.saveToken(res.data.token);
         this.props.history.push('/');
       })
       .catch(error => {
@@ -161,4 +164,16 @@ class Auth extends Component {
   }
 }
 
-export default Auth;
+const mapDispatchToProps = dispatch => {
+  return {
+    saveToken: token => dispatch(actions.saveToken(token))
+  };
+};
+
+// component only export used for testing
+export const AuthComponentOnly = Auth;
+
+export default connect(
+  null,
+  mapDispatchToProps
+)(Auth);
