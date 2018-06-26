@@ -8,10 +8,11 @@ import Select from '../../components/UI/Select';
 import Button from '../../components/UI/Button';
 import BoardCreateUpdate from '../../components/Modals/BoardCreateUpdate';
 import Confirm from '../../components/Modals/Confirm';
+import { connect } from 'react-redux';
+import * as actions from './actions';
 
 // 3rd party imports
 import styled from 'styled-components';
-import jwtDecode from 'jwt-decode';
 import axios from 'axios';
 
 const HomeContainer = styled.div`
@@ -31,28 +32,17 @@ class Home extends Component {
       message: null,
       confirmFunction: null
     },
-    authToken: null,
     availableBoards: {},
     selectedBoardId: null // database board id of the selected board
   };
 
   componentDidMount() {
-    if (this.isLoggedIn()) this.retrieveData();
-    else this.props.history.push('/auth');
-  }
-
-  // if authToken exists and has not expired, user is considered logged in
-  isLoggedIn() {
-    const authToken = localStorage.getItem('authToken');
-    if (authToken) {
-      const decodedToken = jwtDecode(authToken);
-      if (new Date() <= new Date(decodedToken.exp * 1000)) {
-        axios.defaults.headers.common['Authorization'] = `JWT ${authToken}`;
-        this.setState({ authToken: authToken });
-        return true;
-      }
-    }
-    return false;
+    if (this.props.authToken) {
+      axios.defaults.headers.common['Authorization'] = `JWT ${
+        this.props.authToken
+      }`;
+      this.retrieveData();
+    } else this.props.history.push('/auth');
   }
 
   // retrieve available user boards from the server
@@ -208,13 +198,9 @@ class Home extends Component {
       );
     }
 
-    const board =
-      this.state.authToken && this.state.selectedBoardId ? (
-        <Board
-          authToken={this.state.authToken}
-          id={this.state.selectedBoardId}
-        />
-      ) : null;
+    const board = this.state.selectedBoardId ? (
+      <Board authToken={this.props.authToken} id={this.state.selectedBoardId} />
+    ) : null;
 
     const createBoardButton = (
       <Button
@@ -276,10 +262,27 @@ class Home extends Component {
           {deleteBoardButton}
           {logoutButton}
         </div>
+        <button onClick={this.props.onTest}>test</button>
         {board}
       </HomeContainer>
     );
   }
 }
 
-export default Home;
+const mapStateToProps = state => {
+  return {
+    authToken: state.auth.token,
+    value: state.home.value
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    onTest: () => dispatch(actions.test())
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Home);
