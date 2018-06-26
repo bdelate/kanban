@@ -27,6 +27,8 @@ const reducer = (state = initialState, action) => {
   switch (action.type) {
     case 'SAVE_TOKEN':
       return saveToken(state, action.token);
+    case 'LOGOUT':
+      return { ...state, token: null };
     default:
       return state;
   }
