@@ -5,6 +5,8 @@ const initialState = {
   token: validateAuthToken()
 };
 
+// called when module is initially loaded which will save authToken to
+// store if it exists and is valid
 function validateAuthToken() {
   const authToken = localStorage.getItem('authToken');
   if (authToken) {

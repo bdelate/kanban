@@ -74,6 +74,7 @@ class Auth extends Component {
       .post('/api/signup/', userData)
       .then(res => {
         localStorage.setItem('authToken', res.data.token);
+        this.props.saveToken(res.data.token);
         this.props.history.push('/');
       })
       .catch(error => {
