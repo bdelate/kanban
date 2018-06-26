@@ -2,23 +2,23 @@
 import React from 'react';
 
 // project imports
-import Auth from './Auth';
+import Auth, { AuthComponentOnly } from './Auth';
 
 // 3rd party imports
 import { configure, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import moxios from 'moxios'
+import moxios from 'moxios';
 
 configure({ adapter: new Adapter() });
 
-beforeEach(function () {
+beforeEach(function() {
   // mock axios calls to the server
   moxios.install();
-})
+});
 
-afterEach(function () {
+afterEach(function() {
   moxios.uninstall();
-})
+});
 
 function flushPromises() {
   return new Promise(resolve => setImmediate(resolve));
@@ -27,10 +27,10 @@ function flushPromises() {
 it('Updates error state if getAuthToken server call fails', async () => {
   moxios.stubRequest('/api/obtain-token/', {
     status: 400
-  })
-  const auth = shallow(<Auth />);
+  });
+  const auth = shallow(<AuthComponentOnly />);
   const event = {
-    preventDefault() { },
+    preventDefault() {},
     target: {
       username: { value: 'john' },
       password: { password: 'password' }
@@ -48,10 +48,10 @@ it('Saves token when getAuthToken server call succeeds', async () => {
     response: {
       token: 'testTokenValue'
     }
-  })
-  const auth = shallow(<Auth />);
+  });
+  const auth = shallow(<AuthComponentOnly />);
   const event = {
-    preventDefault() { },
+    preventDefault() {},
     target: {
       username: { value: 'john' },
       password: { password: 'password' }
@@ -70,8 +70,8 @@ it('Saves token when getAuthToken server call succeeds', async () => {
     setItem(key, value) {
       this.store[key] = value.toString();
     }
-  };
-  global.localStorage = new LocalStorageMock;
+  }
+  global.localStorage = new LocalStorageMock();
 
   auth.instance().getAuthToken(event);
   await flushPromises();
@@ -82,10 +82,10 @@ it('Saves token when getAuthToken server call succeeds', async () => {
 it('Updates error state if signUp server call fails', async () => {
   moxios.stubRequest('/api/signup/', {
     status: 400
-  })
-  const auth = shallow(<Auth />);
+  });
+  const auth = shallow(<AuthComponentOnly />);
   const event = {
-    preventDefault() { },
+    preventDefault() {},
     target: {
       username: { value: 'john' },
       password: { password: 'password' }
@@ -103,10 +103,10 @@ it('Saves token when signUp server call succeeds', async () => {
     response: {
       token: 'testTokenValue'
     }
-  })
-  const auth = shallow(<Auth />);
+  });
+  const auth = shallow(<AuthComponentOnly />);
   const event = {
-    preventDefault() { },
+    preventDefault() {},
     target: {
       username: { value: 'john' },
       password: { password: 'password' }
@@ -125,8 +125,8 @@ it('Saves token when signUp server call succeeds', async () => {
     setItem(key, value) {
       this.store[key] = value.toString();
     }
-  };
-  global.localStorage = new LocalStorageMock;
+  }
+  global.localStorage = new LocalStorageMock();
 
   auth.instance().signUp(event);
   await flushPromises();
@@ -135,7 +135,7 @@ it('Saves token when signUp server call succeeds', async () => {
 });
 
 it('Can toggle between signup / login and set correct submit function', () => {
-  const auth = shallow(<Auth />);
+  const auth = shallow(<AuthComponentOnly />);
   auth.instance().signUp = jest.fn();
   auth.instance().getAuthToken = jest.fn();
 
@@ -146,7 +146,6 @@ it('Can toggle between signup / login and set correct submit function', () => {
   expect(auth.find('#idShowLogIn').length).toBe(1);
   auth.find('#idAuthForm').simulate('submit');
   expect(auth.instance().signUp).toHaveBeenCalledTimes(1);
-
 
   // toggle to login form and test submission
   auth.find('#idShowLogIn').simulate('click');
