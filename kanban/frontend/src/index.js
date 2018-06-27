@@ -8,6 +8,7 @@ import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 import homeReducer from './containers/Home/reducers';
 import authReducer from './components/Auth/reducers';
+import boardReducer from './containers/Board/reducers';
 
 // 3rd party imports
 import { BrowserRouter } from 'react-router-dom';
@@ -17,7 +18,8 @@ import thunk from 'redux-thunk';
 
 const rootReducer = combineReducers({
   auth: authReducer,
-  home: homeReducer
+  home: homeReducer,
+  board: boardReducer
 });
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

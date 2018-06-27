@@ -10,6 +10,8 @@ import Spinner from '../../components/Spinner/Spinner';
 import Info from '../../components/Modals/Info';
 import Confirm from '../../components/Modals/Confirm';
 import BoardControls from '../../containers/BoardControls/BoardControls';
+import { connect } from 'react-redux';
+import * as actions from './actions';
 
 // 3rd party imports
 import styled from 'styled-components';
@@ -65,6 +67,7 @@ class Board extends Component {
       this.props.authToken
     }`;
     this.retrieveData();
+    this.props.getBoard(this.props.id);
   }
 
   // called when the props change (eg: a different boardId was selected)
@@ -74,8 +77,9 @@ class Board extends Component {
 
   // if board id has changed, call retrieveData to laod the new board
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.id !== this.state.id) {
+    if (prevState.id !== this.props.id) {
       this.retrieveData();
+      this.props.getBoard(this.props.id);
     }
   }
 
@@ -83,7 +87,7 @@ class Board extends Component {
   async retrieveData() {
     this.setState({ retrievingData: true });
     await axios
-      .get(`/api/boards/${this.state.id}/`)
+      .get(`/api/boards/${this.props.id}/`)
       .then(res => {
         this.setState(
           {
@@ -756,5 +760,21 @@ class Board extends Component {
 
 Board.propTypes = propTypes;
 
+const mapStateToProps = state => {
+  return {
+    authToken: state.auth.token,
+    id: state.home.selectedBoardId
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    getBoard: id => dispatch(actions.getBoard(id))
+  };
+};
+
 export const BoardComponentOnly = Board; // used for shallow unit testing
-export default DragDropContext(HTML5Backend)(Board);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(DragDropContext(HTML5Backend)(Board));

@@ -111,7 +111,7 @@ class BoardSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Board
-        fields = ('user', 'name', 'columns')
+        fields = ('id', 'user', 'name', 'columns')
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
