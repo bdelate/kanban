@@ -8,10 +8,12 @@ import Select from '../../components/UI/Select';
 import Button from '../../components/UI/Button';
 import BoardCreateUpdate from '../../components/Modals/BoardCreateUpdate';
 import Confirm from '../../components/Modals/Confirm';
+import { connect } from 'react-redux';
+import * as actions from './actions';
+import * as authActions from '../../components/Auth/actions';
 
 // 3rd party imports
 import styled from 'styled-components';
-import jwtDecode from 'jwt-decode';
 import axios from 'axios';
 
 const HomeContainer = styled.div`
@@ -22,137 +24,66 @@ const HomeContainer = styled.div`
 
 class Home extends Component {
   state = {
-    infoModal: false,
-    boardCreateUpdate: {
+    boardCreateUpdateModal: {
       active: false,
       name: null
     },
     confirmModal: {
       message: null,
       confirmFunction: null
-    },
-    authToken: null,
-    availableBoards: {},
-    selectedBoardId: null // database board id of the selected board
+    }
   };
 
   componentDidMount() {
-    if (this.isLoggedIn()) this.retrieveData();
-    else this.props.history.push('/auth');
-  }
-
-  // if authToken exists and has not expired, user is considered logged in
-  isLoggedIn() {
-    const authToken = localStorage.getItem('authToken');
-    if (authToken) {
-      const decodedToken = jwtDecode(authToken);
-      if (new Date() <= new Date(decodedToken.exp * 1000)) {
-        axios.defaults.headers.common['Authorization'] = `JWT ${authToken}`;
-        this.setState({ authToken: authToken });
-        return true;
-      }
+    if (this.props.authToken) {
+      axios.defaults.headers.common['Authorization'] = `JWT ${
+        this.props.authToken
+      }`;
+      this.props.getAvailableBoards();
+    } else {
+      this.props.history.push('/auth');
     }
-    return false;
   }
-
-  // retrieve available user boards from the server
-  async retrieveData() {
-    await axios
-      .get('/api/boards/')
-      .then(res => {
-        this.setState({ availableBoards: res.data });
-      })
-      .catch(error => {
-        const message = 'Error: Unable to load board data';
-        this.toggleInfoHandler(message);
-      });
-  }
-
-  // display / hide info modal with message
-  toggleInfoHandler = (message = null) => {
-    this.setState({ infoModal: message });
-  };
-
-  // update state: selectedBoardId
-  selectBoard = id => {
-    this.setState({ selectedBoardId: parseInt(id, 10) });
-  };
 
   // create a new board
-  createBoardHandler = async name => {
+  createBoardHandler = name => {
     this.toggleBoardCreateUpdateHandler();
-    await axios
-      .post('/api/boards/', { name: name })
-      .then(res => {
-        const availableBoards = { ...this.state.availableBoards };
-        availableBoards[res.data.id] = res.data.name;
-        this.setState({
-          availableBoards: availableBoards,
-          selectedBoardId: res.data.id
-        });
-      })
-      .catch(error => {
-        const message = 'Error: Unable to create board';
-        this.toggleInfoHandler(message);
-      });
+    this.props.createBoard(name);
   };
 
   // change the boards name
-  updateBoardHandler = async name => {
+  renameBoardHandler = name => {
     this.toggleBoardCreateUpdateHandler();
-    if (name !== this.state.availableBoards[this.state.selectedBoardId]) {
-      this.toggleBoardCreateUpdateHandler();
-      await axios
-        .patch(`/api/boards/${this.state.selectedBoardId}/`, { name: name })
-        .then(res => {
-          const availableBoards = { ...this.state.availableBoards };
-          availableBoards[this.state.selectedBoardId] = res.data.name;
-          this.setState({ availableBoards: availableBoards });
-        })
-        .catch(error => {
-          const message = 'Error: Unable to update board';
-          this.toggleInfoHandler(message);
-        });
+    if (name !== this.props.availableBoards[this.props.selectedBoardId]) {
+      this.props.renameBoard(this.props.selectedBoardId, name);
     }
   };
 
   // delete board
   deleteBoardHandler = async () => {
     this.toggleConfirmHandler();
-    await axios
-      .delete(`/api/boards/${this.state.selectedBoardId}/`)
-      .then(res => {
-        const availableBoards = { ...this.state.availableBoards };
-        delete availableBoards[this.state.selectedBoardId];
-        this.setState({
-          availableBoards: availableBoards,
-          selectedBoardId: null
-        });
-      })
-      .catch(error => {
-        const message = 'Error: Unable to delete board';
-        this.toggleInfoHandler(message);
-      });
+    this.props.deleteBoard(this.props.selectedBoardId);
   };
 
-  // logout user by deleting localStorage authToken and redirect to /auth
+  // logout user
   logout = () => {
     localStorage.removeItem('authToken');
+    this.props.logout();
     this.props.history.push('/auth');
   };
 
   // Display / hide boardCreateUpdate modal
   toggleBoardCreateUpdateHandler = update => {
     const name = update
-      ? this.state.availableBoards[this.state.selectedBoardId]
+      ? this.props.availableBoards[this.props.selectedBoardId]
       : null;
 
-    const boardCreateUpdate = {
-      active: !this.state.boardCreateUpdate.active,
+    const boardCreateUpdateModal = {
+      active: !this.state.boardCreateUpdateModal.active,
       name: name
     };
 
-    this.setState({ boardCreateUpdate: boardCreateUpdate });
+    this.setState({ boardCreateUpdateModal: boardCreateUpdateModal });
   };
 
   // display / hide confirm modal. Specify function to be executed
@@ -174,16 +105,18 @@ class Home extends Component {
   };
 
   render() {
+    // display / hide info modal
     let infoModal = null;
-    if (this.state.infoModal) {
+    if (this.props.infoModal) {
       infoModal = (
         <Info
-          message={this.state.infoModal}
-          toggleInfo={this.toggleInfoHandler}
+          message={this.props.infoModal}
+          toggleInfo={this.props.toggleInfoModal}
         />
       );
     }
 
+    // display / hide confirmation modal
     let confirmModal = null;
     if (this.state.confirmModal.message) {
       confirmModal = (
@@ -195,26 +128,27 @@ class Home extends Component {
       );
     }
 
-    // display modal if this.state.boardCreateUpdate.active == true
+    // display / hide board create/update modal
     let boardCreateUpdate = null;
-    if (this.state.boardCreateUpdate.active) {
+    if (this.state.boardCreateUpdateModal.active) {
       boardCreateUpdate = (
         <BoardCreateUpdate
-          name={this.state.boardCreateUpdate.name}
+          name={this.state.boardCreateUpdateModal.name}
           toggleBoardCreateUpdate={this.toggleBoardCreateUpdateHandler}
           createBoard={this.createBoardHandler}
-          updateBoard={this.updateBoardHandler}
+          renameBoard={this.renameBoardHandler}
         />
       );
     }
 
-    const board =
-      this.state.authToken && this.state.selectedBoardId ? (
-        <Board
-          authToken={this.state.authToken}
-          id={this.state.selectedBoardId}
-        />
-      ) : null;
+    // dropdown containing the available boards
+    const boardSelection = (
+      <Select
+        onChangeFunc={this.props.selectBoard}
+        options={this.props.availableBoards}
+        selectedValue={this.props.selectedBoardId || -1}
+      />
+    );
 
     const createBoardButton = (
       <Button
@@ -226,8 +160,22 @@ class Home extends Component {
       </Button>
     );
 
+    const logoutButton = (
+      <Button domProps={{ onClick: this.logout }}>Logout</Button>
+    );
+
+    // display board and edit/delete buttons if a board has been selected
+    let board = null;
     let editBoardButton = null;
-    if (this.state.selectedBoardId) {
+    let deleteBoardButton = null;
+    if (this.props.selectedBoardId) {
+      board = (
+        <Board
+          authToken={this.props.authToken}
+          id={this.props.selectedBoardId}
+        />
+      );
+
       editBoardButton = (
         <Button
           domProps={{
@@ -237,14 +185,7 @@ class Home extends Component {
           Edit Board Name
         </Button>
       );
-    }
 
-    const logoutButton = (
-      <Button domProps={{ onClick: this.logout }}>Logout</Button>
-    );
-
-    let deleteBoardButton = null;
-    if (this.state.selectedBoardId) {
       deleteBoardButton = (
         <Button
           domProps={{
@@ -266,11 +207,7 @@ class Home extends Component {
         {confirmModal}
         {boardCreateUpdate}
         <div>
-          <Select
-            onChangeFunc={this.selectBoard}
-            options={this.state.availableBoards}
-            selectedValue={this.state.selectedBoardId || -1}
-          />
+          {boardSelection}
           {createBoardButton}
           {editBoardButton}
           {deleteBoardButton}
@@ -282,4 +219,28 @@ class Home extends Component {
   }
 }
 
-export default Home;
+const mapStateToProps = state => {
+  return {
+    authToken: state.auth.token,
+    selectedBoardId: state.home.selectedBoardId,
+    availableBoards: state.home.availableBoards,
+    infoModal: state.home.infoModal
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    selectBoard: id => dispatch(actions.selectBoard(id)),
+    createBoard: name => dispatch(actions.createBoard(name)),
+    renameBoard: (id, name) => dispatch(actions.renameBoard(id, name)),
+    deleteBoard: id => dispatch(actions.deleteBoard(id)),
+    getAvailableBoards: () => dispatch(actions.getAvailableBoards()),
+    toggleInfoModal: message => dispatch(actions.toggleInfoModal(message)),
+    logout: () => dispatch(authActions.logout())
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Home);

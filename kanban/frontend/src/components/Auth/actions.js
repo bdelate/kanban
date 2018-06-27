@@ -4,3 +4,9 @@ export const saveToken = token => {
     token: token
   };
 };
+
+export const logout = () => {
+  return {
+    type: 'LOGOUT'
+  };
+};

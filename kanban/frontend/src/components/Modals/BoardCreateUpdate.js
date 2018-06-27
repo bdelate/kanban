@@ -13,7 +13,7 @@ const propTypes = {
   name: PropTypes.string,
   toggleBoardCreateUpdate: PropTypes.func.isRequired,
   createBoard: PropTypes.func.isRequired,
-  updateBoard: PropTypes.func.isRequired
+  renameBoard: PropTypes.func.isRequired
 };
 
 const Container = styled.div`
@@ -61,7 +61,7 @@ class BoardCreateUpdate extends Component {
           domProps={{
             id: 'idSaveBoardButton',
             disabled: this.state.name.length === 0,
-            onClick: () => this.props.updateBoard(this.state.name)
+            onClick: () => this.props.renameBoard(this.state.name)
           }}
         >
           Save
