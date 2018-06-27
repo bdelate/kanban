@@ -11,11 +11,17 @@ const initialState = {
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case 'SET_BOARD':
+    case 'BOARD_DATA_RECEIVED':
       return {
         ...state,
         result: action.result,
-        entities: action.entities
+        entities: action.entities,
+        retrievingData: false
+      };
+    case 'TOGGLE_RETRIEVING_DATA':
+      return {
+        ...state,
+        retrievingData: action.retrievingData
       };
     default:
       return state;

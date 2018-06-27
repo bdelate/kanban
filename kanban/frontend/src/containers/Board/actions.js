@@ -6,7 +6,7 @@ import axios from 'axios';
 
 function setBoard(result, entities) {
   return {
-    type: 'SET_BOARD',
+    type: 'BOARD_DATA_RECEIVED',
     result: result,
     entities: entities
   };
@@ -14,6 +14,7 @@ function setBoard(result, entities) {
 
 export const getBoard = id => {
   return dispatch => {
+    dispatch(toggleRetrievingData(true));
     axios
       .get(`/api/boards/${id}/`)
       .then(res => {
@@ -21,9 +22,23 @@ export const getBoard = id => {
         dispatch(setBoard(normalizedData.result, normalizedData.entities));
       })
       .catch(error => {
-        // const message = 'Error: Unable to load board data';
-        // this.setState({ retrievingData: false });
-        // this.toggleInfoHandler(message);
+        const message = 'Error: Unable to load board data';
+        dispatch(toggleRetrievingData(false));
+        dispatch(toggleInfoModal(message));
       });
+  };
+};
+
+export const toggleRetrievingData = retrievingData => {
+  return {
+    type: 'TOGGLE_RETRIEVING_DATA',
+    retrievingData: retrievingData
+  };
+};
+
+export const toggleInfoModal = (message = null) => {
+  return {
+    type: 'TOGGLE_INFO_MODAL',
+    infoModal: message
   };
 };

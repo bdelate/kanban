@@ -648,7 +648,7 @@ class Board extends Component {
 
   render() {
     let output = <Spinner />;
-    if (!this.state.retrievingData) {
+    if (!this.props.retrievingData) {
       const columns = this.state.columns.map((column, index) => {
         if (column.collapsed) {
           return (
@@ -728,11 +728,11 @@ class Board extends Component {
     }
 
     let infoModal = null;
-    if (this.state.infoModal) {
+    if (this.props.infoModal) {
       infoModal = (
         <Info
-          message={this.state.infoModal}
-          toggleInfo={this.toggleInfoHandler}
+          message={this.props.infoModal}
+          toggleInfo={this.props.toggleInfoModal}
         />
       );
     }
@@ -763,13 +763,16 @@ Board.propTypes = propTypes;
 const mapStateToProps = state => {
   return {
     authToken: state.auth.token,
-    id: state.home.selectedBoardId
+    id: state.home.selectedBoardId,
+    retrievingData: state.board.retrievingData,
+    infoModal: state.board.infoModal
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    getBoard: id => dispatch(actions.getBoard(id))
+    getBoard: id => dispatch(actions.getBoard(id)),
+    toggleInfoModal: message => dispatch(actions.toggleInfoModal(message))
   };
 };
 
