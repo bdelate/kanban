@@ -10,6 +10,7 @@ import Controls from './Controls';
 import styled from 'styled-components';
 import { DropTarget } from 'react-dnd';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 
 const propTypes = {
   columnIndex: PropTypes.number.isRequired,
@@ -76,18 +77,18 @@ const column = props => {
     <Header>{props.name}</Header>
   );
 
-  const cards = props.cards.map((card, index) => (
-    <Card
-      key={card.id}
-      cardIndex={index}
-      columnIndex={props.columnIndex}
-      task={card.task}
-      spinner={card.spinner}
-      deleteCard={props.deleteCard}
-      reorderCard={props.reorderCard}
-      toggleCardCreateUpdate={props.toggleCardCreateUpdate}
-    />
-  ));
+  // const cards = props.cards.map((card, index) => (
+  //   <Card
+  //     key={card.id}
+  //     cardIndex={index}
+  //     columnIndex={props.columnIndex}
+  //     task={card.task}
+  //     spinner={card.spinner}
+  //     deleteCard={props.deleteCard}
+  //     reorderCard={props.reorderCard}
+  //     toggleCardCreateUpdate={props.toggleCardCreateUpdate}
+  //   />
+  // ));
 
   return (
     <ColumnContainer innerRef={node => connectDropTarget(node)}>
@@ -100,11 +101,18 @@ const column = props => {
         deleteColumn={props.deleteColumn}
       />
       {header}
-      {cards}
+      {/* {cards} */}
     </ColumnContainer>
   );
 };
 
+const mapStateToProps = (state, ownProps) => {
+  return {
+    name: state.board.entities.columns[ownProps.id].name
+  };
+};
 column.propTypes = propTypes;
 
-export default DropTarget(DragTypes.CARD, columnTarget, collect)(column);
+export default connect(mapStateToProps)(
+  DropTarget(DragTypes.CARD, columnTarget, collect)(column)
+);

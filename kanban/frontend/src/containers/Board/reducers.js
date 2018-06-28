@@ -5,7 +5,7 @@ const initialState = {
     cards: {},
     result: null // db board id
   },
-  retrievingData: false,
+  retrievingData: true,
   infoModal: null
 };
 

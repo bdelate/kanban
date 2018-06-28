@@ -42,8 +42,6 @@ const ColumnsContainer = styled.div`
 class Board extends Component {
   state = {
     id: null,
-    retrievingData: true,
-    infoModal: false,
     confirmModal: {
       message: null,
       confirmFunction: null
@@ -66,7 +64,6 @@ class Board extends Component {
     axios.defaults.headers.common['Authorization'] = `JWT ${
       this.props.authToken
     }`;
-    this.retrieveData();
     this.props.getBoard(this.props.id);
   }
 
@@ -78,7 +75,6 @@ class Board extends Component {
   // if board id has changed, call retrieveData to laod the new board
   componentDidUpdate(prevProps, prevState) {
     if (prevState.id !== this.props.id) {
-      this.retrieveData();
       this.props.getBoard(this.props.id);
     }
   }
@@ -649,35 +645,38 @@ class Board extends Component {
   render() {
     let output = <Spinner />;
     if (!this.props.retrievingData) {
-      const columns = this.state.columns.map((column, index) => {
-        if (column.collapsed) {
-          return (
-            <CollapsedColumn
-              {...column}
-              key={column.id}
-              columnIndex={index}
-              numCards={column.cards.length}
-              toggleColumn={this.toggleColumnHandler}
-            />
-          );
-        } else {
-          return (
-            <Column
-              {...column}
-              key={column.id}
-              columnIndex={index}
-              reorderCard={this.reorderCardHandler}
-              moveCard={this.moveCardHandler}
-              deleteCard={this.deleteCardHandler}
-              toggleColumn={this.toggleColumnHandler}
-              toggleCardCreateUpdate={this.toggleCardCreateUpdateHandler}
-              toggleColumnCreateUpdate={this.toggleColumnCreateUpdateHandler}
-              deleteColumn={this.deleteColumnHandler}
-              toggleConfirm={this.toggleConfirmHandler}
-            />
-          );
-        }
+      const columns = this.props.columnIds.map(columnId => {
+        return <Column key={columnId} id={columnId} />;
       });
+      // const columns = this.state.columns.map((column, index) => {
+      //   if (column.collapsed) {
+      //     return (
+      //       <CollapsedColumn
+      //         {...column}
+      //         key={column.id}
+      //         columnIndex={index}
+      //         numCards={column.cards.length}
+      //         toggleColumn={this.toggleColumnHandler}
+      //       />
+      //     );
+      //   } else {
+      //     return (
+      //       <Column
+      //         {...column}
+      //         key={column.id}
+      //         columnIndex={index}
+      //         reorderCard={this.reorderCardHandler}
+      //         moveCard={this.moveCardHandler}
+      //         deleteCard={this.deleteCardHandler}
+      //         toggleColumn={this.toggleColumnHandler}
+      //         toggleCardCreateUpdate={this.toggleCardCreateUpdateHandler}
+      //         toggleColumnCreateUpdate={this.toggleColumnCreateUpdateHandler}
+      //         deleteColumn={this.deleteColumnHandler}
+      //         toggleConfirm={this.toggleConfirmHandler}
+      //       />
+      //     );
+      //   }
+      // });
 
       // display Column modal if this.state.columnCreateUpdate.active
       let columnCreateUpdate = null;
@@ -761,9 +760,14 @@ class Board extends Component {
 Board.propTypes = propTypes;
 
 const mapStateToProps = state => {
+  const columnIds = state.board.entities.boards[state.home.selectedBoardId]
+    ? state.board.entities.boards[state.home.selectedBoardId].columns
+    : [];
+
   return {
     authToken: state.auth.token,
     id: state.home.selectedBoardId,
+    columnIds: columnIds,
     retrievingData: state.board.retrievingData,
     infoModal: state.board.infoModal
   };
