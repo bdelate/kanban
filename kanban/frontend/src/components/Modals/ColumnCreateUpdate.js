@@ -11,9 +11,9 @@ import PropTypes from 'prop-types';
 
 const propTypes = {
   active: PropTypes.bool.isRequired,
-  toggleColumnCreateUpdate: PropTypes.func.isRequired,
-  editColumnName: PropTypes.func.isRequired,
-  createColumn: PropTypes.func.isRequired
+  toggleModal: PropTypes.func.isRequired,
+  editColumnName: PropTypes.func,
+  createColumn: PropTypes.func
 };
 
 const Container = styled.div`
@@ -97,7 +97,7 @@ class ColumnCreateUpdate extends Component {
           {saveButton}
           <Button
             domProps={{
-              onClick: () => this.props.toggleColumnCreateUpdate(false)
+              onClick: this.props.toggleModal
             }}
           >
             Cancel

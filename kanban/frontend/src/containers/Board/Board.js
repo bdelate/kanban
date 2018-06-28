@@ -41,7 +41,6 @@ const ColumnsContainer = styled.div`
 
 class Board extends Component {
   state = {
-    id: null,
     confirmModal: {
       message: null,
       confirmFunction: null
@@ -55,7 +54,6 @@ class Board extends Component {
       columnIndex: -1,
       cardIndex: -1
     },
-    columns: [],
     previousState: {}
   };
 

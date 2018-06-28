@@ -1,10 +1,11 @@
 // react imports
-import React from 'react';
+import React, { Component } from 'react';
 
 // project imports
 import Card from '../../components/Card/Card';
 import { DragTypes } from '../../DragTypes';
 import Controls from './Controls';
+import RenameModal from '../../components/Modals/ColumnCreateUpdate';
 
 // 3rd party imports
 import styled from 'styled-components';
@@ -67,52 +68,76 @@ function collect(connect, monitor) {
   };
 }
 
-const column = props => {
-  const { connectDropTarget } = props;
-  const header = props.spinner ? (
-    <Header>
-      <i className="fas fa-spinner fa-spin" />
-    </Header>
-  ) : (
-    <Header>{props.name}</Header>
-  );
+class Column extends Component {
+  state = {
+    renameModal: false
+  };
 
-  // const cards = props.cards.map((card, index) => (
-  //   <Card
-  //     key={card.id}
-  //     cardIndex={index}
-  //     columnIndex={props.columnIndex}
-  //     task={card.task}
-  //     spinner={card.spinner}
-  //     deleteCard={props.deleteCard}
-  //     reorderCard={props.reorderCard}
-  //     toggleCardCreateUpdate={props.toggleCardCreateUpdate}
-  //   />
-  // ));
+  // update state.columnCreateUpdate which allows for displaying / hiding columnCreateUpdate
+  toggleRenameModal = () => {
+    this.setState({ renameModal: !this.state.renameModal });
+  };
 
-  return (
-    <ColumnContainer innerRef={node => connectDropTarget(node)}>
-      <Controls
-        toggleColumn={props.toggleColumn}
-        toggleCardCreateUpdate={props.toggleCardCreateUpdate}
-        toggleColumnCreateUpdate={props.toggleColumnCreateUpdate}
-        toggleConfirm={props.toggleConfirm}
-        columnIndex={props.columnIndex}
-        deleteColumn={props.deleteColumn}
-      />
-      {header}
-      {/* {cards} */}
-    </ColumnContainer>
-  );
-};
+  render() {
+    const { connectDropTarget } = this.props;
+
+    let renameModal = null;
+    if (this.state.renameModal) {
+      renameModal = (
+        <RenameModal
+          name={this.props.name}
+          toggleModal={this.toggleRenameModal}
+          editColumnName={this.editColumnNameHandler}
+        />
+      );
+    }
+
+    const header = this.props.spinner ? (
+      <Header>
+        <i className="fas fa-spinner fa-spin" />
+      </Header>
+    ) : (
+      <Header>{this.props.name}</Header>
+    );
+
+    // const cards = props.cards.map((card, index) => (
+    //   <Card
+    //     key={card.id}
+    //     cardIndex={index}
+    //     columnIndex={props.columnIndex}
+    //     task={card.task}
+    //     spinner={card.spinner}
+    //     deleteCard={props.deleteCard}
+    //     reorderCard={props.reorderCard}
+    //     toggleCardCreateUpdate={props.toggleCardCreateUpdate}
+    //   />
+    // ));
+
+    return (
+      <ColumnContainer innerRef={node => connectDropTarget(node)}>
+        {renameModal}
+        <Controls
+          toggleColumn={this.props.toggleColumn}
+          toggleCardCreateUpdate={this.props.toggleCardCreateUpdate}
+          toggleRenameModal={this.toggleRenameModal}
+          toggleConfirm={this.props.toggleConfirm}
+          columnIndex={this.props.columnIndex}
+          deleteColumn={this.props.deleteColumn}
+        />
+        {header}
+        {/* {cards} */}
+      </ColumnContainer>
+    );
+  }
+}
 
 const mapStateToProps = (state, ownProps) => {
   return {
     name: state.board.entities.columns[ownProps.id].name
   };
 };
-column.propTypes = propTypes;
+Column.propTypes = propTypes;
 
 export default connect(mapStateToProps)(
-  DropTarget(DragTypes.CARD, columnTarget, collect)(column)
+  DropTarget(DragTypes.CARD, columnTarget, collect)(Column)
 );
