@@ -192,35 +192,6 @@ class Board extends Component {
       });
   };
 
-  // Update column name on the server
-  patchServerColumnName = async columnIndex => {
-    const data = {
-      id: this.state.columns[columnIndex].id,
-      name: this.state.columns[columnIndex].name
-    };
-    await axios
-      .patch(`/api/columns/${data.id}/`, { ...data })
-      .then(res => {
-        this.setState(
-          {
-            columns: [
-              ...this.state.columns.slice(0, columnIndex),
-              { ...res.data },
-              ...this.state.columns.slice(columnIndex + 1)
-            ]
-          },
-          this.savePreviousState
-        );
-      })
-      // restore previous valid state and display error message
-      .catch(error => {
-        const previousState = this.state.previousState;
-        this.setState(previousState);
-        const message = 'Error: Unable to update column on the server';
-        this.toggleInfoHandler(message);
-      });
-  };
-
   // Update single card detail on the server
   patchServerCardDetail = async (columnIndex, cardIndex) => {
     this.toggleCardSpinner(columnIndex, cardIndex);
@@ -269,22 +240,6 @@ class Board extends Component {
         const previousState = this.state.previousState;
         this.setState(previousState);
         const message = 'Error: Unable to create card on the server';
-        this.toggleInfoHandler(message);
-      });
-  };
-
-  // delete column on the server
-  deleteServerColumn = async (columnId, columns) => {
-    await axios
-      .delete(`/api/columns/${columnId}/`)
-      .then(res => {
-        this.savePreviousState();
-      })
-      // restore previous valid state and display error message
-      .catch(error => {
-        const previousState = this.state.previousState;
-        this.setState(previousState);
-        const message = 'Error: Unable to delete column on the server';
         this.toggleInfoHandler(message);
       });
   };
@@ -453,68 +408,6 @@ class Board extends Component {
     columns.push(newColumn);
     this.setState({ columns: columns });
     this.postServerColumn(newColumn);
-  };
-
-  // edit existing column name on the server and update local state
-  editColumnNameHandler = (columnIndex, name) => {
-    this.toggleColumnCreateUpdateHandler(false);
-    this.setState(
-      {
-        columns: [
-          ...this.state.columns.slice(0, columnIndex),
-          {
-            ...this.state.columns[columnIndex],
-            name: name,
-            spinner: true
-          },
-          ...this.state.columns.slice(columnIndex + 1)
-        ]
-      },
-      // call back function executed after setState completes
-      () => this.patchServerColumnName(columnIndex)
-    );
-  };
-
-  // remove column from state.
-  // if: deleted column is the last column - just delete it
-  // else: update position_ids of remaining columns and flag column for
-  // deletion. Use patchServerColumn in this case.
-  deleteColumnHandler = columnIndex => {
-    this.toggleConfirmHandler();
-
-    // was the removed column the last one in the board
-    const was_last_column = true
-      ? this.state.columns[columnIndex].position_id ===
-        this.state.columns.length - 1
-      : false;
-
-    if (was_last_column) {
-      // delete last column. Remaining columns remain unchanged.
-      const columnId = this.state.columns[columnIndex].id;
-      this.setState({
-        columns: [...this.state.columns.slice(0, columnIndex)]
-      });
-      this.deleteServerColumn(columnId);
-    } else {
-      // add delete flag to deleted column
-      const deletedColumn = {
-        ...this.state.columns[columnIndex],
-        delete: true
-      };
-      // remove deleted column from existing columns
-      const columns = [
-        ...this.state.columns.slice(0, columnIndex),
-        ...this.state.columns.slice(columnIndex + 1)
-      ];
-      // update remaining column position_id's
-      for (let i = 0; i < columns.length; i++) {
-        columns[i]['position_id'] = parseInt(i, 10);
-      }
-      // update remaining columns in state
-      this.setState({ columns: columns });
-      // update server columns along with column flagged for deletion
-      this.patchServerColumns([...columns, deletedColumn]);
-    }
   };
 
   // remove card from state.
@@ -688,7 +581,6 @@ class Board extends Component {
             name={column ? column.name : null}
             toggleColumnCreateUpdate={this.toggleColumnCreateUpdateHandler}
             createColumn={this.createColumnHandler}
-            editColumnName={this.editColumnNameHandler}
           />
         );
       }
@@ -734,6 +626,7 @@ class Board extends Component {
       );
     }
 
+    // display / hide confirmation modal
     let confirmModal = null;
     if (this.state.confirmModal.message) {
       confirmModal = (

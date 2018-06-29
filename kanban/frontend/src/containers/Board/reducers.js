@@ -20,6 +20,11 @@ const reducer = (state = initialState, action) => {
         ...state,
         retrievingData: action.retrievingData
       };
+    case 'COLUMN_DELETED':
+      return {
+        ...state,
+        columns: state.columns.filter(id => id !== action.id)
+      };
     default:
       return state;
   }

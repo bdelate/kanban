@@ -1,5 +1,6 @@
 // project imports
 import { toggleInfoModal } from '../Home/actions';
+import { normalizeColumn } from '../../utilities/normalizer';
 
 // 3rd party imports
 import axios from 'axios';
@@ -19,11 +20,18 @@ export const toggleSpinner = (id, displaySpinner) => {
   };
 };
 
-export const setColumnName = (id, name) => {
+export const columnRenamed = (id, name) => {
   return {
-    type: 'SET_COLUMN_NAME',
+    type: 'COLUMN_RENAMED',
     id: id,
     name: name
+  };
+};
+
+export const columnDeleted = id => {
+  return {
+    type: 'COLUMN_DELETED',
+    id: id
   };
 };
 
@@ -35,11 +43,34 @@ export const renameColumn = (id, name) => {
       .patch(`/api/columns/${id}/`, { ...data })
       .then(res => {
         dispatch(toggleSpinner(id, false));
-        dispatch(setColumnName(res.data.id, res.data.name));
+        dispatch(columnRenamed(res.data.id, res.data.name));
       })
       .catch(error => {
         dispatch(toggleSpinner(id, false));
         const message = 'Error: Unable to update column on the server';
+        dispatch(toggleInfoModal(message));
+      });
+  };
+};
+
+// if last column was deleted, only that column is removed from server, board
+// and column store. If non last column was deleted, remaining columns are
+// overwritten to reflect their updated position_ids received from the server
+export const deleteColumn = id => {
+  return dispatch => {
+    dispatch(toggleSpinner(id, true));
+    axios
+      .delete(`/api/columns/${id}/`)
+      .then(res => {
+        dispatch(columnDeleted(id));
+        if (res.data !== '') {
+          const normalizedData = normalizeColumn(res.data);
+          dispatch(overwriteColumns(normalizedData.entities.columns));
+        }
+      })
+      .catch(error => {
+        dispatch(toggleSpinner(id, false));
+        const message = 'Error: Unable to delete column on the server';
         dispatch(toggleInfoModal(message));
       });
   };

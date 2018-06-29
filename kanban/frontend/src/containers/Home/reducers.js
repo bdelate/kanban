@@ -36,6 +36,8 @@ const reducer = (state = initialState, action) => {
       return { ...state, availableBoards: action.availableBoards };
     case 'TOGGLE_INFO_MODAL':
       return { ...state, infoModal: action.infoModal };
+    case 'TOGGLE_CONFIRM_MODAL':
+      return { ...state, confirmModal: action.confirmModal };
     default:
       return state;
   }

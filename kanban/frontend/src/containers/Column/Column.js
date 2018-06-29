@@ -7,6 +7,7 @@ import { DragTypes } from '../../DragTypes';
 import Controls from './Controls';
 import RenameModal from '../../components/Modals/ColumnCreateUpdate';
 import * as actions from './actions';
+import Confirm from '../../components/Modals/Confirm';
 
 // 3rd party imports
 import styled from 'styled-components';
@@ -71,7 +72,11 @@ function collect(connect, monitor) {
 
 class Column extends Component {
   state = {
-    renameModal: false
+    renameModal: false,
+    confirmModal: {
+      message: null,
+      confirmFunction: null
+    }
   };
 
   // used to display / hide the rename modal
@@ -85,6 +90,30 @@ class Column extends Component {
     if (name !== this.props.name) {
       this.props.renameColumn(this.props.id, name);
     }
+  };
+
+  // display / hide confirm modal. Specify function to be executed
+  // if confirm is clicked
+  toggleConfirmModal = (message, confirmFunction) => {
+    let confirmModal;
+    if (message) {
+      confirmModal = {
+        message: message,
+        confirmFunction: () => confirmFunction()
+      };
+    } else {
+      confirmModal = {
+        message: null,
+        confirmFunction: null
+      };
+    }
+    this.setState({ confirmModal: confirmModal });
+  };
+
+  // dispatch deleteColumn
+  handleDelete = () => {
+    this.toggleConfirmModal();
+    this.props.deleteColumn(this.props.id);
   };
 
   render() {
@@ -109,6 +138,18 @@ class Column extends Component {
       <Header>{this.props.name}</Header>
     );
 
+    // display / hide confirmation modal
+    let confirmModal = null;
+    if (this.state.confirmModal.message) {
+      confirmModal = (
+        <Confirm
+          message={this.state.confirmModal.message}
+          confirmFunction={this.handleDelete}
+          toggleConfirm={this.toggleConfirmModal}
+        />
+      );
+    }
+
     // const cards = props.cards.map((card, index) => (
     //   <Card
     //     key={card.id}
@@ -125,13 +166,14 @@ class Column extends Component {
     return (
       <ColumnContainer innerRef={node => connectDropTarget(node)}>
         {renameModal}
+        {confirmModal}
         <Controls
           toggleColumn={this.props.toggleColumn}
           toggleCardCreateUpdate={this.props.toggleCardCreateUpdate}
           toggleRenameModal={this.toggleRenameModal}
-          toggleConfirm={this.props.toggleConfirm}
+          toggleConfirmModal={this.toggleConfirmModal}
           columnIndex={this.props.columnIndex}
-          deleteColumn={this.props.deleteColumn}
+          deleteColumn={() => this.props.deleteColumn(this.props.id)}
         />
         {header}
         {/* {cards} */}
@@ -149,7 +191,8 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    renameColumn: (id, name) => dispatch(actions.renameColumn(id, name))
+    renameColumn: (id, name) => dispatch(actions.renameColumn(id, name)),
+    deleteColumn: id => dispatch(actions.deleteColumn(id))
   };
 };
 

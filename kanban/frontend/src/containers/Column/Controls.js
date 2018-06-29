@@ -56,10 +56,9 @@ const Controls = props => (
         title="Delete Column"
         className="deleteColumn fas fa-trash-alt"
         onClick={() =>
-          props.toggleConfirm(
+          props.toggleConfirmModal(
             'Column along within all of its cards will be permanently deleted',
-            props.deleteColumn,
-            props.columnIndex
+            props.deleteColumn
           )
         }
       />

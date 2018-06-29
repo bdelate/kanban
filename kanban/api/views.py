@@ -56,6 +56,30 @@ class ColumnDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Column.objects.select_related('board')
     serializer_class = ColumnSerializer
 
+    def delete(self, request, pk):
+        """
+        If last board column is deleted, return response without extra data,
+        else update remaining column position_ids and return them in
+        the response.
+        """
+        try:
+            column = Column.objects.get(pk=pk)
+        except Column.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        num_columns = Column.objects.filter(board=column.board).count()
+        column.delete()
+
+        if column.position_id == num_columns - 1:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        columns = Column.objects.filter(board=column.board)
+        for i, col in enumerate(columns):
+            col.position_id = i
+            col.save()
+        serializer = ColumnSerializer(columns, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class ColumnsCreateUpdate(APIView):
 
