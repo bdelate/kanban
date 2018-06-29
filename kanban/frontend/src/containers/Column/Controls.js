@@ -7,9 +7,9 @@ import PropTypes from 'prop-types';
 
 const propTypes = {
   toggleCollapse: PropTypes.func.isRequired,
-  toggleCardCreateUpdate: PropTypes.func.isRequired,
-  toggleRename: PropTypes.func.isRequired,
-  toggleConfirm: PropTypes.func.isRequired,
+  toggleCreateCardModal: PropTypes.func.isRequired,
+  toggleRenameModal: PropTypes.func.isRequired,
+  toggleConfirmModal: PropTypes.func.isRequired,
   deleteColumn: PropTypes.func.isRequired
 };
 
@@ -44,7 +44,7 @@ const Controls = props => (
       <i
         title="Add Task"
         className="fas fa-plus"
-        onClick={() => props.toggleCardCreateUpdate(true, props.columnIndex)}
+        onClick={() => props.togleCreateCardModal(true, props.columnIndex)}
       />
       <i
         title="Change Column Name"

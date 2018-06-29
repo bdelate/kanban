@@ -3,12 +3,12 @@ import React, { Component, Fragment } from 'react';
 
 // project imports
 import Column from '../Column/Column';
-import ColumnCreateUpdate from '../../components/Modals/ColumnCreateUpdate';
+import CreateColumnModal from '../../components/Modals/ColumnCreateUpdate';
 import CardCreateUpdate from '../../components/Modals/CardCreateUpdate';
 import Spinner from '../../components/Spinner/Spinner';
 import Info from '../../components/Modals/Info';
 import Confirm from '../../components/Modals/Confirm';
-import BoardControls from '../../containers/BoardControls/BoardControls';
+import Button from '../../components/UI/Button';
 import { connect } from 'react-redux';
 import * as actions from './actions';
 
@@ -44,10 +44,7 @@ class Board extends Component {
       message: null,
       confirmFunction: null
     },
-    columnCreateUpdate: {
-      active: false,
-      columnIndex: -1
-    },
+    createColumnModal: null,
     cardCreateUpdate: {
       active: false,
       columnIndex: -1,
@@ -69,34 +66,11 @@ class Board extends Component {
     return { ...nextProps };
   }
 
-  // if board id has changed, call retrieveData to laod the new board
+  // if board id has changed, dispatch getBoard to retrieve data from server
   componentDidUpdate(prevProps, prevState) {
     if (prevState.id !== this.props.id) {
       this.props.getBoard(this.props.id);
     }
-  }
-
-  // retrieve all board data from the server
-  async retrieveData() {
-    this.setState({ retrievingData: true });
-    await axios
-      .get(`/api/boards/${this.props.id}/`)
-      .then(res => {
-        this.setState(
-          {
-            ...res.data,
-            ...this.state,
-            retrievingData: false,
-            columns: res.data.columns
-          },
-          this.savePreviousState
-        );
-      })
-      .catch(error => {
-        const message = 'Error: Unable to load board data';
-        this.setState({ retrievingData: false });
-        this.toggleInfoHandler(message);
-      });
   }
 
   // make a deep copy of the entire state and save it to state.previousState
@@ -117,22 +91,6 @@ class Board extends Component {
     this.setState({ previousState: currentState });
   };
 
-  // update all specified columns
-  patchServerColumns = async columns => {
-    await axios
-      .patch(`/api/columns/`, { columns })
-      .then(res => {
-        this.savePreviousState();
-      })
-      //restore previous valid state and display error message
-      .catch(error => {
-        const previousState = this.state.previousState;
-        this.setState(previousState);
-        const message = 'Error: Unable to update columns on the server';
-        this.toggleInfoHandler(message);
-      });
-  };
-
   // update all specified cards.
   // optionally display a card spinner if a spinnerCard is provided
   patchServerCards = async (cards, spinnerCard) => {
@@ -148,32 +106,6 @@ class Board extends Component {
         const previousState = this.state.previousState;
         this.setState(previousState);
         const message = 'Error: Unable to update cards on the server';
-        this.toggleInfoHandler(message);
-      });
-  };
-
-  // create new column on the server. Replace last column with response
-  // to get db id and hide spinner
-  postServerColumn = async column => {
-    await axios
-      .post(`/api/columns/`, column)
-      .then(res => {
-        this.setState(
-          {
-            ...this.state,
-            columns: [
-              ...this.state.columns.slice(0, res.data.position_id),
-              { ...res.data }
-            ]
-          },
-          this.savePreviousState
-        );
-      })
-      // restore previous valid state and display error message
-      .catch(error => {
-        const previousState = this.state.previousState;
-        this.setState(previousState);
-        const message = 'Error: Unable to create column on the server';
         this.toggleInfoHandler(message);
       });
   };
@@ -346,13 +278,8 @@ class Board extends Component {
     this.setState({ cardCreateUpdate: cardCreateUpdate });
   };
 
-  // update state.columnCreateUpdate which allows for displaying / hiding columnCreateUpdate
-  toggleColumnCreateUpdateHandler = (active, columnIndex = -1) => {
-    const columnCreateUpdate = {
-      active: active,
-      columnIndex: columnIndex
-    };
-    this.setState({ columnCreateUpdate: columnCreateUpdate });
+  toggleCreateColumnModal = message => {
+    this.setState({ createColumnModal: !this.state.createColumnModal });
   };
 
   // show / hide spinner within a specific card
@@ -379,21 +306,17 @@ class Board extends Component {
     });
   };
 
-  // create new column in state and call postServerColumn to create it on the server
-  createColumnHandler = name => {
-    this.toggleColumnCreateUpdateHandler(false);
-    const columns = [...this.state.columns];
-    const newColumn = {
-      id: -1, // temporary id used for Column keys until id received from db
-      spinner: true,
+  handleCreateColumn = name => {
+    const column = {
       name: name,
-      position_id: this.state.columns.length,
-      board_id: this.state.id,
-      cards: []
+      id: -1,
+      position_id: this.props.columnIds.length,
+      board_id: this.props.id,
+      cards: [],
+      spinner: true
     };
-    columns.push(newColumn);
-    this.setState({ columns: columns });
-    this.postServerColumn(newColumn);
+    this.toggleCreateColumnModal();
+    this.props.createColumn(column);
   };
 
   // remove card from state.
@@ -526,18 +449,12 @@ class Board extends Component {
         return <Column key={columnId} id={columnId} />;
       });
 
-      // display Column modal if this.state.columnCreateUpdate.active
-      let columnCreateUpdate = null;
-      if (this.state.columnCreateUpdate.active) {
-        const column = this.state.columns[
-          this.state.columnCreateUpdate.columnIndex
-        ];
-        columnCreateUpdate = (
-          <ColumnCreateUpdate
-            {...this.state.columnCreateUpdate}
-            name={column ? column.name : null}
-            toggleColumnCreateUpdate={this.toggleColumnCreateUpdateHandler}
-            createColumn={this.createColumnHandler}
+      let createColumnModal = null;
+      if (this.state.createColumnModal) {
+        createColumnModal = (
+          <CreateColumnModal
+            toggleModal={this.toggleCreateColumnModal}
+            createColumn={name => this.handleCreateColumn(name)}
           />
         );
       }
@@ -561,11 +478,13 @@ class Board extends Component {
 
       output = (
         <BoardContainer>
-          <BoardControls
-            toggleColumnCreateUpdate={this.toggleColumnCreateUpdateHandler}
-          />
+          <div>
+            <Button domProps={{ onClick: this.toggleCreateColumnModal }}>
+              Create Column
+            </Button>
+          </div>
           <ColumnsContainer>
-            {columnCreateUpdate}
+            {createColumnModal}
             {cardCreateUpdate}
             {columns}
           </ColumnsContainer>
@@ -620,7 +539,8 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     getBoard: id => dispatch(actions.getBoard(id)),
-    toggleInfoModal: message => dispatch(actions.toggleInfoModal(message))
+    toggleInfoModal: message => dispatch(actions.toggleInfoModal(message)),
+    createColumn: column => dispatch(actions.createColumn(column))
   };
 };
 

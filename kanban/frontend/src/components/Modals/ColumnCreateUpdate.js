@@ -10,7 +10,6 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
 const propTypes = {
-  active: PropTypes.bool.isRequired,
   toggleModal: PropTypes.func.isRequired,
   renameColumn: PropTypes.func,
   createColumn: PropTypes.func
@@ -54,19 +53,7 @@ class ColumnCreateUpdate extends Component {
 
   render() {
     let saveButton;
-    if (this.props.columnIndex === -1) {
-      saveButton = (
-        <Button
-          domProps={{
-            id: 'idSaveColumnButton',
-            disabled: this.state.name.length === 0,
-            onClick: () => this.props.createColumn(this.state.name)
-          }}
-        >
-          Create
-        </Button>
-      );
-    } else {
+    if (this.props.name) {
       saveButton = (
         <Button
           domProps={{
@@ -76,6 +63,18 @@ class ColumnCreateUpdate extends Component {
           }}
         >
           Save
+        </Button>
+      );
+    } else {
+      saveButton = (
+        <Button
+          domProps={{
+            id: 'idSaveColumnButton',
+            disabled: this.state.name.length === 0,
+            onClick: () => this.props.createColumn(this.state.name)
+          }}
+        >
+          Create
         </Button>
       );
     }

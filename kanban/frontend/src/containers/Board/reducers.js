@@ -20,6 +20,14 @@ const reducer = (state = initialState, action) => {
         ...state,
         retrievingData: action.retrievingData
       };
+    case 'COLUMN_CREATED':
+      if (!state.columns.includes(action.id)) {
+        return {
+          ...state,
+          columns: state.columns.concat(action.column.id)
+        };
+      }
+      break;
     case 'COLUMN_DELETED':
       return {
         ...state,

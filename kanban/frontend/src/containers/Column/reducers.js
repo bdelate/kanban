@@ -4,6 +4,11 @@ const reducer = (state = initialState, action) => {
   switch (action.type) {
     case 'OVERWRITE_COLUMNS':
       return { ...action.columns };
+    case 'COLUMN_CREATED':
+      return {
+        ...state,
+        [action.column.id]: { ...action.column }
+      };
     case 'COLUMN_RENAMED':
       return {
         ...state,

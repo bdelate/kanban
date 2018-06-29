@@ -39,7 +39,7 @@ const collapsedColumn = props => {
         onClick={props.toggleCollapse}
       />
       <Header>
-        {props.name}: {props.numCards} Tasks
+        {props.name}: {props.numCards} Cards
       </Header>
     </ColumnContainer>
   );

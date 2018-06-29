@@ -17,16 +17,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 const propTypes = {
-  columnIndex: PropTypes.number.isRequired,
-  name: PropTypes.string.isRequired,
-  cards: PropTypes.array.isRequired,
-  reorderCard: PropTypes.func.isRequired,
-  moveCard: PropTypes.func.isRequired,
-  toggleColumn: PropTypes.func.isRequired,
-  toggleColumnCreateUpdate: PropTypes.func.isRequired,
-  toggleCardCreateUpdate: PropTypes.func.isRequired,
-  toggleConfirm: PropTypes.func.isRequired,
-  deleteColumn: PropTypes.func.isRequired
+  id: PropTypes.number.isRequired
 };
 
 const ColumnContainer = styled.div`
