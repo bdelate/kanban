@@ -1,21 +1,18 @@
 const initialState = {
-  entities: {
-    boards: {},
-    columns: {},
-    cards: {},
-    result: null // db board id
-  },
+  id: null,
+  user: null,
+  name: null,
+  columns: [],
   retrievingData: true,
   infoModal: null
 };
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case 'BOARD_DATA_RECEIVED':
+    case 'OVERWRITE_BOARD':
       return {
         ...state,
-        result: action.result,
-        entities: action.entities,
+        ...action.board,
         retrievingData: false
       };
     case 'TOGGLE_RETRIEVING_DATA':

@@ -758,14 +758,10 @@ class Board extends Component {
 Board.propTypes = propTypes;
 
 const mapStateToProps = state => {
-  const columnIds = state.board.entities.boards[state.home.selectedBoardId]
-    ? state.board.entities.boards[state.home.selectedBoardId].columns
-    : [];
-
   return {
     authToken: state.auth.token,
     id: state.home.selectedBoardId,
-    columnIds: columnIds,
+    columnIds: state.board.columns,
     retrievingData: state.board.retrievingData,
     infoModal: state.board.infoModal
   };

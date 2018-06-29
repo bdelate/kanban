@@ -1,14 +1,14 @@
 // project imports
 import { normalizeBoard } from '../../utilities/normalizer';
+import * as columnActions from '../Column/actions';
 
 // 3rd party imports
 import axios from 'axios';
 
-function setBoard(result, entities) {
+function overwriteBoard(board) {
   return {
-    type: 'BOARD_DATA_RECEIVED',
-    result: result,
-    entities: entities
+    type: 'OVERWRITE_BOARD',
+    board: board
   };
 }
 
@@ -19,7 +19,10 @@ export const getBoard = id => {
       .get(`/api/boards/${id}/`)
       .then(res => {
         const normalizedData = normalizeBoard(res.data);
-        dispatch(setBoard(normalizedData.result, normalizedData.entities));
+        dispatch(
+          columnActions.overwriteColumns(normalizedData.entities.columns)
+        );
+        dispatch(overwriteBoard(normalizedData.entities.boards[id]));
       })
       .catch(error => {
         const message = 'Error: Unable to load board data';

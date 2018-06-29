@@ -6,6 +6,7 @@ import Card from '../../components/Card/Card';
 import { DragTypes } from '../../DragTypes';
 import Controls from './Controls';
 import RenameModal from '../../components/Modals/ColumnCreateUpdate';
+import * as actions from './actions';
 
 // 3rd party imports
 import styled from 'styled-components';
@@ -73,9 +74,17 @@ class Column extends Component {
     renameModal: false
   };
 
-  // update state.columnCreateUpdate which allows for displaying / hiding columnCreateUpdate
+  // used to display / hide the rename modal
   toggleRenameModal = () => {
     this.setState({ renameModal: !this.state.renameModal });
+  };
+
+  // dispatch renameColumn if column name was changed
+  handleRename = name => {
+    this.toggleRenameModal();
+    if (name !== this.props.name) {
+      this.props.renameColumn(this.props.id, name);
+    }
   };
 
   render() {
@@ -87,7 +96,7 @@ class Column extends Component {
         <RenameModal
           name={this.props.name}
           toggleModal={this.toggleRenameModal}
-          editColumnName={this.editColumnNameHandler}
+          renameColumn={this.handleRename}
         />
       );
     }
@@ -133,11 +142,20 @@ class Column extends Component {
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    name: state.board.entities.columns[ownProps.id].name
+    name: state.columns[ownProps.id].name,
+    spinner: state.columns[ownProps.id].spinner
   };
 };
+
+const mapDispatchToProps = dispatch => {
+  return {
+    renameColumn: (id, name) => dispatch(actions.renameColumn(id, name))
+  };
+};
+
 Column.propTypes = propTypes;
 
-export default connect(mapStateToProps)(
-  DropTarget(DragTypes.CARD, columnTarget, collect)(Column)
-);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(DropTarget(DragTypes.CARD, columnTarget, collect)(Column));

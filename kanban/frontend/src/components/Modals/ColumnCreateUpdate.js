@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 const propTypes = {
   active: PropTypes.bool.isRequired,
   toggleModal: PropTypes.func.isRequired,
-  editColumnName: PropTypes.func,
+  renameColumn: PropTypes.func,
   createColumn: PropTypes.func
 };
 
@@ -72,8 +72,7 @@ class ColumnCreateUpdate extends Component {
           domProps={{
             id: 'idSaveColumnButton',
             disabled: this.state.name.length === 0,
-            onClick: () =>
-              this.props.editColumnName(this.props.columnIndex, this.state.name)
+            onClick: () => this.props.renameColumn(this.state.name)
           }}
         >
           Save
