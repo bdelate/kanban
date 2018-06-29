@@ -157,18 +157,7 @@ class Column extends Component {
         );
       }
 
-      // const cards = props.cards.map((card, index) => (
-      //   <Card
-      //     key={card.id}
-      //     cardIndex={index}
-      //     columnIndex={props.columnIndex}
-      //     task={card.task}
-      //     spinner={card.spinner}
-      //     deleteCard={props.deleteCard}
-      //     reorderCard={props.reorderCard}
-      //     toggleCardCreateUpdate={props.toggleCardCreateUpdate}
-      //   />
-      // ));
+      const cards = this.props.cardIds.map(id => <Card key={id} id={id} />);
 
       return (
         <ColumnContainer innerRef={node => connectDropTarget(node)}>
@@ -182,7 +171,7 @@ class Column extends Component {
             deleteColumn={() => this.props.deleteColumn(this.props.id)}
           />
           {header}
-          {/* {cards} */}
+          {cards}
         </ColumnContainer>
       );
     }

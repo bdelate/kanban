@@ -9,6 +9,7 @@ import { DragTypes } from '../../DragTypes';
 import styled from 'styled-components';
 import { DragSource, DropTarget } from 'react-dnd';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 
 const propTypes = {
   cardIndex: PropTypes.number.isRequired,
@@ -186,6 +187,13 @@ const card = props => {
   return output;
 };
 
+const mapStateToProps = (state, ownProps) => {
+  return {
+    task: state.cards[ownProps.id].task,
+    spinner: state.cards[ownProps.id].spinner
+  };
+};
+
 card.propTypes = propTypes;
 
 // export CardSource separately to be used in tests
@@ -193,6 +201,6 @@ export const CardSource = DragSource(DragTypes.CARD, cardSource, collectSource)(
   card
 );
 
-export default DropTarget(DragTypes.CARD, cardTarget, collectTarget)(
-  CardSource
+export default connect(mapStateToProps)(
+  DropTarget(DragTypes.CARD, cardTarget, collectTarget)(CardSource)
 );
