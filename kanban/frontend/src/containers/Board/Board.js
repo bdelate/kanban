@@ -4,7 +4,6 @@ import React, { Component, Fragment } from 'react';
 // project imports
 import Column from '../Column/Column';
 import CreateColumnModal from '../../components/Modals/ColumnCreateUpdate';
-import CardCreateUpdate from '../../components/Modals/CardCreateUpdate';
 import Spinner from '../../components/Spinner/Spinner';
 import Info from '../../components/Modals/Info';
 import Confirm from '../../components/Modals/Confirm';
@@ -44,7 +43,7 @@ class Board extends Component {
       message: null,
       confirmFunction: null
     },
-    createColumnModal: null,
+    createColumnModal: false,
     cardCreateUpdate: {
       active: false,
       columnIndex: -1,
@@ -278,7 +277,7 @@ class Board extends Component {
     this.setState({ cardCreateUpdate: cardCreateUpdate });
   };
 
-  toggleCreateColumnModal = message => {
+  toggleCreateColumnModal = () => {
     this.setState({ createColumnModal: !this.state.createColumnModal });
   };
 
@@ -459,23 +458,6 @@ class Board extends Component {
         );
       }
 
-      // display CardCreateUpdate modal if this.state.cardCreateUpdate.active
-      let cardCreateUpdate = null;
-      if (this.state.cardCreateUpdate.active) {
-        const card = this.state.columns[this.state.cardCreateUpdate.columnIndex]
-          .cards[this.state.cardCreateUpdate.cardIndex];
-        cardCreateUpdate = (
-          <CardCreateUpdate
-            {...this.state.cardCreateUpdate}
-            task={card ? card.task : null}
-            toggleCardCreateUpdate={this.toggleCardCreateUpdateHandler}
-            editCardDetail={this.editCardDetailHandler}
-            deleteCard={this.deleteCardHandler}
-            createCard={this.createCardHandler}
-          />
-        );
-      }
-
       output = (
         <BoardContainer>
           <div>
@@ -485,7 +467,6 @@ class Board extends Component {
           </div>
           <ColumnsContainer>
             {createColumnModal}
-            {cardCreateUpdate}
             {columns}
           </ColumnsContainer>
         </BoardContainer>

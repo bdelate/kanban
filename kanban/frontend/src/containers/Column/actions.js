@@ -1,6 +1,7 @@
 // project imports
 import { toggleInfoModal } from '../Home/actions';
 import { normalizeColumn } from '../../utilities/normalizer';
+import * as cardActions from '../../components/Card/actions';
 
 // 3rd party imports
 import axios from 'axios';
@@ -71,6 +72,30 @@ export const deleteColumn = id => {
       .catch(error => {
         dispatch(toggleSpinner(id, false));
         const message = 'Error: Unable to delete column on the server';
+        dispatch(toggleInfoModal(message));
+      });
+  };
+};
+
+export const cardCreated = card => {
+  return {
+    type: 'CARD_CREATED',
+    card: card
+  };
+};
+
+export const createCard = card => {
+  return dispatch => {
+    dispatch(cardCreated(card));
+    axios
+      .post(`/api/cards/`, card)
+      .then(res => {
+        dispatch(cardActions.cardDeleted(card.column_id, card.id));
+        dispatch(cardCreated(res.data));
+      })
+      .catch(error => {
+        dispatch(cardActions.cardDeleted(card.column_id, card.id));
+        const message = 'Error: Unable to create card on the server';
         dispatch(toggleInfoModal(message));
       });
   };

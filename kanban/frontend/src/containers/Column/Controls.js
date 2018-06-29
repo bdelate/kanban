@@ -44,7 +44,7 @@ const Controls = props => (
       <i
         title="Add Task"
         className="fas fa-plus"
-        onClick={() => props.togleCreateCardModal(true, props.columnIndex)}
+        onClick={props.toggleCreateCardModal}
       />
       <i
         title="Change Column Name"

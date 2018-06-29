@@ -5,10 +5,7 @@ const reducer = (state = initialState, action) => {
     case 'OVERWRITE_COLUMNS':
       return { ...action.columns };
     case 'COLUMN_CREATED':
-      return {
-        ...state,
-        [action.column.id]: { ...action.column }
-      };
+      return { ...state, [action.column.id]: { ...action.column } };
     case 'COLUMN_RENAMED':
       return {
         ...state,
@@ -18,6 +15,24 @@ const reducer = (state = initialState, action) => {
       const columns = { ...state };
       delete columns[action.id];
       return columns;
+    case 'CARD_CREATED':
+      const column = {
+        ...state[action.card.column_id],
+        cards: [...state[action.card.column_id].cards]
+      };
+      if (!column.cards.includes(action.card.id)) {
+        column.cards = column.cards.concat(action.card.id);
+        return { ...state, [action.card.column_id]: column };
+      }
+      break;
+    case 'CARD_DELETED':
+      const cards = state[action.column_id].cards.filter(
+        id => id !== action.id
+      );
+      return {
+        ...state,
+        [action.column_id]: { ...state[action.column_id], cards: cards }
+      };
     case 'TOGGLE_SPINNER':
       return {
         ...state,

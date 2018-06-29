@@ -57,20 +57,7 @@ class CardCreateUpdate extends Component {
 
   render() {
     let saveButton;
-    if (this.props.cardIndex === -1) {
-      saveButton = (
-        <Button
-          domProps={{
-            id: 'idSaveCardButton',
-            disabled: this.state.task.length === 0,
-            onClick: () =>
-              this.props.createCard(this.props.columnIndex, this.state.task)
-          }}
-        >
-          Create
-        </Button>
-      );
-    } else {
+    if (this.props.task) {
       saveButton = (
         <Button
           domProps={{
@@ -85,6 +72,18 @@ class CardCreateUpdate extends Component {
           }}
         >
           Save
+        </Button>
+      );
+    } else {
+      saveButton = (
+        <Button
+          domProps={{
+            id: 'idSaveCardButton',
+            disabled: this.state.task.length === 0,
+            onClick: () => this.props.createCard(this.state.task)
+          }}
+        >
+          Create
         </Button>
       );
     }
@@ -106,11 +105,7 @@ class CardCreateUpdate extends Component {
           />
           <div>
             {saveButton}
-            <Button
-              domProps={{
-                onClick: () => this.props.toggleCardCreateUpdate(false)
-              }}
-            >
+            <Button domProps={{ onClick: this.props.toggleModal }}>
               Cancel
             </Button>
           </div>

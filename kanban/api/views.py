@@ -131,7 +131,7 @@ class CardsCreateUpdate(APIView):
         Create new card. Add resulting card id to response data
         """
         serializer = CardSerializer(data=request.data)
-        if serializer.is_valid():
+        if not serializer.is_valid():
             instance = serializer.save()
             data = {'id': instance.id}
             data.update(serializer.data)
