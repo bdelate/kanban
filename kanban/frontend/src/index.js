@@ -10,6 +10,7 @@ import homeReducer from './containers/Home/reducers';
 import authReducer from './components/Auth/reducers';
 import boardReducer from './containers/Board/reducers';
 import columnReducer from './containers/Column/reducers';
+import cardReducer from './components/Card/reducers';
 
 // 3rd party imports
 import { BrowserRouter } from 'react-router-dom';
@@ -21,7 +22,8 @@ const rootReducer = combineReducers({
   auth: authReducer,
   home: homeReducer,
   board: boardReducer,
-  columns: columnReducer
+  columns: columnReducer,
+  cards: cardReducer
 });
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

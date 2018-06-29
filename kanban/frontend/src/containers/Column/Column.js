@@ -128,7 +128,7 @@ class Column extends Component {
       return (
         <CollapsedColumn
           name={this.props.name}
-          numCards={1} // TODO: get from props store
+          numCards={this.props.cardIds.length}
           toggleCollapse={this.toggleCollapse}
         />
       );
@@ -201,6 +201,7 @@ class Column extends Component {
 const mapStateToProps = (state, ownProps) => {
   return {
     name: state.columns[ownProps.id].name,
+    cardIds: state.columns[ownProps.id].cards,
     spinner: state.columns[ownProps.id].spinner
   };
 };

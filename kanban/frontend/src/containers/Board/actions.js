@@ -1,6 +1,7 @@
 // project imports
 import { normalizeBoard } from '../../utilities/normalizer';
 import * as columnActions from '../Column/actions';
+import * as cardActions from '../../components/Card/actions';
 
 // 3rd party imports
 import axios from 'axios';
@@ -19,6 +20,7 @@ export const getBoard = id => {
       .get(`/api/boards/${id}/`)
       .then(res => {
         const normalizedData = normalizeBoard(res.data);
+        dispatch(cardActions.overwriteCards(normalizedData.entities.cards));
         dispatch(
           columnActions.overwriteColumns(normalizedData.entities.columns)
         );
