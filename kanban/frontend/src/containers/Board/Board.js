@@ -3,7 +3,6 @@ import React, { Component, Fragment } from 'react';
 
 // project imports
 import Column from '../Column/Column';
-import CollapsedColumn from '../../components/CollapsedColumn/CollapsedColumn';
 import ColumnCreateUpdate from '../../components/Modals/ColumnCreateUpdate';
 import CardCreateUpdate from '../../components/Modals/CardCreateUpdate';
 import Spinner from '../../components/Spinner/Spinner';
@@ -116,19 +115,6 @@ class Board extends Component {
     }
     delete currentState.previousState;
     this.setState({ previousState: currentState });
-  };
-
-  // collapse / uncollapse column
-  toggleColumnHandler = columnIndex => {
-    const column = { ...this.state.columns[columnIndex] };
-    column.collapsed = !column.collapsed;
-    this.setState({
-      columns: [
-        ...this.state.columns.slice(0, columnIndex),
-        column,
-        ...this.state.columns.slice(columnIndex + 1)
-      ]
-    });
   };
 
   // update all specified columns
@@ -539,35 +525,6 @@ class Board extends Component {
       const columns = this.props.columnIds.map(columnId => {
         return <Column key={columnId} id={columnId} />;
       });
-      // const columns = this.state.columns.map((column, index) => {
-      //   if (column.collapsed) {
-      //     return (
-      //       <CollapsedColumn
-      //         {...column}
-      //         key={column.id}
-      //         columnIndex={index}
-      //         numCards={column.cards.length}
-      //         toggleColumn={this.toggleColumnHandler}
-      //       />
-      //     );
-      //   } else {
-      //     return (
-      //       <Column
-      //         {...column}
-      //         key={column.id}
-      //         columnIndex={index}
-      //         reorderCard={this.reorderCardHandler}
-      //         moveCard={this.moveCardHandler}
-      //         deleteCard={this.deleteCardHandler}
-      //         toggleColumn={this.toggleColumnHandler}
-      //         toggleCardCreateUpdate={this.toggleCardCreateUpdateHandler}
-      //         toggleColumnCreateUpdate={this.toggleColumnCreateUpdateHandler}
-      //         deleteColumn={this.deleteColumnHandler}
-      //         toggleConfirm={this.toggleConfirmHandler}
-      //       />
-      //     );
-      //   }
-      // });
 
       // display Column modal if this.state.columnCreateUpdate.active
       let columnCreateUpdate = null;

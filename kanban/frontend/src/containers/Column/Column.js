@@ -8,6 +8,7 @@ import Controls from './Controls';
 import RenameModal from '../../components/Modals/ColumnCreateUpdate';
 import * as actions from './actions';
 import Confirm from '../../components/Modals/Confirm';
+import CollapsedColumn from '../../components/CollapsedColumn/CollapsedColumn';
 
 // 3rd party imports
 import styled from 'styled-components';
@@ -72,6 +73,7 @@ function collect(connect, monitor) {
 
 class Column extends Component {
   state = {
+    collapsed: false,
     renameModal: false,
     confirmModal: {
       message: null,
@@ -116,69 +118,83 @@ class Column extends Component {
     this.props.deleteColumn(this.props.id);
   };
 
+  // collapse / uncollapse column
+  toggleCollapse = () => {
+    this.setState({ collapsed: !this.state.collapsed });
+  };
+
   render() {
-    const { connectDropTarget } = this.props;
-
-    let renameModal = null;
-    if (this.state.renameModal) {
-      renameModal = (
-        <RenameModal
+    if (this.state.collapsed) {
+      return (
+        <CollapsedColumn
           name={this.props.name}
-          toggleModal={this.toggleRenameModal}
-          renameColumn={this.handleRename}
+          numCards={1} // TODO: get from props store
+          toggleCollapse={this.toggleCollapse}
         />
       );
-    }
+    } else {
+      const { connectDropTarget } = this.props;
 
-    const header = this.props.spinner ? (
-      <Header>
-        <i className="fas fa-spinner fa-spin" />
-      </Header>
-    ) : (
-      <Header>{this.props.name}</Header>
-    );
+      let renameModal = null;
+      if (this.state.renameModal) {
+        renameModal = (
+          <RenameModal
+            name={this.props.name}
+            toggleModal={this.toggleRenameModal}
+            renameColumn={this.handleRename}
+          />
+        );
+      }
 
-    // display / hide confirmation modal
-    let confirmModal = null;
-    if (this.state.confirmModal.message) {
-      confirmModal = (
-        <Confirm
-          message={this.state.confirmModal.message}
-          confirmFunction={this.handleDelete}
-          toggleConfirm={this.toggleConfirmModal}
-        />
+      const header = this.props.spinner ? (
+        <Header>
+          <i className="fas fa-spinner fa-spin" />
+        </Header>
+      ) : (
+        <Header>{this.props.name}</Header>
+      );
+
+      // display / hide confirmation modal
+      let confirmModal = null;
+      if (this.state.confirmModal.message) {
+        confirmModal = (
+          <Confirm
+            message={this.state.confirmModal.message}
+            confirmFunction={this.handleDelete}
+            toggleConfirm={this.toggleConfirmModal}
+          />
+        );
+      }
+
+      // const cards = props.cards.map((card, index) => (
+      //   <Card
+      //     key={card.id}
+      //     cardIndex={index}
+      //     columnIndex={props.columnIndex}
+      //     task={card.task}
+      //     spinner={card.spinner}
+      //     deleteCard={props.deleteCard}
+      //     reorderCard={props.reorderCard}
+      //     toggleCardCreateUpdate={props.toggleCardCreateUpdate}
+      //   />
+      // ));
+
+      return (
+        <ColumnContainer innerRef={node => connectDropTarget(node)}>
+          {renameModal}
+          {confirmModal}
+          <Controls
+            toggleCollapse={this.toggleCollapse}
+            toggleCardCreateUpdate={this.props.toggleCardCreateUpdate}
+            toggleRenameModal={this.toggleRenameModal}
+            toggleConfirmModal={this.toggleConfirmModal}
+            deleteColumn={() => this.props.deleteColumn(this.props.id)}
+          />
+          {header}
+          {/* {cards} */}
+        </ColumnContainer>
       );
     }
-
-    // const cards = props.cards.map((card, index) => (
-    //   <Card
-    //     key={card.id}
-    //     cardIndex={index}
-    //     columnIndex={props.columnIndex}
-    //     task={card.task}
-    //     spinner={card.spinner}
-    //     deleteCard={props.deleteCard}
-    //     reorderCard={props.reorderCard}
-    //     toggleCardCreateUpdate={props.toggleCardCreateUpdate}
-    //   />
-    // ));
-
-    return (
-      <ColumnContainer innerRef={node => connectDropTarget(node)}>
-        {renameModal}
-        {confirmModal}
-        <Controls
-          toggleColumn={this.props.toggleColumn}
-          toggleCardCreateUpdate={this.props.toggleCardCreateUpdate}
-          toggleRenameModal={this.toggleRenameModal}
-          toggleConfirmModal={this.toggleConfirmModal}
-          columnIndex={this.props.columnIndex}
-          deleteColumn={() => this.props.deleteColumn(this.props.id)}
-        />
-        {header}
-        {/* {cards} */}
-      </ColumnContainer>
-    );
   }
 }
 

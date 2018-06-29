@@ -6,11 +6,10 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
 const propTypes = {
-  toggleColumn: PropTypes.func.isRequired,
+  toggleCollapse: PropTypes.func.isRequired,
   toggleCardCreateUpdate: PropTypes.func.isRequired,
   toggleRename: PropTypes.func.isRequired,
   toggleConfirm: PropTypes.func.isRequired,
-  columnIndex: PropTypes.number.isRequired,
   deleteColumn: PropTypes.func.isRequired
 };
 
@@ -39,7 +38,7 @@ const Controls = props => (
     <i
       title="Collapse Column"
       className="fas fa-compress"
-      onClick={() => props.toggleColumn(props.columnIndex)}
+      onClick={props.toggleCollapse}
     />
     <FlexEnd>
       <i
