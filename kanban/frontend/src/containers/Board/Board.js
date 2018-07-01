@@ -5,7 +5,6 @@ import React, { Component, Fragment } from 'react';
 import Column from '../Column/Column';
 import CreateColumnModal from '../../components/Modals/ColumnCreateUpdate';
 import Spinner from '../../components/Spinner/Spinner';
-import Info from '../../components/Modals/Info';
 import Confirm from '../../components/Modals/Confirm';
 import Button from '../../components/UI/Button';
 import { connect } from 'react-redux';
@@ -43,8 +42,7 @@ class Board extends Component {
       message: null,
       confirmFunction: null
     },
-    createColumnModal: false,
-    previousState: {}
+    createColumnModal: false
   };
 
   // set auth token and retrieve data on initial mount
@@ -66,71 +64,6 @@ class Board extends Component {
       this.props.getBoard(this.props.id);
     }
   }
-
-  // make a deep copy of the entire state and save it to state.previousState
-  savePreviousState = () => {
-    const currentState = { ...this.state };
-    for (let column in this.state.columns) {
-      currentState.columns[column] = { ...this.state.columns[column] };
-      currentState.columns[column].cards = [
-        ...this.state.columns[column].cards
-      ];
-      for (let card in this.state.columns[column].cards) {
-        currentState.columns[column].cards[card] = {
-          ...this.state.columns[column].cards[card]
-        };
-      }
-    }
-    delete currentState.previousState;
-    this.setState({ previousState: currentState });
-  };
-
-  // move card to a different column
-  moveCardHandler = (fromColumnIndex, fromCardIndex, toColumnIndex) => {
-    // create deep copy of all columns
-    const updatedState = { columns: [...this.state.columns] };
-    for (let column in updatedState.columns) {
-      updatedState.columns[column] = { ...this.state.columns[column] };
-      updatedState.columns[column].cards = [
-        ...this.state.columns[column].cards
-      ];
-      for (let card in this.state.columns[column].cards) {
-        updatedState.columns[column].cards[card] = {
-          ...this.state.columns[column].cards[card]
-        };
-      }
-    }
-
-    // remove card from fromColumnIndex
-    const card = updatedState.columns[fromColumnIndex].cards.splice(
-      fromCardIndex,
-      1
-    )[0];
-
-    // update card column_id and position_id
-    card.column_id = updatedState.columns[toColumnIndex].id;
-    card.position_id = updatedState.columns[toColumnIndex].cards.length;
-
-    // push card to toColumnIndex
-    updatedState.columns[toColumnIndex].cards.push(card);
-
-    // update card position ids in fromColumnIndex
-    for (let key in updatedState.columns[fromColumnIndex].cards) {
-      updatedState.columns[fromColumnIndex].cards[key][
-        'position_id'
-      ] = parseInt(key, 10);
-    }
-
-    // update state
-    this.setState({ columns: updatedState.columns });
-
-    // update server with changed cards, ie: moved card and cards in fromColumn
-    const newCardIndex = updatedState.columns[toColumnIndex].cards.length - 1;
-    const cards = [...updatedState.columns[fromColumnIndex].cards];
-    cards.push(updatedState.columns[toColumnIndex].cards[newCardIndex]);
-    const spinnerCard = [toColumnIndex, newCardIndex];
-    this.patchServerCards(cards, spinnerCard);
-  };
 
   toggleCreateColumnModal = () => {
     this.setState({ createColumnModal: !this.state.createColumnModal });
@@ -199,16 +132,6 @@ class Board extends Component {
       );
     }
 
-    let infoModal = null;
-    if (this.props.infoModal) {
-      infoModal = (
-        <Info
-          message={this.props.infoModal}
-          toggleInfo={this.props.toggleInfoModal}
-        />
-      );
-    }
-
     // display / hide confirmation modal
     let confirmModal = null;
     if (this.state.confirmModal.message) {
@@ -223,7 +146,6 @@ class Board extends Component {
 
     return (
       <Fragment>
-        {infoModal}
         {confirmModal}
         {output}
       </Fragment>
@@ -238,15 +160,13 @@ const mapStateToProps = state => {
     authToken: state.auth.token,
     id: state.home.selectedBoardId,
     columnIds: state.board.columns,
-    retrievingData: state.board.retrievingData,
-    infoModal: state.board.infoModal
+    retrievingData: state.board.retrievingData
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
     getBoard: id => dispatch(actions.getBoard(id)),
-    toggleInfoModal: message => dispatch(actions.toggleInfoModal(message)),
     createColumn: column => dispatch(actions.createColumn(column))
   };
 };

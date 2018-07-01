@@ -59,7 +59,7 @@ const Task = styled.div`
 `;
 
 const cardSource = {
-  // return card id, column id and card index it is dragged
+  // return card id, column id and card index when the card is dragged
   beginDrag(props) {
     return {
       id: props.id,
@@ -145,6 +145,7 @@ class Card extends Component {
     this.setState({ updateModal: !this.state.updateModal });
   };
 
+  // dispatch updateCard if the task has been changed
   handleUpdate = task => {
     this.toggleUpdateModal();
     if (task !== this.props.task) this.props.updateCard(this.props.id, task);

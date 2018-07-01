@@ -134,3 +134,48 @@ export const reorderCards = args => {
     }
   };
 };
+
+export const cardMoved = args => {
+  return {
+    type: 'CARD_MOVED',
+    fromColumnId: args.fromColumnId,
+    toColumnId: args.toColumnId,
+    cardId: args.cardId
+  };
+};
+
+// move card to a different column. Update moved card details along with
+// position ids of cards in original column
+export const moveCard = args => {
+  return (dispatch, getState) => {
+    dispatch(cardMoved(args));
+    dispatch(cardActions.toggleSpinner(args.cardId, true));
+
+    // create array of fromColumn cards with updated position ids
+    const cards = getState().columns[args.fromColumnId].cards.map(
+      (id, index) => {
+        return { id: id, position_id: index };
+      }
+    );
+
+    // append updated details for moved card to cards array
+    cards.push({
+      id: args.cardId,
+      column_id: args.toColumnId,
+      position_id: args.toPositionId
+    });
+
+    // update server, then update store to reflect teh udpated position ids
+    axios
+      .patch(`/api/cards/`, { cards })
+      .then(res => {
+        const normalizedData = normalizeCards(res.data);
+        dispatch(cardActions.cardsUpdated(normalizedData.entities.cards));
+      })
+      .catch(error => {
+        dispatch(cardActions.toggleSpinner(args.cardId, false));
+        const message = 'Error: Unable to update card on the server';
+        dispatch(toggleInfoModal(message));
+      });
+  };
+};

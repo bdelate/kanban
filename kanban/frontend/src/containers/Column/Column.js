@@ -18,7 +18,10 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 const propTypes = {
-  id: PropTypes.number.isRequired
+  id: PropTypes.number.isRequired,
+  name: PropTypes.string.isRequired,
+  cardIds: PropTypes.array,
+  spinner: PropTypes.bool
 };
 
 const ColumnContainer = styled.div`
@@ -41,13 +44,16 @@ const Header = styled.h2`
 const columnTarget = {
   drop(props, monitor, component) {
     if (monitor.getItem().column_id !== props.id) {
-      console.log('here');
-      // props.moveCard(
-      //   monitor.getItem().columnIndex,
-      //   monitor.getItem().cardIndex,
-      //   props.columnIndex
-      // );
+      // card dropped on different column
+      const args = {
+        fromColumnId: monitor.getItem().column_id,
+        toColumnId: props.id,
+        cardId: monitor.getItem().id,
+        toPositionId: props.cardIds.length
+      };
+      props.moveCard(args);
     } else {
+      // card dropped on same column
       const cards = props.cardIds.map((id, index) => {
         return { id: id, position_id: index };
       });
@@ -96,6 +102,7 @@ class Column extends Component {
     }
   };
 
+  // dispatch createCard
   handleCreateCard = task => {
     this.toggleCreateCardModal();
     const card = {
@@ -191,6 +198,16 @@ class Column extends Component {
         );
       }
 
+      const controls = (
+        <Controls
+          toggleCollapse={this.toggleCollapse}
+          toggleCreateCardModal={this.toggleCreateCardModal}
+          toggleRenameModal={this.toggleRenameModal}
+          toggleConfirmModal={this.toggleConfirmModal}
+          deleteColumn={() => this.props.deleteColumn(this.props.id)}
+        />
+      );
+
       const cards = this.props.cardIds.map((id, index) => (
         <Card key={id} id={id} index={index} />
       ));
@@ -200,13 +217,7 @@ class Column extends Component {
           {renameModal}
           {confirmModal}
           {createCardModal}
-          <Controls
-            toggleCollapse={this.toggleCollapse}
-            toggleCreateCardModal={this.toggleCreateCardModal}
-            toggleRenameModal={this.toggleRenameModal}
-            toggleConfirmModal={this.toggleConfirmModal}
-            deleteColumn={() => this.props.deleteColumn(this.props.id)}
-          />
+          {controls}
           {header}
           {cards}
         </ColumnContainer>
@@ -228,7 +239,8 @@ const mapDispatchToProps = dispatch => {
     renameColumn: (id, name) => dispatch(actions.renameColumn(id, name)),
     deleteColumn: id => dispatch(actions.deleteColumn(id)),
     createCard: card => dispatch(actions.createCard(card)),
-    reorderCards: args => dispatch(actions.reorderCards(args))
+    reorderCards: args => dispatch(actions.reorderCards(args)),
+    moveCard: args => dispatch(actions.moveCard(args))
   };
 };
 

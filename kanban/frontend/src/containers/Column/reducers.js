@@ -33,6 +33,17 @@ const reducer = (state = initialState, action) => {
         ...state,
         [action.column_id]: { ...state[action.column_id], cards: cards }
       };
+    case 'CARD_MOVED':
+      const fromColumn = { ...state[action.fromColumnId] };
+      fromColumn.cards = fromColumn.cards.filter(id => id !== action.cardId);
+      return {
+        ...state,
+        [action.fromColumnId]: fromColumn,
+        [action.toColumnId]: {
+          ...state[action.toColumnId],
+          cards: state[action.toColumnId].cards.concat(action.cardId)
+        }
+      };
     case 'CARDS_REORDERED':
       const cardIds = [...state[action.column_id].cards];
       const temp = cardIds[action.fromCardIndex];
