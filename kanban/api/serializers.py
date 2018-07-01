@@ -50,7 +50,7 @@ class CardSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Card
-        fields = ('task', 'position_id', 'column_id')
+        fields = ('id', 'task', 'position_id', 'column_id')
 
 
 class ColumnListSerializer(serializers.ListSerializer):

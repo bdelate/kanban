@@ -33,7 +33,7 @@ const reducer = (state = initialState, action) => {
         ...state,
         [action.column_id]: { ...state[action.column_id], cards: cards }
       };
-    case 'TOGGLE_SPINNER':
+    case 'TOGGLE_COLUMN_SPINNER':
       return {
         ...state,
         [action.id]: { ...state[action.id], spinner: action.spinner }

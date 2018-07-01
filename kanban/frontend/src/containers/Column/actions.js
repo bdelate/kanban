@@ -15,7 +15,7 @@ export const overwriteColumns = columns => {
 
 export const toggleSpinner = (id, displaySpinner) => {
   return {
-    type: 'TOGGLE_SPINNER',
+    type: 'TOGGLE_COLUMN_SPINNER',
     id: id,
     spinner: displaySpinner
   };

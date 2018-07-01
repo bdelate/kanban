@@ -121,6 +121,30 @@ class CardDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Card.objects.select_related('column', 'column__board')
     serializer_class = ExistingCardSerializer
 
+    def delete(self, request, pk):
+        """
+        If last column card is deleted, return response without extra data,
+        else update remaining card position_ids and return them in
+        the response.
+        """
+        try:
+            card = Card.objects.get(pk=pk)
+        except Card.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        num_cards = Card.objects.filter(column=card.column_id).count()
+        card.delete()
+
+        if card.position_id == num_cards - 1:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        cards = Card.objects.filter(column=card.column_id)
+        for i, current_card in enumerate(cards):
+            current_card.position_id = i
+            current_card.save()
+        serializer = CardSerializer(cards, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class CardsCreateUpdate(APIView):
 
@@ -131,7 +155,7 @@ class CardsCreateUpdate(APIView):
         Create new card. Add resulting card id to response data
         """
         serializer = CardSerializer(data=request.data)
-        if not serializer.is_valid():
+        if serializer.is_valid():
             instance = serializer.save()
             data = {'id': instance.id}
             data.update(serializer.data)

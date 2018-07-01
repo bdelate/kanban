@@ -128,55 +128,6 @@ class Board extends Component {
       });
   };
 
-  // create new card on the server, update state with response (to get db id)
-  postServerCard = async (columnIndex, card) => {
-    await axios
-      .post(`/api/cards/`, card)
-      .then(res => {
-        const cardIndex = this.state.columns[columnIndex].cards.length - 1;
-        this.setState(
-          {
-            ...this.state,
-            columns: [
-              ...this.state.columns.slice(0, columnIndex),
-              {
-                ...this.state.columns[columnIndex],
-                cards: [
-                  ...this.state.columns[columnIndex].cards.slice(0, cardIndex),
-                  { ...res.data }
-                ]
-              },
-              ...this.state.columns.slice(columnIndex + 1)
-            ]
-          },
-          this.savePreviousState
-        );
-      })
-      // restore previous valid state and display error message
-      .catch(error => {
-        const previousState = this.state.previousState;
-        this.setState(previousState);
-        const message = 'Error: Unable to create card on the server';
-        this.toggleInfoHandler(message);
-      });
-  };
-
-  // delete card on the server
-  deleteServerCard = async cardId => {
-    await axios
-      .delete(`/api/cards/${cardId}/`)
-      .then(res => {
-        this.savePreviousState();
-      })
-      // restore previous valid state and display error message
-      .catch(error => {
-        const previousState = this.state.previousState;
-        this.setState(previousState);
-        const message = 'Error: Unable to delete card on the server';
-        this.toggleInfoHandler(message);
-      });
-  };
-
   // reorder cards within a column
   reorderCardHandler = ({
     hasDropped,
@@ -263,46 +214,8 @@ class Board extends Component {
     this.patchServerCards(cards, spinnerCard);
   };
 
-  // update state.cardCreateUpdate which allows for displaying / hiding cardCreateUpdate modal
-  toggleCardCreateUpdateHandler = (
-    active,
-    columnIndex = -1,
-    cardIndex = -1
-  ) => {
-    const cardCreateUpdate = {
-      active: active,
-      columnIndex: columnIndex,
-      cardIndex: cardIndex
-    };
-    this.setState({ cardCreateUpdate: cardCreateUpdate });
-  };
-
   toggleCreateColumnModal = () => {
     this.setState({ createColumnModal: !this.state.createColumnModal });
-  };
-
-  // show / hide spinner within a specific card
-  toggleCardSpinner = (columnIndex, cardIndex) => {
-    const spinner = this.state.columns[columnIndex].cards[cardIndex].spinner;
-    this.setState(prevState => {
-      return {
-        columns: [
-          ...this.state.columns.slice(0, columnIndex),
-          {
-            ...this.state.columns[columnIndex],
-            cards: [
-              ...this.state.columns[columnIndex].cards.slice(0, cardIndex),
-              {
-                ...this.state.columns[columnIndex].cards[cardIndex],
-                spinner: !spinner
-              },
-              ...this.state.columns[columnIndex].cards.slice(cardIndex + 1)
-            ]
-          },
-          ...this.state.columns.slice(columnIndex + 1)
-        ]
-      };
-    });
   };
 
   handleCreateColumn = name => {
@@ -316,53 +229,6 @@ class Board extends Component {
     };
     this.toggleCreateColumnModal();
     this.props.createColumn(column);
-  };
-
-  // remove card from state.
-  // if: deleted card is the last card - just delete it
-  // else: update position_ids of remaining cards and flag card for
-  // deletion. Use patchServerCard in this case.
-  deleteCardHandler = (columnIndex, cardIndex) => {
-    this.toggleCardCreateUpdateHandler(false);
-
-    // deep copy column with all of its cards
-    const column = { ...this.state.columns[columnIndex] };
-    column.cards = [...this.state.columns[columnIndex].cards];
-    for (let card in this.state.columns[columnIndex].cards) {
-      column.cards[card] = { ...this.state.columns[columnIndex].cards[card] };
-    }
-
-    // was the removed card the last one in the column
-    const was_last_card = true
-      ? column.cards[cardIndex].position_id === column.cards.length - 1
-      : false;
-
-    // retrieve deleted card and flag for deletion
-    const deletedCard = { ...column.cards[cardIndex], delete: true };
-
-    // remove card from column
-    column.cards.splice(cardIndex, 1);
-
-    // update remaining card position ids if removed card was not the last one
-    if (!was_last_card) {
-      for (let key in column.cards) {
-        column.cards[key]['position_id'] = parseInt(key, 10);
-      }
-    }
-
-    this.setState({
-      columns: [
-        ...this.state.columns.slice(0, columnIndex),
-        column,
-        ...this.state.columns.slice(columnIndex + 1)
-      ]
-    });
-
-    if (!was_last_card) {
-      this.patchServerCards([...column.cards, deletedCard]);
-    } else {
-      this.deleteServerCard(deletedCard.id);
-    }
   };
 
   // edit existing card on the server and update local state
@@ -390,32 +256,6 @@ class Board extends Component {
       // call back function executed after setState completes
       () => this.patchServerCardDetail(columnIndex, cardIndex)
     );
-  };
-
-  // create new card in state and call postServerCard to create it on the server
-  createCardHandler = (columnIndex, task) => {
-    this.toggleCardCreateUpdateHandler(false);
-
-    const column = { ...this.state.columns[columnIndex] };
-    column.cards = [...this.state.columns[columnIndex].cards];
-    const new_card = {
-      id: -1, // temporary id used for Card keys until id received from db
-      spinner: true,
-      task: task,
-      column_id: column.id,
-      position_id: column.cards.length
-    };
-    column.cards.push(new_card);
-
-    this.setState({
-      columns: [
-        ...this.state.columns.slice(0, columnIndex),
-        column,
-        ...this.state.columns.slice(columnIndex + 1)
-      ]
-    });
-
-    this.postServerCard(columnIndex, new_card);
   };
 
   // display / hide info modal with message

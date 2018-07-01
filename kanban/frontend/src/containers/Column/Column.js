@@ -187,7 +187,9 @@ class Column extends Component {
         );
       }
 
-      const cards = this.props.cardIds.map(id => <Card key={id} id={id} />);
+      const cards = this.props.cardIds.map(id => (
+        <Card key={id} column_id={this.props.id} id={id} />
+      ));
 
       return (
         <ColumnContainer innerRef={node => connectDropTarget(node)}>

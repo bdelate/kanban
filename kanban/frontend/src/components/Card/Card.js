@@ -1,9 +1,11 @@
 // react imports
-import React from 'react';
+import React, { Component } from 'react';
 import { findDOMNode } from 'react-dom';
 
 // project imports
 import { DragTypes } from '../../DragTypes';
+import Confirm from '../../components/Modals/Confirm';
+import * as actions from './actions';
 
 // 3rd party imports
 import styled from 'styled-components';
@@ -12,12 +14,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 const propTypes = {
-  cardIndex: PropTypes.number.isRequired,
-  columnIndex: PropTypes.number.isRequired,
-  task: PropTypes.string.isRequired,
-  spinner: PropTypes.bool,
-  reorderCard: PropTypes.func.isRequired,
-  toggleCardCreateUpdate: PropTypes.func.isRequired
+  id: PropTypes.number.isRequired
 };
 
 const CardContainer = styled.div`
@@ -127,65 +124,114 @@ function collectTarget(connect, monitor) {
   };
 }
 
-const card = props => {
-  const {
-    connectDragSource,
-    connectDropTarget,
-    connectDragPreview,
-    isDragging
-  } = props;
-  const opacity = isDragging ? 0 : 1;
+class Card extends Component {
+  state = {
+    confirmModal: {
+      message: null,
+      confirmFunction: null
+    }
+  };
 
-  let output = null;
-  if (props.spinner) {
-    output = (
-      <CardContainer>
-        <Controls />
-        <Task>
-          <i className="fas fa-spinner fa-spin" />
-        </Task>
-      </CardContainer>
-    );
-  } else {
-    output = connectDropTarget(
-      connectDragPreview(
-        <div>
-          <CardContainer style={{ opacity }}>
-            <Controls>
-              <div>
-                {connectDragSource(
-                  <i title="Move Card" className="fas fa-expand-arrows-alt" />
-                )}
-              </div>
-              <FlexEnd>
-                <i
-                  title="Edit Task"
-                  className="fas fa-edit"
-                  onClick={() =>
-                    props.toggleCardCreateUpdate(
-                      true,
-                      props.columnIndex,
-                      props.cardIndex
-                    )
-                  }
-                />
-                <i
-                  title="Delete Card"
-                  className="fas fa-trash-alt"
-                  onClick={() =>
-                    props.deleteCard(props.columnIndex, props.cardIndex)
-                  }
-                />
-              </FlexEnd>
-            </Controls>
-            <Task>{props.task}</Task>
-          </CardContainer>
-        </div>
-      )
-    );
+  // display / hide confirm modal. Specify function to be executed
+  // if confirm is clicked
+  toggleConfirmModal = (message, confirmFunction) => {
+    let confirmModal;
+    if (message) {
+      confirmModal = {
+        message: message,
+        confirmFunction: () => confirmFunction()
+      };
+    } else {
+      confirmModal = {
+        message: null,
+        confirmFunction: null
+      };
+    }
+    this.setState({ confirmModal: confirmModal });
+  };
+
+  // dispatch deleteCard
+  handleDelete = () => {
+    this.toggleConfirmModal();
+    this.props.deleteCard(this.props.column_id, this.props.id);
+  };
+
+  render() {
+    const {
+      connectDragSource,
+      connectDropTarget,
+      connectDragPreview,
+      isDragging
+    } = this.props;
+    const opacity = isDragging ? 0 : 1;
+
+    let output = null;
+    if (this.props.spinner) {
+      output = (
+        <CardContainer>
+          <Controls />
+          <Task>
+            <i className="fas fa-spinner fa-spin" />
+          </Task>
+        </CardContainer>
+      );
+    } else {
+      // display / hide confirmation modal
+      let confirmModal = null;
+      if (this.state.confirmModal.message) {
+        confirmModal = (
+          <Confirm
+            message={this.state.confirmModal.message}
+            confirmFunction={this.handleDelete}
+            toggleConfirm={this.toggleConfirmModal}
+          />
+        );
+      }
+
+      output = connectDropTarget(
+        connectDragPreview(
+          <div>
+            {confirmModal}
+            <CardContainer style={{ opacity }}>
+              <Controls>
+                <div>
+                  {connectDragSource(
+                    <i title="Move Card" className="fas fa-expand-arrows-alt" />
+                  )}
+                </div>
+                <FlexEnd>
+                  <i
+                    title="Edit Task"
+                    className="fas fa-edit"
+                    onClick={() =>
+                      this.props.toggleCardCreateUpdate(
+                        true,
+                        this.props.columnIndex,
+                        this.props.cardIndex
+                      )
+                    }
+                  />
+                  <i
+                    title="Delete Card"
+                    className="fas fa-trash-alt"
+                    onClick={() =>
+                      this.toggleConfirmModal(
+                        'Permanently delete card?',
+                        this.handleDelete
+                      )
+                    }
+                  />
+                </FlexEnd>
+              </Controls>
+              <Task>{this.props.task}</Task>
+            </CardContainer>
+          </div>
+        )
+      );
+    }
+    return output;
   }
-  return output;
-};
+}
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -194,13 +240,20 @@ const mapStateToProps = (state, ownProps) => {
   };
 };
 
-card.propTypes = propTypes;
+const mapDispatchToProps = dispatch => {
+  return {
+    deleteCard: (column_id, id) => dispatch(actions.deleteCard(column_id, id))
+  };
+};
+
+Card.propTypes = propTypes;
 
 // export CardSource separately to be used in tests
 export const CardSource = DragSource(DragTypes.CARD, cardSource, collectSource)(
-  card
+  Card
 );
 
-export default connect(mapStateToProps)(
-  DropTarget(DragTypes.CARD, cardTarget, collectTarget)(CardSource)
-);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(DropTarget(DragTypes.CARD, cardTarget, collectTarget)(CardSource));

@@ -10,6 +10,16 @@ const reducer = (state = initialState, action) => {
       return cards;
     case 'CARD_CREATED':
       return { ...state, [action.card.id]: { ...action.card } };
+    case 'CARDS_UPDATED':
+      return {
+        ...state,
+        ...action.cards
+      };
+    case 'TOGGLE_CARD_SPINNER':
+      return {
+        ...state,
+        [action.id]: { ...state[action.id], spinner: action.spinner }
+      };
     default:
       return state;
   }

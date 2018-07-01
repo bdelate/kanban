@@ -10,13 +10,9 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
 const propTypes = {
-  active: PropTypes.bool.isRequired,
-  columnIndex: PropTypes.number.isRequired,
-  cardIndex: PropTypes.number.isRequired,
-  task: PropTypes.string,
-  toggleCardCreateUpdate: PropTypes.func.isRequired,
-  editCardDetail: PropTypes.func.isRequired,
-  createCard: PropTypes.func.isRequired
+  toggleModal: PropTypes.func.isRequired,
+  renameCard: PropTypes.func,
+  createCard: PropTypes.func
 };
 
 const Container = styled.div`
