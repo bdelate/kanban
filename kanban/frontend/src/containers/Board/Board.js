@@ -44,11 +44,6 @@ class Board extends Component {
       confirmFunction: null
     },
     createColumnModal: false,
-    cardCreateUpdate: {
-      active: false,
-      columnIndex: -1,
-      cardIndex: -1
-    },
     previousState: {}
   };
 
@@ -105,25 +100,6 @@ class Board extends Component {
         const previousState = this.state.previousState;
         this.setState(previousState);
         const message = 'Error: Unable to update cards on the server';
-        this.toggleInfoHandler(message);
-      });
-  };
-
-  // Update single card detail on the server
-  patchServerCardDetail = async (columnIndex, cardIndex) => {
-    this.toggleCardSpinner(columnIndex, cardIndex);
-    const card = { ...this.state.columns[columnIndex].cards[cardIndex] };
-    await axios
-      .patch(`/api/cards/${card.id}/`, { ...card })
-      .then(res => {
-        this.toggleCardSpinner(columnIndex, cardIndex);
-        this.savePreviousState();
-      })
-      // restore previous valid state and display error message
-      .catch(error => {
-        const previousState = this.state.previousState;
-        this.setState(previousState);
-        const message = 'Error: Unable to update card on the server';
         this.toggleInfoHandler(message);
       });
   };
@@ -229,33 +205,6 @@ class Board extends Component {
     };
     this.toggleCreateColumnModal();
     this.props.createColumn(column);
-  };
-
-  // edit existing card on the server and update local state
-  editCardDetailHandler = (columnIndex, cardIndex, task) => {
-    this.toggleCardCreateUpdateHandler(false);
-
-    const card = { ...this.state.columns[columnIndex].cards[cardIndex] };
-    card.task = task;
-
-    this.setState(
-      {
-        columns: [
-          ...this.state.columns.slice(0, columnIndex),
-          {
-            ...this.state.columns[columnIndex],
-            cards: [
-              ...this.state.columns[columnIndex].cards.slice(0, cardIndex),
-              { ...card },
-              ...this.state.columns[columnIndex].cards.slice(cardIndex + 1)
-            ]
-          },
-          ...this.state.columns.slice(columnIndex + 1)
-        ]
-      },
-      // call back function executed after setState completes
-      () => this.patchServerCardDetail(columnIndex, cardIndex)
-    );
   };
 
   // display / hide info modal with message

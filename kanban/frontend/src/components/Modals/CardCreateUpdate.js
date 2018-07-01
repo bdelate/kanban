@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 
 const propTypes = {
   toggleModal: PropTypes.func.isRequired,
-  renameCard: PropTypes.func,
+  udpateCard: PropTypes.func,
   createCard: PropTypes.func
 };
 
@@ -59,12 +59,7 @@ class CardCreateUpdate extends Component {
           domProps={{
             id: 'idSaveCardButton',
             disabled: this.state.task.length === 0,
-            onClick: () =>
-              this.props.editCardDetail(
-                this.props.columnIndex,
-                this.props.cardIndex,
-                this.state.task
-              )
+            onClick: () => this.props.updateCard(this.state.task)
           }}
         >
           Save

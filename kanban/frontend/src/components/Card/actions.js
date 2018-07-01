@@ -57,3 +57,22 @@ export const deleteCard = (column_id, id) => {
       });
   };
 };
+
+export const updateCard = (id, task) => {
+  return dispatch => {
+    dispatch(toggleSpinner(id, true));
+    axios
+      .patch(`/api/cards/${id}/`, { task: task })
+      .then(res => {
+        const card = {
+          [res.data.id]: res.data
+        };
+        dispatch(cardsUpdated(card));
+      })
+      .catch(error => {
+        dispatch(toggleSpinner(id, false));
+        const message = 'Error: Unable to update card on the server';
+        dispatch(toggleInfoModal(message));
+      });
+  };
+};

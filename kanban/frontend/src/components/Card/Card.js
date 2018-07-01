@@ -6,6 +6,7 @@ import { findDOMNode } from 'react-dom';
 import { DragTypes } from '../../DragTypes';
 import Confirm from '../../components/Modals/Confirm';
 import * as actions from './actions';
+import UpdateModal from '../Modals/CardCreateUpdate';
 
 // 3rd party imports
 import styled from 'styled-components';
@@ -14,7 +15,8 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 const propTypes = {
-  id: PropTypes.number.isRequired
+  id: PropTypes.number.isRequired,
+  column_id: PropTypes.number.isRequired
 };
 
 const CardContainer = styled.div`
@@ -126,10 +128,21 @@ function collectTarget(connect, monitor) {
 
 class Card extends Component {
   state = {
+    updateModal: false,
     confirmModal: {
       message: null,
       confirmFunction: null
     }
+  };
+
+  // used to display / hide card update modal
+  toggleUpdateModal = () => {
+    this.setState({ updateModal: !this.state.updateModal });
+  };
+
+  handleUpdate = task => {
+    this.toggleUpdateModal();
+    if (task !== this.props.task) this.props.updateCard(this.props.id, task);
   };
 
   // display / hide confirm modal. Specify function to be executed
@@ -188,10 +201,23 @@ class Card extends Component {
         );
       }
 
+      // display / hide update modal
+      let updateModal = null;
+      if (this.state.updateModal) {
+        updateModal = (
+          <UpdateModal
+            task={this.props.task}
+            toggleModal={this.toggleUpdateModal}
+            updateCard={task => this.handleUpdate(task)}
+          />
+        );
+      }
+
       output = connectDropTarget(
         connectDragPreview(
           <div>
             {confirmModal}
+            {updateModal}
             <CardContainer style={{ opacity }}>
               <Controls>
                 <div>
@@ -203,13 +229,7 @@ class Card extends Component {
                   <i
                     title="Edit Task"
                     className="fas fa-edit"
-                    onClick={() =>
-                      this.props.toggleCardCreateUpdate(
-                        true,
-                        this.props.columnIndex,
-                        this.props.cardIndex
-                      )
-                    }
+                    onClick={this.toggleUpdateModal}
                   />
                   <i
                     title="Delete Card"
@@ -242,7 +262,8 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    deleteCard: (column_id, id) => dispatch(actions.deleteCard(column_id, id))
+    deleteCard: (column_id, id) => dispatch(actions.deleteCard(column_id, id)),
+    updateCard: (id, task) => dispatch(actions.updateCard(id, task))
   };
 };
 
