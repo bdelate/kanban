@@ -40,19 +40,23 @@ const Header = styled.h2`
 
 const columnTarget = {
   drop(props, monitor, component) {
-    if (monitor.getItem().columnIndex !== props.columnIndex) {
-      props.moveCard(
-        monitor.getItem().columnIndex,
-        monitor.getItem().cardIndex,
-        props.columnIndex
-      );
+    if (monitor.getItem().column_id !== props.id) {
+      console.log('here');
+      // props.moveCard(
+      //   monitor.getItem().columnIndex,
+      //   monitor.getItem().cardIndex,
+      //   props.columnIndex
+      // );
     } else {
+      const cards = props.cardIds.map((id, index) => {
+        return { id: id, position_id: index };
+      });
       const args = {
+        cardId: monitor.getItem().id,
         hasDropped: true,
-        columnIndex: monitor.getItem().columnIndex,
-        toCardIndex: monitor.getItem().cardIndex
+        cards: cards
       };
-      props.reorderCard(args);
+      props.reorderCards(args);
     }
   }
 };
@@ -187,8 +191,8 @@ class Column extends Component {
         );
       }
 
-      const cards = this.props.cardIds.map(id => (
-        <Card key={id} column_id={this.props.id} id={id} />
+      const cards = this.props.cardIds.map((id, index) => (
+        <Card key={id} id={id} index={index} />
       ));
 
       return (
@@ -223,7 +227,8 @@ const mapDispatchToProps = dispatch => {
   return {
     renameColumn: (id, name) => dispatch(actions.renameColumn(id, name)),
     deleteColumn: id => dispatch(actions.deleteColumn(id)),
-    createCard: card => dispatch(actions.createCard(card))
+    createCard: card => dispatch(actions.createCard(card)),
+    reorderCards: args => dispatch(actions.reorderCards(args))
   };
 };
 

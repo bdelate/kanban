@@ -33,6 +33,15 @@ const reducer = (state = initialState, action) => {
         ...state,
         [action.column_id]: { ...state[action.column_id], cards: cards }
       };
+    case 'CARDS_REORDERED':
+      const cardIds = [...state[action.column_id].cards];
+      const temp = cardIds[action.fromCardIndex];
+      cardIds[action.fromCardIndex] = cardIds[action.toCardIndex];
+      cardIds[action.toCardIndex] = temp;
+      return {
+        ...state,
+        [action.column_id]: { ...state[action.column_id], cards: cardIds }
+      };
     case 'TOGGLE_COLUMN_SPINNER':
       return {
         ...state,

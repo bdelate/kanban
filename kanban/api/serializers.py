@@ -17,7 +17,12 @@ class CardListSerializer(serializers.ListSerializer):
         for card_id, data in data_mapping.items():
             card = card_mapping[card_id]
             self.child.update(card, data)
-            cards.append(card)
+            cards.append({
+                'id': card.id,
+                'task': card.task,
+                'position_id': card.position_id,
+                'column_id': card.column_id
+            })
         return cards
 
 

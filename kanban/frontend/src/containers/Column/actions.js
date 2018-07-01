@@ -1,6 +1,6 @@
 // project imports
 import { toggleInfoModal } from '../Home/actions';
-import { normalizeColumn } from '../../utilities/normalizer';
+import { normalizeColumn, normalizeCards } from '../../utilities/normalizer';
 import * as cardActions from '../../components/Card/actions';
 
 // 3rd party imports
@@ -98,5 +98,39 @@ export const createCard = card => {
         const message = 'Error: Unable to create card on the server';
         dispatch(toggleInfoModal(message));
       });
+  };
+};
+
+export const cardsReordered = args => {
+  return {
+    type: 'CARDS_REORDERED',
+    column_id: args.column_id,
+    fromCardIndex: args.fromCardIndex,
+    toCardIndex: args.toCardIndex
+  };
+};
+
+// reorder cards locally (ie: store) while drag is still in progress.
+// when a card is dropped, the server is updated after which the store
+// is upated to reflect the new position_ids
+export const reorderCards = args => {
+  return dispatch => {
+    if (!args.hasDropped) {
+      dispatch(cardsReordered(args));
+    } else {
+      dispatch(cardActions.toggleSpinner(args.cardId, true));
+      const cards = args.cards;
+      axios
+        .patch(`/api/cards/`, { cards })
+        .then(res => {
+          const normalizedData = normalizeCards(res.data);
+          dispatch(cardActions.cardsUpdated(normalizedData.entities.cards));
+        })
+        .catch(error => {
+          dispatch(cardActions.toggleSpinner(args.cardId, false));
+          const message = 'Error: Unable to update card on the server';
+          dispatch(toggleInfoModal(message));
+        });
+    }
   };
 };

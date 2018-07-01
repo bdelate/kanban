@@ -148,6 +148,21 @@ class CardsCreateUpdate(APIView):
             return Response(data, status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def patch(self, request):
+        """
+        Update multiple existing cards
+        """
+        card_ids = [card['id'] for card in request.data['cards']]
+        cards = Card.objects.filter(id__in=card_ids)
+        serializer = ExistingCardSerializer(instance=cards,
+                                            data=request.data['cards'],
+                                            many=True,
+                                            partial=True)
+        if serializer.is_valid():
+            result = serializer.save()
+            return Response(result, status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class SignUp(APIView):
 

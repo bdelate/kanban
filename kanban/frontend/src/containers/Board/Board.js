@@ -85,64 +85,6 @@ class Board extends Component {
     this.setState({ previousState: currentState });
   };
 
-  // update all specified cards.
-  // optionally display a card spinner if a spinnerCard is provided
-  patchServerCards = async (cards, spinnerCard) => {
-    if (spinnerCard) this.toggleCardSpinner(spinnerCard[0], spinnerCard[1]);
-    await axios
-      .patch(`/api/cards/`, { cards })
-      .then(res => {
-        if (spinnerCard) this.toggleCardSpinner(spinnerCard[0], spinnerCard[1]);
-        this.savePreviousState();
-      })
-      //restore previous valid state and display error message
-      .catch(error => {
-        const previousState = this.state.previousState;
-        this.setState(previousState);
-        const message = 'Error: Unable to update cards on the server';
-        this.toggleInfoHandler(message);
-      });
-  };
-
-  // reorder cards within a column
-  reorderCardHandler = ({
-    hasDropped,
-    columnIndex,
-    fromCardIndex,
-    toCardIndex
-  }) => {
-    // deep copy single column with all of its cards
-    const column = { ...this.state.columns[columnIndex] };
-    column.cards = [...this.state.columns[columnIndex].cards];
-    for (let card in this.state.columns[columnIndex].cards) {
-      column.cards[card] = { ...this.state.columns[columnIndex].cards[card] };
-    }
-
-    // card has been dropped, update column on the server
-    if (hasDropped) {
-      const spinnerCard = [columnIndex, toCardIndex];
-      this.patchServerCards(column.cards, spinnerCard);
-    } else {
-      // card hasn't been dropped yet, update local column state only
-      // reorder card
-      const card = column.cards.splice(fromCardIndex, 1)[0];
-      column.cards.splice(toCardIndex, 0, card);
-
-      // update position_ids
-      for (let key in column.cards) {
-        column.cards[key]['position_id'] = parseInt(key, 10);
-      }
-
-      this.setState({
-        columns: [
-          ...this.state.columns.slice(0, columnIndex),
-          column,
-          ...this.state.columns.slice(columnIndex + 1)
-        ]
-      });
-    }
-  };
-
   // move card to a different column
   moveCardHandler = (fromColumnIndex, fromCardIndex, toColumnIndex) => {
     // create deep copy of all columns
@@ -205,11 +147,6 @@ class Board extends Component {
     };
     this.toggleCreateColumnModal();
     this.props.createColumn(column);
-  };
-
-  // display / hide info modal with message
-  toggleInfoHandler = (message = null) => {
-    this.setState({ infoModal: message });
   };
 
   // display / hide confirm modal. Specify function and params to be executed

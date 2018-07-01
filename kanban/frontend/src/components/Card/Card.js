@@ -6,6 +6,7 @@ import { findDOMNode } from 'react-dom';
 import { DragTypes } from '../../DragTypes';
 import Confirm from '../../components/Modals/Confirm';
 import * as actions from './actions';
+import * as columnActions from '../../containers/Column/actions';
 import UpdateModal from '../Modals/CardCreateUpdate';
 
 // 3rd party imports
@@ -16,7 +17,10 @@ import { connect } from 'react-redux';
 
 const propTypes = {
   id: PropTypes.number.isRequired,
-  column_id: PropTypes.number.isRequired
+  column_id: PropTypes.number.isRequired,
+  position_id: PropTypes.number.isRequired,
+  task: PropTypes.string.isRequired,
+  spinner: PropTypes.bool
 };
 
 const CardContainer = styled.div`
@@ -55,11 +59,12 @@ const Task = styled.div`
 `;
 
 const cardSource = {
-  // return the columnIndex + cardIndex of the card when it starts to be dragged
+  // return card id, column id and card index it is dragged
   beginDrag(props) {
     return {
-      columnIndex: props.columnIndex,
-      cardIndex: props.cardIndex
+      id: props.id,
+      column_id: props.column_id,
+      index: props.index
     };
   }
 };
@@ -67,9 +72,9 @@ const cardSource = {
 const cardTarget = {
   // reorder cards when hovered if they are in the same column
   hover(props, monitor, component) {
-    if (monitor.getItem().columnIndex === props.columnIndex) {
-      const dragIndex = monitor.getItem().cardIndex;
-      const hoverIndex = props.cardIndex;
+    if (monitor.getItem().column_id === props.column_id) {
+      const dragIndex = monitor.getItem().index;
+      const hoverIndex = props.index;
 
       // Don't replace items with themselves
       if (dragIndex === hoverIndex) {
@@ -102,12 +107,12 @@ const cardTarget = {
       // reorder cards
       const args = {
         hasDropped: false,
-        columnIndex: monitor.getItem().columnIndex,
+        column_id: monitor.getItem().column_id,
         fromCardIndex: dragIndex,
         toCardIndex: hoverIndex
       };
-      props.reorderCard(args);
-      monitor.getItem().cardIndex = hoverIndex;
+      props.reorderCards(args);
+      monitor.getItem().index = hoverIndex;
     }
   }
 };
@@ -255,6 +260,8 @@ class Card extends Component {
 
 const mapStateToProps = (state, ownProps) => {
   return {
+    column_id: state.cards[ownProps.id].column_id,
+    position_id: state.cards[ownProps.id].position_id,
     task: state.cards[ownProps.id].task,
     spinner: state.cards[ownProps.id].spinner
   };
@@ -263,7 +270,8 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = dispatch => {
   return {
     deleteCard: (column_id, id) => dispatch(actions.deleteCard(column_id, id)),
-    updateCard: (id, task) => dispatch(actions.updateCard(id, task))
+    updateCard: (id, task) => dispatch(actions.updateCard(id, task)),
+    reorderCards: args => dispatch(columnActions.reorderCards(args))
   };
 };
 
