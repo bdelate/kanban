@@ -13,23 +13,11 @@ class CardListSerializer(serializers.ListSerializer):
         card_mapping = {card.id: card for card in instance}
         data_mapping = {item['id']: item for item in validated_data}
 
-        # identify and delete cards that have the 'delete' flag
-        deleted_cards = [
-            card['id']
-            for card
-            in self.initial_data
-            if card.get('delete', False)
-        ]
-        for card_id in deleted_cards:
-            card = card_mapping[card_id]
-            card.delete()
-
         cards = []
         for card_id, data in data_mapping.items():
-            if card_id not in deleted_cards:
-                card = card_mapping[card_id]
-                self.child.update(card, data)
-                cards.append(card)
+            card = card_mapping[card_id]
+            self.child.update(card, data)
+            cards.append(card)
         return cards
 
 
@@ -57,29 +45,17 @@ class ColumnListSerializer(serializers.ListSerializer):
 
     def update(self, instance, validated_data):
         """
-        Update (and optionally delete) multiple existing columns
+        Update multiple existing columns
         """
         column_mapping = {column.id: column for column in instance}
         data_mapping = {item['id']: item for item in validated_data}
 
-        # identify and delete columns that have the 'delete' flag
-        deleted_columns = [
-            column['id']
-            for column
-            in self.initial_data
-            if column.get('delete', False)
-        ]
-        for column_id in deleted_columns:
-            column = column_mapping[column_id]
-            column.delete()
-
         # update and return columns that were not deleted
         columns = []
         for column_id, data in data_mapping.items():
-            if column_id not in deleted_columns:
-                column = column_mapping[column_id]
-                self.child.update(column, data)
-                columns.append(column)
+            column = column_mapping[column_id]
+            self.child.update(column, data)
+            columns.append(column)
         return columns
 
 

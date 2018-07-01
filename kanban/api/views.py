@@ -97,20 +97,6 @@ class ColumnsCreateUpdate(APIView):
             return Response(data, status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def patch(self, request):
-        """
-        Update (and optionally delete) multiple existing columns
-        """
-        column_ids = [column['id'] for column in request.data['columns']]
-        columns = Column.objects.filter(id__in=column_ids)
-        serializer = ExistingColumnSerializer(instance=columns,
-                                              data=request.data['columns'],
-                                              many=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.validated_data, status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class CardDetail(generics.RetrieveUpdateDestroyAPIView):
     """
@@ -160,20 +146,6 @@ class CardsCreateUpdate(APIView):
             data = {'id': instance.id}
             data.update(serializer.data)
             return Response(data, status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def patch(self, request):
-        """
-        Update (and optionally delete) multiple existing cards
-        """
-        card_ids = [card['id'] for card in request.data['cards']]
-        cards = Card.objects.filter(id__in=card_ids)
-        serializer = ExistingCardSerializer(instance=cards,
-                                            data=request.data['cards'],
-                                            many=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.validated_data, status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
