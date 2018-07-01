@@ -56,6 +56,30 @@ class ColumnDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Column.objects.select_related('board')
     serializer_class = ColumnSerializer
 
+    def delete(self, request, pk):
+        """
+        If last board column is deleted, return response without extra data,
+        else update remaining column position_ids and return them in
+        the response.
+        """
+        try:
+            column = Column.objects.get(pk=pk)
+        except Column.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        num_columns = Column.objects.filter(board=column.board).count()
+        column.delete()
+
+        if column.position_id == num_columns - 1:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        columns = Column.objects.filter(board=column.board)
+        for i, col in enumerate(columns):
+            col.position_id = i
+            col.save()
+        serializer = ColumnSerializer(columns, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class ColumnsCreateUpdate(APIView):
 
@@ -73,20 +97,6 @@ class ColumnsCreateUpdate(APIView):
             return Response(data, status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def patch(self, request):
-        """
-        Update (and optionally delete) multiple existing columns
-        """
-        column_ids = [column['id'] for column in request.data['columns']]
-        columns = Column.objects.filter(id__in=column_ids)
-        serializer = ExistingColumnSerializer(instance=columns,
-                                              data=request.data['columns'],
-                                              many=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.validated_data, status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class CardDetail(generics.RetrieveUpdateDestroyAPIView):
     """
@@ -96,6 +106,30 @@ class CardDetail(generics.RetrieveUpdateDestroyAPIView):
 
     queryset = Card.objects.select_related('column', 'column__board')
     serializer_class = ExistingCardSerializer
+
+    def delete(self, request, pk):
+        """
+        If last column card is deleted, return response without extra data,
+        else update remaining card position_ids and return them in
+        the response.
+        """
+        try:
+            card = Card.objects.get(pk=pk)
+        except Card.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        num_cards = Card.objects.filter(column=card.column_id).count()
+        card.delete()
+
+        if card.position_id == num_cards - 1:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        cards = Card.objects.filter(column=card.column_id)
+        for i, current_card in enumerate(cards):
+            current_card.position_id = i
+            current_card.save()
+        serializer = CardSerializer(cards, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CardsCreateUpdate(APIView):
@@ -116,16 +150,17 @@ class CardsCreateUpdate(APIView):
 
     def patch(self, request):
         """
-        Update (and optionally delete) multiple existing cards
+        Update multiple existing cards
         """
         card_ids = [card['id'] for card in request.data['cards']]
         cards = Card.objects.filter(id__in=card_ids)
         serializer = ExistingCardSerializer(instance=cards,
                                             data=request.data['cards'],
-                                            many=True)
+                                            many=True,
+                                            partial=True)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.validated_data, status.HTTP_200_OK)
+            result = serializer.save()
+            return Response(result, status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

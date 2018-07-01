@@ -6,10 +6,9 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
 const propTypes = {
-  columnIndex: PropTypes.number.isRequired,
   name: PropTypes.string.isRequired,
   numCards: PropTypes.number.isRequired,
-  toggleColumn: PropTypes.func.isRequired
+  toggleCollapse: PropTypes.func.isRequired
 };
 
 const ColumnContainer = styled.div`
@@ -37,10 +36,10 @@ const collapsedColumn = props => {
       <i
         title="Expand Column"
         className="fas fa-expand"
-        onClick={() => props.toggleColumn(props.columnIndex)}
+        onClick={props.toggleCollapse}
       />
       <Header>
-        {props.name}: {props.numCards} Tasks
+        {props.name}: {props.numCards} Cards
       </Header>
     </ColumnContainer>
   );

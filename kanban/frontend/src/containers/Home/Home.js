@@ -169,12 +169,7 @@ class Home extends Component {
     let editBoardButton = null;
     let deleteBoardButton = null;
     if (this.props.selectedBoardId) {
-      board = (
-        <Board
-          authToken={this.props.authToken}
-          id={this.props.selectedBoardId}
-        />
-      );
+      board = <Board />;
 
       editBoardButton = (
         <Button

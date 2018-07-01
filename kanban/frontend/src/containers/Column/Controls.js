@@ -6,11 +6,10 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
 const propTypes = {
-  toggleColumn: PropTypes.func.isRequired,
-  toggleCardCreateUpdate: PropTypes.func.isRequired,
-  toggleColumnCreateUpdate: PropTypes.func.isRequired,
-  toggleConfirm: PropTypes.func.isRequired,
-  columnIndex: PropTypes.number.isRequired,
+  toggleCollapse: PropTypes.func.isRequired,
+  toggleCreateCardModal: PropTypes.func.isRequired,
+  toggleRenameModal: PropTypes.func.isRequired,
+  toggleConfirmModal: PropTypes.func.isRequired,
   deleteColumn: PropTypes.func.isRequired
 };
 
@@ -39,27 +38,26 @@ const Controls = props => (
     <i
       title="Collapse Column"
       className="fas fa-compress"
-      onClick={() => props.toggleColumn(props.columnIndex)}
+      onClick={props.toggleCollapse}
     />
     <FlexEnd>
       <i
         title="Add Task"
         className="fas fa-plus"
-        onClick={() => props.toggleCardCreateUpdate(true, props.columnIndex)}
+        onClick={props.toggleCreateCardModal}
       />
       <i
         title="Change Column Name"
         className="fas fa-edit"
-        onClick={() => props.toggleColumnCreateUpdate(true, props.columnIndex)}
+        onClick={props.toggleRenameModal}
       />
       <i
         title="Delete Column"
         className="deleteColumn fas fa-trash-alt"
         onClick={() =>
-          props.toggleConfirm(
+          props.toggleConfirmModal(
             'Column along within all of its cards will be permanently deleted',
-            props.deleteColumn,
-            props.columnIndex
+            props.deleteColumn
           )
         }
       />

@@ -1,22 +1,26 @@
 // react imports
-import React from 'react';
+import React, { Component } from 'react';
 import { findDOMNode } from 'react-dom';
 
 // project imports
 import { DragTypes } from '../../DragTypes';
+import Confirm from '../../components/Modals/Confirm';
+import * as actions from './actions';
+import * as columnActions from '../../containers/Column/actions';
+import UpdateModal from '../Modals/CardCreateUpdate';
 
 // 3rd party imports
 import styled from 'styled-components';
 import { DragSource, DropTarget } from 'react-dnd';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 
 const propTypes = {
-  cardIndex: PropTypes.number.isRequired,
-  columnIndex: PropTypes.number.isRequired,
+  id: PropTypes.number.isRequired,
+  column_id: PropTypes.number.isRequired,
+  position_id: PropTypes.number.isRequired,
   task: PropTypes.string.isRequired,
-  spinner: PropTypes.bool,
-  reorderCard: PropTypes.func.isRequired,
-  toggleCardCreateUpdate: PropTypes.func.isRequired
+  spinner: PropTypes.bool
 };
 
 const CardContainer = styled.div`
@@ -55,11 +59,12 @@ const Task = styled.div`
 `;
 
 const cardSource = {
-  // return the columnIndex + cardIndex of the card when it starts to be dragged
+  // return card id, column id and card index when the card is dragged
   beginDrag(props) {
     return {
-      columnIndex: props.columnIndex,
-      cardIndex: props.cardIndex
+      id: props.id,
+      column_id: props.column_id,
+      index: props.index
     };
   }
 };
@@ -67,9 +72,9 @@ const cardSource = {
 const cardTarget = {
   // reorder cards when hovered if they are in the same column
   hover(props, monitor, component) {
-    if (monitor.getItem().columnIndex === props.columnIndex) {
-      const dragIndex = monitor.getItem().cardIndex;
-      const hoverIndex = props.cardIndex;
+    if (monitor.getItem().column_id === props.column_id) {
+      const dragIndex = monitor.getItem().index;
+      const hoverIndex = props.index;
 
       // Don't replace items with themselves
       if (dragIndex === hoverIndex) {
@@ -102,12 +107,12 @@ const cardTarget = {
       // reorder cards
       const args = {
         hasDropped: false,
-        columnIndex: monitor.getItem().columnIndex,
+        column_id: monitor.getItem().column_id,
         fromCardIndex: dragIndex,
         toCardIndex: hoverIndex
       };
-      props.reorderCard(args);
-      monitor.getItem().cardIndex = hoverIndex;
+      props.reorderCards(args);
+      monitor.getItem().index = hoverIndex;
     }
   }
 };
@@ -126,73 +131,159 @@ function collectTarget(connect, monitor) {
   };
 }
 
-const card = props => {
-  const {
-    connectDragSource,
-    connectDropTarget,
-    connectDragPreview,
-    isDragging
-  } = props;
-  const opacity = isDragging ? 0 : 1;
+class Card extends Component {
+  state = {
+    updateModal: false,
+    confirmModal: {
+      message: null,
+      confirmFunction: null
+    }
+  };
 
-  let output = null;
-  if (props.spinner) {
-    output = (
-      <CardContainer>
-        <Controls />
-        <Task>
-          <i className="fas fa-spinner fa-spin" />
-        </Task>
-      </CardContainer>
-    );
-  } else {
-    output = connectDropTarget(
-      connectDragPreview(
-        <div>
-          <CardContainer style={{ opacity }}>
-            <Controls>
-              <div>
-                {connectDragSource(
-                  <i title="Move Card" className="fas fa-expand-arrows-alt" />
-                )}
-              </div>
-              <FlexEnd>
-                <i
-                  title="Edit Task"
-                  className="fas fa-edit"
-                  onClick={() =>
-                    props.toggleCardCreateUpdate(
-                      true,
-                      props.columnIndex,
-                      props.cardIndex
-                    )
-                  }
-                />
-                <i
-                  title="Delete Card"
-                  className="fas fa-trash-alt"
-                  onClick={() =>
-                    props.deleteCard(props.columnIndex, props.cardIndex)
-                  }
-                />
-              </FlexEnd>
-            </Controls>
-            <Task>{props.task}</Task>
-          </CardContainer>
-        </div>
-      )
-    );
+  // used to display / hide card update modal
+  toggleUpdateModal = () => {
+    this.setState({ updateModal: !this.state.updateModal });
+  };
+
+  // dispatch updateCard if the task has been changed
+  handleUpdate = task => {
+    this.toggleUpdateModal();
+    if (task !== this.props.task) this.props.updateCard(this.props.id, task);
+  };
+
+  // display / hide confirm modal. Specify function to be executed
+  // if confirm is clicked
+  toggleConfirmModal = (message, confirmFunction) => {
+    let confirmModal;
+    if (message) {
+      confirmModal = {
+        message: message,
+        confirmFunction: () => confirmFunction()
+      };
+    } else {
+      confirmModal = {
+        message: null,
+        confirmFunction: null
+      };
+    }
+    this.setState({ confirmModal: confirmModal });
+  };
+
+  // dispatch deleteCard
+  handleDelete = () => {
+    this.toggleConfirmModal();
+    this.props.deleteCard(this.props.column_id, this.props.id);
+  };
+
+  render() {
+    const {
+      connectDragSource,
+      connectDropTarget,
+      connectDragPreview,
+      isDragging
+    } = this.props;
+    const opacity = isDragging ? 0 : 1;
+
+    let output = null;
+    if (this.props.spinner) {
+      output = (
+        <CardContainer>
+          <Controls />
+          <Task>
+            <i className="fas fa-spinner fa-spin" />
+          </Task>
+        </CardContainer>
+      );
+    } else {
+      // display / hide confirmation modal
+      let confirmModal = null;
+      if (this.state.confirmModal.message) {
+        confirmModal = (
+          <Confirm
+            message={this.state.confirmModal.message}
+            confirmFunction={this.handleDelete}
+            toggleConfirm={this.toggleConfirmModal}
+          />
+        );
+      }
+
+      // display / hide update modal
+      let updateModal = null;
+      if (this.state.updateModal) {
+        updateModal = (
+          <UpdateModal
+            task={this.props.task}
+            toggleModal={this.toggleUpdateModal}
+            updateCard={task => this.handleUpdate(task)}
+          />
+        );
+      }
+
+      output = connectDropTarget(
+        connectDragPreview(
+          <div>
+            {confirmModal}
+            {updateModal}
+            <CardContainer style={{ opacity }}>
+              <Controls>
+                <div>
+                  {connectDragSource(
+                    <i title="Move Card" className="fas fa-expand-arrows-alt" />
+                  )}
+                </div>
+                <FlexEnd>
+                  <i
+                    title="Edit Task"
+                    className="fas fa-edit"
+                    onClick={this.toggleUpdateModal}
+                  />
+                  <i
+                    title="Delete Card"
+                    className="fas fa-trash-alt"
+                    onClick={() =>
+                      this.toggleConfirmModal(
+                        'Permanently delete card?',
+                        this.handleDelete
+                      )
+                    }
+                  />
+                </FlexEnd>
+              </Controls>
+              <Task>{this.props.task}</Task>
+            </CardContainer>
+          </div>
+        )
+      );
+    }
+    return output;
   }
-  return output;
+}
+
+const mapStateToProps = (state, ownProps) => {
+  return {
+    column_id: state.cards[ownProps.id].column_id,
+    position_id: state.cards[ownProps.id].position_id,
+    task: state.cards[ownProps.id].task,
+    spinner: state.cards[ownProps.id].spinner
+  };
 };
 
-card.propTypes = propTypes;
+const mapDispatchToProps = dispatch => {
+  return {
+    deleteCard: (column_id, id) => dispatch(actions.deleteCard(column_id, id)),
+    updateCard: (id, task) => dispatch(actions.updateCard(id, task)),
+    reorderCards: args => dispatch(columnActions.reorderCards(args))
+  };
+};
+
+Card.propTypes = propTypes;
 
 // export CardSource separately to be used in tests
 export const CardSource = DragSource(DragTypes.CARD, cardSource, collectSource)(
-  card
+  Card
 );
 
-export default DropTarget(DragTypes.CARD, cardTarget, collectTarget)(
-  CardSource
-);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(DropTarget(DragTypes.CARD, cardTarget, collectTarget)(CardSource));

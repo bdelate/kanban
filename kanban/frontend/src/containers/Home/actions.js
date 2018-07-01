@@ -97,3 +97,10 @@ export const toggleInfoModal = (message = null) => {
     infoModal: message
   };
 };
+
+export const toggleConfirmModal = (message = null) => {
+  return {
+    type: 'TOGGLE_CONFIRM_MODAL',
+    confirmModal: message
+  };
+};

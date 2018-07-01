@@ -10,10 +10,9 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
 const propTypes = {
-  active: PropTypes.bool.isRequired,
-  toggleColumnCreateUpdate: PropTypes.func.isRequired,
-  editColumnName: PropTypes.func.isRequired,
-  createColumn: PropTypes.func.isRequired
+  toggleModal: PropTypes.func.isRequired,
+  renameColumn: PropTypes.func,
+  createColumn: PropTypes.func
 };
 
 const Container = styled.div`
@@ -54,7 +53,19 @@ class ColumnCreateUpdate extends Component {
 
   render() {
     let saveButton;
-    if (this.props.columnIndex === -1) {
+    if (this.props.name) {
+      saveButton = (
+        <Button
+          domProps={{
+            id: 'idSaveColumnButton',
+            disabled: this.state.name.length === 0,
+            onClick: () => this.props.renameColumn(this.state.name)
+          }}
+        >
+          Save
+        </Button>
+      );
+    } else {
       saveButton = (
         <Button
           domProps={{
@@ -64,19 +75,6 @@ class ColumnCreateUpdate extends Component {
           }}
         >
           Create
-        </Button>
-      );
-    } else {
-      saveButton = (
-        <Button
-          domProps={{
-            id: 'idSaveColumnButton',
-            disabled: this.state.name.length === 0,
-            onClick: () =>
-              this.props.editColumnName(this.props.columnIndex, this.state.name)
-          }}
-        >
-          Save
         </Button>
       );
     }
@@ -97,7 +95,7 @@ class ColumnCreateUpdate extends Component {
           {saveButton}
           <Button
             domProps={{
-              onClick: () => this.props.toggleColumnCreateUpdate(false)
+              onClick: this.props.toggleModal
             }}
           >
             Cancel

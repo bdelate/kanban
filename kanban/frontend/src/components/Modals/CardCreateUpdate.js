@@ -10,13 +10,9 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
 const propTypes = {
-  active: PropTypes.bool.isRequired,
-  columnIndex: PropTypes.number.isRequired,
-  cardIndex: PropTypes.number.isRequired,
-  task: PropTypes.string,
-  toggleCardCreateUpdate: PropTypes.func.isRequired,
-  editCardDetail: PropTypes.func.isRequired,
-  createCard: PropTypes.func.isRequired
+  toggleModal: PropTypes.func.isRequired,
+  udpateCard: PropTypes.func,
+  createCard: PropTypes.func
 };
 
 const Container = styled.div`
@@ -57,17 +53,16 @@ class CardCreateUpdate extends Component {
 
   render() {
     let saveButton;
-    if (this.props.cardIndex === -1) {
+    if (this.props.task) {
       saveButton = (
         <Button
           domProps={{
             id: 'idSaveCardButton',
             disabled: this.state.task.length === 0,
-            onClick: () =>
-              this.props.createCard(this.props.columnIndex, this.state.task)
+            onClick: () => this.props.updateCard(this.state.task)
           }}
         >
-          Create
+          Save
         </Button>
       );
     } else {
@@ -76,15 +71,10 @@ class CardCreateUpdate extends Component {
           domProps={{
             id: 'idSaveCardButton',
             disabled: this.state.task.length === 0,
-            onClick: () =>
-              this.props.editCardDetail(
-                this.props.columnIndex,
-                this.props.cardIndex,
-                this.state.task
-              )
+            onClick: () => this.props.createCard(this.state.task)
           }}
         >
-          Save
+          Create
         </Button>
       );
     }
@@ -106,11 +96,7 @@ class CardCreateUpdate extends Component {
           />
           <div>
             {saveButton}
-            <Button
-              domProps={{
-                onClick: () => this.props.toggleCardCreateUpdate(false)
-              }}
-            >
+            <Button domProps={{ onClick: this.props.toggleModal }}>
               Cancel
             </Button>
           </div>
