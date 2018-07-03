@@ -8,7 +8,7 @@ class CardListSerializer(serializers.ListSerializer):
 
     def update(self, instance, validated_data):
         """
-        Update (and optionally delete) multiple existing cards
+        Update multiple existing cards
         """
         card_mapping = {card.id: card for card in instance}
         data_mapping = {item['id']: item for item in validated_data}
@@ -102,9 +102,11 @@ class CreateUserSerializer(serializers.ModelSerializer):
         fields = ('username', 'password')
 
     def create(self, validated_data):
-        user = get_user_model().objects.create(
-            username=validated_data['username'],
-            password=validated_data['password'])
+        user, created = get_user_model().objects.get_or_create(
+            username=validated_data['username']
+        )
+        user.set_password(validated_data['password'])
+        user.save()
         jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
         jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
         payload = jwt_payload_handler(user)
