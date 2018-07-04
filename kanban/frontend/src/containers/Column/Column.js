@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 
 // project imports
-import Card from '../../components/Card/Card';
+import Card from '../Card/Card';
 import { DragTypes } from '../../DragTypes';
 import Controls from './Controls';
 import RenameModal from '../../components/Modals/ColumnCreateUpdate';

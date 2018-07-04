@@ -1,7 +1,7 @@
 // project imports
 import { toggleInfoModal } from '../Home/actions';
 import { normalizeColumn, normalizeCards } from '../../utilities/normalizer';
-import * as cardActions from '../../components/Card/actions';
+import * as cardActions from '../Card/actions';
 
 // 3rd party imports
 import axios from 'axios';

@@ -6,8 +6,8 @@ import { findDOMNode } from 'react-dom';
 import { DragTypes } from '../../DragTypes';
 import Confirm from '../../components/Modals/Confirm';
 import * as actions from './actions';
-import * as columnActions from '../../containers/Column/actions';
-import UpdateModal from '../Modals/CardCreateUpdate';
+import * as columnActions from '../Column/actions';
+import UpdateModal from '../../components/Modals/CardCreateUpdate';
 
 // 3rd party imports
 import styled from 'styled-components';

@@ -1,7 +1,7 @@
 // project imports
 import { normalizeBoard } from '../../utilities/normalizer';
 import * as columnActions from '../Column/actions';
-import * as cardActions from '../../components/Card/actions';
+import * as cardActions from '../Card/actions';
 
 // 3rd party imports
 import axios from 'axios';

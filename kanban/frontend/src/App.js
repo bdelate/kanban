@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 
 // project imports
 import Home from './containers/Home/Home';
-import Auth from './components/Auth/Auth';
+import Auth from './containers/Auth/Auth';
 
 // 3rd party imports
 import styled from 'styled-components';

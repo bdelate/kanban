@@ -10,7 +10,7 @@ import BoardCreateUpdate from '../../components/Modals/BoardCreateUpdate';
 import Confirm from '../../components/Modals/Confirm';
 import { connect } from 'react-redux';
 import * as actions from './actions';
-import * as authActions from '../../components/Auth/actions';
+import * as authActions from '../Auth/actions';
 
 // 3rd party imports
 import styled from 'styled-components';
