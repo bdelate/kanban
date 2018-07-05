@@ -42,14 +42,18 @@ it('Updates error state if getAuthToken server call fails', async () => {
   expect(auth.state().error).toBeTruthy();
 });
 
-it('Saves token when getAuthToken server call succeeds', async () => {
+it('Saves token and calls saveToken when getAuthToken() succeeds', async () => {
+  const response = {
+    token: 'testTokenValue'
+  };
   moxios.stubRequest('/api/obtain-token/', {
     status: 200,
-    response: {
-      token: 'testTokenValue'
-    }
+    response: response
   });
-  const auth = shallow(<AuthComponentOnly />);
+  const props = {
+    saveToken: jest.fn()
+  };
+
   const event = {
     preventDefault() {},
     target: {
@@ -73,10 +77,12 @@ it('Saves token when getAuthToken server call succeeds', async () => {
   }
   global.localStorage = new LocalStorageMock();
 
+  const auth = shallow(<AuthComponentOnly {...props} />);
   auth.instance().getAuthToken(event);
   await flushPromises();
   auth.update();
   expect(global.localStorage.getItem('authToken')).toEqual('testTokenValue');
+  expect(props.saveToken).toHaveBeenCalledWith(response.token);
 });
 
 it('Updates error state if signUp server call fails', async () => {
@@ -97,14 +103,14 @@ it('Updates error state if signUp server call fails', async () => {
   expect(auth.state().error).toBeTruthy();
 });
 
-it('Saves token when signUp server call succeeds', async () => {
+it('Saves token and calls saveToken when signUp() succeeds', async () => {
+  const response = { token: 'testTokenValue' };
   moxios.stubRequest('/api/signup/', {
     status: 200,
-    response: {
-      token: 'testTokenValue'
-    }
+    response: response
   });
-  const auth = shallow(<AuthComponentOnly />);
+  const props = { saveToken: jest.fn() };
+  const auth = shallow(<AuthComponentOnly {...props} />);
   const event = {
     preventDefault() {},
     target: {
@@ -132,6 +138,7 @@ it('Saves token when signUp server call succeeds', async () => {
   await flushPromises();
   auth.update();
   expect(global.localStorage.getItem('authToken')).toEqual('testTokenValue');
+  expect(props.saveToken).toHaveBeenCalledWith(response.token);
 });
 
 it('Can toggle between signup / login and set correct submit function', () => {
