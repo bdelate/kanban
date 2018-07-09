@@ -14,16 +14,27 @@ import { connect } from 'react-redux';
 
 const Container = styled.div`
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
 `;
 
 const Card = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
   max-width: 30vw;
   margin: 15px;
   padding: 5px;
   border-radius: 2px;
   background-color: #c3d9e8;
   color: #000;
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  justify-items: center;
+  min-width: 200px;
 `;
 
 const Link = styled.span`
@@ -140,7 +151,7 @@ class Auth extends Component {
         </Card>
         <Card>
           {error}
-          <form id="idAuthForm" onSubmit={this.state.submit}>
+          <Form id="idAuthForm" onSubmit={this.state.submit}>
             <Input
               domProps={{
                 type: 'text',
@@ -158,7 +169,7 @@ class Auth extends Component {
               }}
             />
             {submitSection}
-          </form>
+          </Form>
         </Card>
       </Container>
     );
