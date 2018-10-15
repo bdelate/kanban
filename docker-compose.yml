@@ -1,0 +1,38 @@
+version: '3.6'
+
+services:
+
+  db:
+    image: postgres:9.5.14
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./docker_files/backend
+    image: kanban-backend
+    command: python ./kanban/manage.py runserver 0.0.0.0:8000 --settings=kanban.settings.dev
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ./docker_files/frontend
+    image: kanban-frontend
+    command: npm start
+    ports:
+      - 3000:3000
+    volumes:
+      - ./kanban/frontend:/code
+      - /code/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

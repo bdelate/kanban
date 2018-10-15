@@ -1,0 +1,14 @@
+# Pull base image
+FROM node:10.12
+
+# Set work directory
+WORKDIR /code
+
+# Copy requirements
+COPY ./kanban/frontend/package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy project
+COPY ./kanban/frontend/ .
