@@ -1,5 +1,5 @@
 kanban/frontend/node_modules/
-kanban/kanban/settings/dev.py
 kanban/kanban/settings/live.py
 *.pyc
 .vscode
+.mypy_cache
