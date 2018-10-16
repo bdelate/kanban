@@ -11,3 +11,11 @@ Functionality:
 * Column and card (task) creation
 * Dragging of cards between columns
 * Dragging of cards within a column to sort / organise them
+
+### Dev setup
+```
+docker-compose build
+docker-compose run web python ./kanban/manage.py migrate --settings=kanban.settings.dev
+docker-compose run web python ./kanban/manage.py createsuperuser --settings=kanban.settings.dev
+docker-compose up
+```
